@@ -1,49 +1,21 @@
+"use client"
+
 import { BottomNav } from "@/components/navigation/bottom-nav"
-import { ArrowLeft, Play, Clock, CheckCircle, BookOpen } from "lucide-react"
+import { ArrowLeft, PlayCircle, Clock, BookOpen, Star, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
+import { useAuth } from "@/contexts/auth-context"
 
-const courses = [
-  {
-    id: "1",
-    title: "传统扎染基础入门课程",
-    instructor: "李师傅",
-    thumbnail: "/tie-dye-tutorial-hands-on.jpg",
-    progress: 85,
-    totalLessons: 5,
-    completedLessons: 4,
-    lastWatched: "2024-12-01",
-    status: "in-progress",
-  },
-  {
-    id: "2",
-    title: "蜡染工艺深度解析与实践",
-    instructor: "王老师",
-    thumbnail: "/wax-resist-dyeing-technique.jpg",
-    progress: 100,
-    totalLessons: 6,
-    completedLessons: 6,
-    lastWatched: "2024-11-28",
-    status: "completed",
-  },
-  {
-    id: "3",
-    title: "现代蓝染创新技法探索",
-    instructor: "张艺术家",
-    thumbnail: "/modern-indigo-dyeing-art.jpg",
-    progress: 30,
-    totalLessons: 8,
-    completedLessons: 2,
-    lastWatched: "2024-11-25",
-    status: "in-progress",
-  },
-]
+// 使用空数组作为默认数据，实际数据应从API获取
+const courses = []
 
 export default function CoursesPage() {
+  const { user } = useAuth()
+  
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -59,8 +31,10 @@ export default function CoursesPage() {
       </header>
 
       {/* Courses List */}
-      <section className="p-4 space-y-4">
-        {courses.map((course) => (
+        <section className="p-4 space-y-4">
+          {courses.length > 0 ? (
+            <div className="space-y-4">
+              {courses.map((course) => (
           <Card key={course.id} className="p-4">
             <div className="flex gap-4">
               <div className="relative w-24 h-18 flex-shrink-0">
@@ -121,9 +95,20 @@ export default function CoursesPage() {
                 </div>
               </div>
             </div>
-          </Card>
-        ))}
-      </section>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <BookOpen className="h-12 w-12 mx-auto text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-medium">暂无课程</h3>
+          <p className="mt-2 text-sm text-muted-foreground">您还没有购买任何课程</p>
+          <Link href="/courses">
+            <Button className="mt-4">浏览课程</Button>
+          </Link>
+        </div>
+      )}
+        </section>
 
       <BottomNav />
     </div>

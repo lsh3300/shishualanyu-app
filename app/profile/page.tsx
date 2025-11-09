@@ -15,25 +15,104 @@ import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, signOut, getToken } = useAuth()
   const router = useRouter()
   const [showLoginForm, setShowLoginForm] = useState(false)
+  const [userStats, setUserStats] = useState({
+    orders: 0,
+    courses: 0,
+    favorites: 0,
+    assignments: 0,
+    learningDays: 0,
+    completedCourses: 0
+  })
+  const [statsLoading, setStatsLoading] = useState(false)
+  const [fetchTrigger, setFetchTrigger] = useState(0) // 添加一个触发器状态
+  
+  // 添加一个简单的测试，确保组件正在渲染
+  console.log('ProfilePage component rendering, user:', user ? 'User exists' : 'No user')
   
   // 获取全局状态中的未读消息和通知数量
   const { unreadMessages, unreadNotifications } = useGlobalState()
 
-  // Mock user data
+  // 获取用户统计数据
+  useEffect(() => {
+    console.log('useEffect triggered, user:', user ? 'User exists' : 'No user')
+    
+    const fetchUserStats = async () => {
+    console.log('fetchUserStats called, user:', user ? 'User exists' : 'No user')
+    
+    // 暂时移除用户检查，总是尝试获取数据
+    // if (!user) {
+    //   console.log('No user found, skipping stats fetch')
+    //   return
+    // }
+    
+    setStatsLoading(true)
+    try {
+        // 获取访问令牌
+        const token = await getToken()
+        
+        console.log('Token retrieved:', token ? 'Token exists' : 'No token')
+        
+        // 暂时移除令牌检查，总是发送请求
+        // if (!token) {
+        //   console.error('无法获取访问令牌')
+        //   return
+        // }
+        
+        console.log('Making request to /api/user/stats')
+        const response = await fetch('/api/user/stats', {
+          headers: {
+            // 暂时不添加授权头
+            // 'Authorization': `Bearer ${token}`
+          }
+        })
+        
+        console.log('Response status:', response.status)
+        console.log('Response ok:', response.ok)
+        
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Response data:', data)
+          const newStats = {
+            orders: data.stats.orders || 0,
+            courses: data.stats.courses || 0,
+            favorites: data.stats.favorites || 0,
+            assignments: data.stats.courses || 0, // 暂时使用课程数作为作业数
+            learningDays: data.stats.learningDays || 0,
+            completedCourses: data.stats.completedCourses || 0
+          }
+          console.log('Setting user stats to:', newStats)
+          setUserStats(newStats)
+        } else {
+          console.error('获取用户统计数据失败:', response.status)
+          const errorText = await response.text()
+          console.error('Error response:', errorText)
+        }
+      } catch (error) {
+        console.error('获取用户统计数据出错:', error)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+
+    fetchUserStats()
+  }, [user, getToken, fetchTrigger]) // 添加fetchTrigger到依赖项
+  
+  // 在组件挂载后触发一次数据获取
+  useEffect(() => {
+    console.log('Component mounted, triggering fetch')
+    setFetchTrigger(prev => prev + 1)
+  }, [])
+
+  // 用户数据
   const userData = {
     name: user?.user_metadata?.display_name || user?.email?.split("@")[0] || "用户",
     email: user?.email || "",
     avatar: user?.user_metadata?.avatar_url || "",
-    signature: "热爱传统文化，专注蓝染艺术",
-    stats: {
-      orders: 12,
-      courses: 8,
-      favorites: 24,
-      assignments: 5,
-    },
+    signature: "",
+    stats: userStats,
   }
 
   const handleLoginRequired = () => {
@@ -79,80 +158,106 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Stats */}
-            {user && (
-              <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{userData.stats.orders}</div>
-                  <div className="text-xs text-muted-foreground">订单</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{userData.stats.courses}</div>
-                  <div className="text-xs text-muted-foreground">课程</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{userData.stats.favorites}</div>
-                  <div className="text-xs text-muted-foreground">收藏</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{userData.stats.assignments}</div>
-                  <div className="text-xs text-muted-foreground">作业</div>
-                </div>
+            {/* Stats - 暂时移除用户检查，总是显示统计 */}
+            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
+              <div className="text-center">
+                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.orders}</div>
+                <div className="text-xs text-muted-foreground">订单</div>
               </div>
-            )}
+              <div className="text-center">
+                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.courses}</div>
+                <div className="text-xs text-muted-foreground">课程</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.favorites}</div>
+                <div className="text-xs text-muted-foreground">收藏</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.assignments}</div>
+                <div className="text-xs text-muted-foreground">作业</div>
+              </div>
+            </div>
           </Card>
         </div>
       </header>
 
-      {/* 会员卡片 */}
-      {user && (
-        <section className="px-4 mb-6">
-          <CouponCard count={3} href="/profile/coupons" />
-        </section>
-      )}
+      {/* 会员卡片 - 暂时移除用户检查，总是显示 */}
+      <section className="px-4 mb-6">
+        <CouponCard count={user ? 3 : 0} href="/profile/coupons" />
+      </section>
 
-      {/* 用户成就 */}
-      {user && (
-        <section className="px-4 mb-6">
-          <Card className="p-5 border-0 bg-gradient-to-br from-primary/5 to-background shadow-sm">
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-              <Trophy className="h-5 w-5 mr-2 text-primary" />
-              最近成就
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                  <Star className="h-4 w-4 text-primary" />
-                </div>
-                <p className="text-sm font-medium text-foreground">完成课程</p>
-                <p className="text-xl font-bold text-primary">{userData.stats.courses}</p>
+      {/* 用户成就 - 暂时移除用户检查，总是显示 */}
+      <section className="px-4 mb-6">
+        <Card className="p-5 border-0 bg-gradient-to-br from-primary/5 to-background shadow-sm">
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+            <Trophy className="h-5 w-5 mr-2 text-primary" />
+            最近成就
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                <Star className="h-4 w-4 text-primary" />
               </div>
-              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp className="h-4 w-4 text-secondary" />
-                </div>
-                <p className="text-sm font-medium text-foreground">学习天数</p>
-                <p className="text-xl font-bold text-secondary">32</p>
-              </div>
-              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
-                  <Trophy className="h-4 w-4 text-accent" />
-                </div>
-                <p className="text-sm font-medium text-foreground">收藏夹</p>
-                <p className="text-xl font-bold text-accent">{userData.stats.favorites}</p>
-              </div>
+              <p className="text-sm font-medium text-foreground">完成课程</p>
+              <p className="text-xl font-bold text-primary">{statsLoading ? "..." : userStats.completedCourses}</p>
             </div>
-          </Card>
-        </section>
-      )}
+            <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+              <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
+                <TrendingUp className="h-4 w-4 text-secondary" />
+              </div>
+              <p className="text-sm font-medium text-foreground">学习天数</p>
+              <p className="text-xl font-bold text-secondary">{statsLoading ? "..." : userStats.learningDays}</p>
+            </div>
+            <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+              <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
+                <Trophy className="h-4 w-4 text-accent" />
+              </div>
+              <p className="text-sm font-medium text-foreground">收藏夹</p>
+              <p className="text-xl font-bold text-accent">{statsLoading ? "..." : userStats.favorites}</p>
+            </div>
+          </div>
+        </Card>
+      </section>
 
       {/* 功能菜单 */}
       <section className="px-4 mb-6">
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <ProfileMenuItem href="/profile/orders" icon={ShoppingBag} title="我的订单" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/courses" icon={BookOpen} title="我的课程" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/favorites" icon={Heart} title="我的收藏" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/assignments" icon={FileText} title="我的作业" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem 
+            href="/profile/orders" 
+            icon={ShoppingBag} 
+            title="我的订单" 
+            showArrow={false} 
+            badge={statsLoading ? "..." : userStats.orders}
+            onClick={user ? undefined : handleLoginRequired} 
+            className="bg-white hover:bg-primary/5 transition-colors" 
+          />
+          <ProfileMenuItem 
+            href="/profile/courses" 
+            icon={BookOpen} 
+            title="我的课程" 
+            showArrow={false} 
+            badge={statsLoading ? "..." : userStats.courses}
+            onClick={user ? undefined : handleLoginRequired} 
+            className="bg-white hover:bg-primary/5 transition-colors" 
+          />
+          <ProfileMenuItem 
+            href="/profile/favorites" 
+            icon={Heart} 
+            title="我的收藏" 
+            showArrow={false} 
+            badge={statsLoading ? "..." : userStats.favorites}
+            onClick={user ? undefined : handleLoginRequired} 
+            className="bg-white hover:bg-primary/5 transition-colors" 
+          />
+          <ProfileMenuItem 
+            href="/profile/assignments" 
+            icon={FileText} 
+            title="我的作业" 
+            showArrow={false} 
+            badge={statsLoading ? "..." : userStats.assignments}
+            onClick={user ? undefined : handleLoginRequired} 
+            className="bg-white hover:bg-primary/5 transition-colors" 
+          />
         </div>
 
         <div className="space-y-3">
@@ -176,7 +281,7 @@ export default function ProfilePage() {
           />
           <ProfileMenuItem href="/profile/addresses" icon={MapPin} title="地址管理" onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
           {!user && (
-            <ProfileMenuItem href="/profile/coupons" icon={Gift} title="优惠券" subtitle="3张可用" onClick={handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+            <ProfileMenuItem href="/profile/coupons" icon={Gift} title="优惠券" subtitle="0张可用" onClick={handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
           )}
           <ProfileMenuItem href="/profile/support" icon={MessageCircle} title="联系客服" className="bg-white hover:bg-primary/5 transition-colors" />
           <ProfileMenuItem href="/profile/settings" icon={Settings} title="设置" onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
@@ -184,16 +289,12 @@ export default function ProfilePage() {
       </section>
 
       {/* Logout */}
-      {isLoggedIn && (
+      {user && (
         <section className="px-4">
           <Button
             variant="outline"
             className="w-full text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground bg-transparent"
-            onClick={() => {
-              setIsLoggedIn(false)
-              // 从localStorage中移除登录状态
-              localStorage.removeItem('isLoggedIn')
-            }}
+            onClick={handleLogout}
           >
             <LogOut className="h-4 w-4 mr-2" />
             退出登录
@@ -213,10 +314,9 @@ export default function ProfilePage() {
             </div>
             <div className="p-4">
               <LoginForm onSuccess={() => {
-                setIsLoggedIn(true)
-                // 保存登录状态到localStorage
-                localStorage.setItem('isLoggedIn', 'true')
                 setShowLoginForm(false)
+                // 登录成功后，useAuth会自动更新user状态
+                // 不需要手动设置isLoggedIn
               }} onSwitchToRegister={() => {
                 // 简化实现，暂时不支持注册切换
                 alert('注册功能暂未实现')

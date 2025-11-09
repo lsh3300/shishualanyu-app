@@ -52,72 +52,11 @@ export function useMessages(initialData?: Message[]): UseMessagesReturn {
       // const response = await fetch('/api/messages');
       // const data = await response.json();
       
-      // 模拟API调用
-      const mockMessages: Message[] = [
-        {
-          id: '1',
-          type: 'system',
-          title: '系统通知',
-          content: '欢迎加入世说蓝语平台！您的账号已成功激活，现在可以开始探索蓝染文化的奇妙世界。',
-          isRead: false,
-          timestamp: '2024-01-20T10:30:00',
-        },
-        {
-          id: '2',
-          type: 'course',
-          title: '课程更新提醒',
-          content: '您关注的「传统扎染基础入门」课程已更新新章节，快来学习吧！',
-          isRead: false,
-          timestamp: '2024-01-19T15:20:00',
-          avatar: '/placeholder-user.jpg',
-          userName: '张老师',
-          relatedUrl: '/teaching/1',
-        },
-        {
-          id: '3',
-          type: 'order',
-          title: '订单状态更新',
-          content: '您的订单 #20240118001 已发货，预计3-5天送达。',
-          isRead: true,
-          timestamp: '2024-01-18T09:15:00',
-          userName: '物流中心',
-          relatedUrl: '/orders/20240118001',
-        },
-        {
-          id: '4',
-          type: 'community',
-          title: '社区动态',
-          content: '李师傅发布了新的蓝染作品，引发了社区热议。',
-          isRead: true,
-          timestamp: '2024-01-17T14:45:00',
-          avatar: '/traditional-indigo-dyeing-master-craftsman.jpg',
-          userName: '李师傅',
-          relatedUrl: '/community/works/123',
-        },
-        {
-          id: '5',
-          type: 'comment',
-          title: '新评论通知',
-          content: '您的作品「蓝染山水」收到了新的评论："色彩运用非常出色，特别是渐变效果！"',
-          isRead: false,
-          timestamp: '2024-01-16T11:00:00',
-          userName: '艺术爱好者',
-          relatedUrl: '/community/works/456',
-        },
-        {
-          id: '6',
-          type: 'follow',
-          title: '新关注者',
-          content: '「蓝染爱好者」关注了您，快去看看他的作品吧！',
-          isRead: false,
-          timestamp: '2024-01-15T16:30:00',
-          userName: '蓝染爱好者',
-          relatedUrl: '/profile/789',
-        },
-      ];
+      // 暂时返回空数组，等待API实现
+      const messages: Message[] = [];
       
       // 应用全局已读状态到消息列表
-      const updatedMessages = mockMessages.map(msg => ({
+      const updatedMessages = messages.map(msg => ({
         ...msg,
         isRead: msg.isRead || readMessageIds.includes(msg.id)
       }));
@@ -249,6 +188,6 @@ export function useMessages(initialData?: Message[]): UseMessagesReturn {
 
 // 单独的未读消息计数钩子 - 简化版本
 export const useUnreadCount = () => {
-  const unreadCount = 3; // 直接返回固定值，避免使用hooks
-  return { unreadCount };
+  const { unreadMessages } = useGlobalState();
+  return { unreadCount: unreadMessages };
 };

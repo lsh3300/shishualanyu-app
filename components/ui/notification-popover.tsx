@@ -42,64 +42,13 @@ export function NotificationPopover({ className }: NotificationPopoverProps) {
   useEffect(() => {
     setMounted(true);
     
-    // 模拟通知数据
-    const mockNotifications: NotificationItem[] = [
-      {
-        id: '1',
-        type: 'system',
-        title: '系统通知',
-        content: '您关注的"蓝染进阶技法"课程已更新新章节',
-        timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30分钟前
-        read: false,
-        actionUrl: '/teaching/1',
-        avatar: '/placeholder.svg'
-      },
-      {
-        id: '2',
-        type: 'order',
-        title: '订单状态更新',
-        content: '您的订单#2024051501已发货，预计3-5天送达',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2小时前
-        read: false,
-        actionUrl: '/profile/orders',
-        avatar: '/placeholder.svg'
-      },
-      {
-        id: '3',
-        type: 'message',
-        title: '新消息',
-        content: '蓝染大师回复了您的提问："关于扎染的技巧..."',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1天前
-        read: true,
-        actionUrl: '/messages/1',
-        avatar: '/placeholder-user.jpg'
-      },
-      {
-        id: '4',
-        type: 'achievement',
-        title: '获得新成就',
-        content: '恭喜您完成"蓝染初学者"课程，获得"初级染匠"徽章',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2天前
-        read: true,
-        actionUrl: '/profile/achievements',
-        avatar: '/placeholder.svg'
-      },
-      {
-        id: '5',
-        type: 'like',
-        title: '收到点赞',
-        content: '您的作品"蓝染围巾"获得了10个点赞',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72), // 3天前
-        read: true,
-        actionUrl: '/profile/works/1',
-        avatar: '/placeholder.svg'
-      }
-    ];
+    // 初始化为空数组，等待API实现
+    const notifications: NotificationItem[] = [];
     
-    setNotifications(mockNotifications);
+    setNotifications(notifications);
     
     // 初始化时同步未读通知数量到全局状态
-    const localUnreadCount = mockNotifications.filter(n => !n.read).length;
+    const localUnreadCount = notifications.filter(n => !n.read).length;
     setUnreadNotifications(localUnreadCount);
   }, [setUnreadNotifications]);
 

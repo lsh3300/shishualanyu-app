@@ -14,15 +14,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function SettingsPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { user, signOut } = useAuth()
   const [userData, setUserData] = useState({
-    name: "张三",
-    email: "zhangsan@example.com",
-    avatar: "/avatars/user-01.jpg",
-    bio: "热爱学习，热爱生活",
-    phone: "138****8000",
+    name: "",
+    email: "",
+    avatar: "",
+    bio: "",
+    phone: "",
     notifications: {
       email: true,
       push: true,
@@ -38,23 +39,48 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const router = useRouter()
 
-  // 在客户端渲染完成后，从localStorage获取登录状态和用户数据
+  // 当用户信息变化时，更新userData状态
   useEffect(() => {
-    const savedLoggedInState = localStorage.getItem('isLoggedIn') === 'true'
-    setIsLoggedIn(savedLoggedInState)
-    
-    // 从localStorage获取用户数据
-    const savedUserData = localStorage.getItem('userData')
-    if (savedUserData) {
-      setUserData(JSON.parse(savedUserData))
+    if (user) {
+      // 从认证上下文获取用户信息
+      const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "用户"
+      const email = user.email || ""
+      const avatar = user.user_metadata?.avatar_url || ""
+      
+      setUserData(prev => ({
+        ...prev,
+        name: displayName,
+        email: email,
+        avatar: avatar
+      }))
+      
+      // 尝试从localStorage获取额外的用户数据
+      const savedUserData = localStorage.getItem('userData')
+      if (savedUserData) {
+        const parsedData = JSON.parse(savedUserData)
+        setUserData(prev => ({
+          ...prev,
+          bio: parsedData.bio || "",
+          phone: parsedData.phone || "",
+          notifications: parsedData.notifications || prev.notifications
+        }))
+      }
     }
-  }, [])
+  }, [user])
 
   // 更新用户资料
   const handleUpdateProfile = (updatedProfile: any) => {
     const newUserData = { ...userData, ...updatedProfile }
     setUserData(newUserData)
     localStorage.setItem('userData', JSON.stringify(newUserData))
+    
+    // 更新认证上下文中的用户元数据
+    if (user && updatedProfile.name) {
+      // 注意：实际应用中应该调用API更新用户元数据
+      // 这里仅作为示例，实际需要通过Supabase API更新
+      console.log("更新用户元数据:", updatedProfile)
+    }
+    
     setIsProfileDialogOpen(false)
   }
 
@@ -84,15 +110,14 @@ export default function SettingsPage() {
   }
 
   // 退出登录
-  const handleLogout = () => {
-    localStorage.setItem('isLoggedIn', 'false')
-    setIsLoggedIn(false)
+  const handleLogout = async () => {
+    await signOut()
     setIsLogoutDialogOpen(false)
     router.push('/profile')
   }
 
   // 如果未登录，显示提示登录界面
-  if (!isLoggedIn) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-background p-4 flex flex-col items-center justify-center">
         <div className="w-full max-w-md">
@@ -102,7 +127,7 @@ export default function SettingsPage() {
               <h1 className="text-2xl font-bold mt-4">设置</h1>
               <p className="text-muted-foreground mt-2">登录后可以管理您的账户设置</p>
             </div>
-            <Link href="/profile">
+            <Link href="/auth">
               <Button className="w-full">去登录</Button>
             </Link>
           </Card>

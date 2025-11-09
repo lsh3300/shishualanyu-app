@@ -38,7 +38,7 @@ export const useGlobalState = create<GlobalState>()(
   persist(
     (set, get) => ({
       // 消息状态
-      unreadMessages: 3,
+      unreadMessages: 0,
       setUnreadMessages: (count) => set({ unreadMessages: count }),
       decrementUnreadMessages: () => set((state) => ({ 
         unreadMessages: Math.max(0, state.unreadMessages - 1) 
@@ -55,7 +55,7 @@ export const useGlobalState = create<GlobalState>()(
       isMessageRead: (id) => get().readMessageIds.includes(id),
       
       // 通知状态
-      unreadNotifications: 2,
+      unreadNotifications: 0,
       setUnreadNotifications: (count) => set({ unreadNotifications: count }),
       decrementUnreadNotifications: () => set((state) => ({ 
         unreadNotifications: Math.max(0, state.unreadNotifications - 1) 

@@ -6,11 +6,13 @@ import { Heart, ArrowLeft, Filter, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
 import { ProductCard } from "@/components/ui/product-card"
 import { CourseCard } from "@/components/ui/course-card"
+import { useAuth } from "@/contexts/auth-context"
+import { Input } from "@/components/ui/input"
 
 export default function FavoritesPage() {
+  const { user } = useAuth()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState("products")
   const [searchQuery, setSearchQuery] = useState("")
@@ -21,60 +23,9 @@ export default function FavoritesPage() {
     setIsLoggedIn(savedLoggedInState)
   }, [])
 
-  // 模拟收藏的产品数据
-  const favoriteProducts = [
-    {
-      id: "prod1",
-      name: "蓝染手工围巾",
-      price: 299,
-      image: "/indigo-dyed-linen-tea-mat.jpg",
-      category: "clothing",
-      rating: 4.8,
-      reviewCount: 24
-    },
-    {
-      id: "prod2",
-      name: "蓝染帆布包",
-      price: 199,
-      image: "/indigo-dyed-canvas-bag.jpg",
-      category: "accessories",
-      rating: 4.5,
-      reviewCount: 18
-    },
-    {
-      id: "prod3",
-      name: "蓝染装饰画",
-      price: 499,
-      image: "/modern-indigo-dyeing-art.jpg",
-      category: "home",
-      rating: 4.9,
-      reviewCount: 32
-    }
-  ]
-
-  // 模拟收藏的课程数据
-  const favoriteCourses = [
-    {
-      id: "course1",
-      title: "蓝染基础入门",
-      instructor: "李大师",
-      image: "/tie-dye-tutorial-hands-on.jpg",
-      price: 99,
-      rating: 4.7,
-      studentsCount: 1280,
-      duration: "4小时"
-    },
-    {
-      id: "course2",
-      title: "高级扎染技法",
-      instructor: "王教授",
-      image: "/modern-indigo-dyeing-art.jpg",
-      price: 149,
-      rating: 4.9,
-      studentsCount: 860,
-      duration: "6小时"
-    }
-  ]
+  // 使用空数组作为默认数据，实际数据应从API获取
+  const favoriteProducts = []
+  const favoriteCourses = []
 
   // 根据搜索关键词过滤收藏内容
   const filteredProducts = favoriteProducts.filter(product => 
@@ -141,43 +92,54 @@ export default function FavoritesPage() {
       <div className="p-4">
         <Tabs defaultValue="products" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="products">商品 ({filteredProducts.length})</TabsTrigger>
-            <TabsTrigger value="courses">课程 ({filteredCourses.length})</TabsTrigger>
+            <TabsTrigger value="products">商品 ({favoriteProducts.length})</TabsTrigger>
+            <TabsTrigger value="courses">课程 ({favoriteCourses.length})</TabsTrigger>
           </TabsList>
           
           <TabsContent value="products" className="mt-0">
-            {filteredProducts.length > 0 ? (
+            {favoriteProducts.length > 0 ? (
               <div className="grid grid-cols-2 gap-4">
-                {filteredProducts.map((product) => (
-                  <ProductCard 
+                {favoriteProducts.map((product) => (
+                  <ProductCard
                     key={product.id}
                     product={product}
-                    className="h-full"
+                    showFavorite={true}
+                    isFavorite={true}
                   />
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground" />
-                <p className="mt-4 text-muted-foreground">没有找到匹配的商品收藏</p>
+                <h3 className="mt-4 text-lg font-medium">暂无收藏商品</h3>
+                <p className="mt-2 text-sm text-muted-foreground">您还没有收藏任何商品</p>
+                <Link href="/shop">
+                  <Button className="mt-4">去逛逛</Button>
+                </Link>
               </div>
             )}
           </TabsContent>
           
           <TabsContent value="courses" className="mt-0">
-            {filteredCourses.length > 0 ? (
-              <div className="space-y-4">
-                {filteredCourses.map((course) => (
-                  <CourseCard 
+            {favoriteCourses.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {favoriteCourses.map((course) => (
+                  <CourseCard
                     key={course.id}
                     course={course}
+                    showFavorite={true}
+                    isFavorite={true}
                   />
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
                 <Heart className="h-12 w-12 mx-auto text-muted-foreground" />
-                <p className="mt-4 text-muted-foreground">没有找到匹配的课程收藏</p>
+                <h3 className="mt-4 text-lg font-medium">暂无收藏课程</h3>
+                <p className="mt-2 text-sm text-muted-foreground">您还没有收藏任何课程</p>
+                <Link href="/courses">
+                  <Button className="mt-4">浏览课程</Button>
+                </Link>
               </div>
             )}
           </TabsContent>

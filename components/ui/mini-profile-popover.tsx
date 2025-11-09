@@ -30,8 +30,6 @@ export function MiniProfilePopover({ className }: MiniProfilePopoverProps) {
   const user = {
     name: "蓝染爱好者",
     avatar: "/placeholder-user.jpg",
-    unreadNotifications: 3,
-    unreadMessages: 5,
     level: "中级染匠",
     levelProgress: 75,
     nextLevel: "高级染匠",
@@ -148,9 +146,9 @@ export function MiniProfilePopover({ className }: MiniProfilePopoverProps) {
           <Link href="/messages" className="flex flex-col items-center p-2 rounded-lg hover:bg-muted transition-colors">
             <div className="relative">
               <Bell className="h-5 w-5 text-muted-foreground" />
-              {user.unreadNotifications > 0 && (
+              {unreadNotifications > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-primary text-[10px]">
-                  {user.unreadNotifications}
+                  {unreadNotifications}
                 </Badge>
               )}
             </div>

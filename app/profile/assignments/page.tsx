@@ -1,15 +1,18 @@
 "use client"
 
+import { BottomNav } from "@/components/navigation/bottom-nav"
+import { ArrowLeft, FileText, Clock, CheckCircle, AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { FileText, ArrowLeft, Clock, CheckCircle, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function AssignmentsPage() {
+  const { user } = useAuth()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState("pending")
 
@@ -19,38 +22,9 @@ export default function AssignmentsPage() {
     setIsLoggedIn(savedLoggedInState)
   }, [])
 
-  // 模拟待完成作业数据
-  const pendingAssignments = [
-    {
-      id: "assign1",
-      title: "蓝染基础练习",
-      courseName: "蓝染基础入门",
-      dueDate: "2023-12-15",
-      progress: 30,
-      image: "/tie-dye-tutorial-hands-on.jpg"
-    },
-    {
-      id: "assign2",
-      title: "扎染图案设计",
-      courseName: "高级扎染技法",
-      dueDate: "2023-12-20",
-      progress: 0,
-      image: "/modern-indigo-dyeing-art.jpg"
-    }
-  ]
-
-  // 模拟已完成作业数据
-  const completedAssignments = [
-    {
-      id: "assign3",
-      title: "蓝染色彩搭配",
-      courseName: "蓝染基础入门",
-      completedDate: "2023-11-28",
-      score: 92,
-      feedback: "色彩搭配协调，技法运用熟练",
-      image: "/indigo-dyed-linen-tea-mat.jpg"
-    }
-  ]
+  // 使用空数组作为默认数据，实际数据应从API获取
+  const pendingAssignments = []
+  const completedAssignments = []
 
   // 计算截止日期剩余天数
   const getDaysRemaining = (dueDate) => {
@@ -85,6 +59,7 @@ export default function AssignmentsPage() {
             </Link>
           </Card>
         </div>
+        <BottomNav />
       </div>
     )
   }

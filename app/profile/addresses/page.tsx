@@ -42,31 +42,8 @@ export default function AddressesPage() {
       if (savedAddresses) {
         setAddresses(JSON.parse(savedAddresses))
       } else {
-        // 默认地址数据
-        const defaultAddresses: Address[] = [
-          {
-            id: "addr1",
-            name: "张三",
-            phone: "13800138000",
-            province: "浙江省",
-            city: "杭州市",
-            district: "西湖区",
-            detail: "文化创意园区A座302室",
-            isDefault: true
-          },
-          {
-            id: "addr2",
-            name: "李四",
-            phone: "13900139000",
-            province: "浙江省",
-            city: "杭州市",
-            district: "上城区",
-            detail: "湖滨路18号",
-            isDefault: false
-          }
-        ]
-        setAddresses(defaultAddresses)
-        localStorage.setItem('userAddresses', JSON.stringify(defaultAddresses))
+        // 初始化为空数组，不提供默认地址数据
+        setAddresses([])
       }
     }
   }, [])

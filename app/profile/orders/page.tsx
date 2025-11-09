@@ -1,68 +1,16 @@
+"use client"
+
 import { BottomNav } from "@/components/navigation/bottom-nav"
-import { ArrowLeft, Package, Truck, CheckCircle, Clock } from "lucide-react"
+import { ArrowLeft, Package, Truck, CheckCircle, Clock, ShoppingBag } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import { useAuth } from "@/contexts/auth-context"
 
-const orders = [
-  {
-    id: "20241201001",
-    status: "delivered",
-    statusText: "已送达",
-    date: "2024-12-01",
-    total: 296,
-    items: [
-      {
-        id: "1",
-        name: "手工扎染丝巾",
-        image: "/handmade-tie-dye-silk-scarf.jpg",
-        price: 168,
-        quantity: 1,
-      },
-      {
-        id: "2",
-        name: "蓝染棉麻茶席",
-        image: "/indigo-dyed-linen-tea-mat.jpg",
-        price: 128,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    id: "20241128002",
-    status: "shipping",
-    statusText: "运输中",
-    date: "2024-11-28",
-    total: 158,
-    items: [
-      {
-        id: "3",
-        name: "扎染棉质T恤",
-        image: "/placeholder.svg",
-        price: 158,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    id: "20241125003",
-    status: "processing",
-    statusText: "处理中",
-    date: "2024-11-25",
-    total: 88,
-    items: [
-      {
-        id: "4",
-        name: "蓝染帆布包",
-        image: "/indigo-dyed-canvas-bag.jpg",
-        price: 88,
-        quantity: 1,
-      },
-    ],
-  },
-]
+// 使用空数组作为默认数据，实际数据应从API获取
+const orders = []
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -91,6 +39,8 @@ const getStatusColor = (status: string) => {
 }
 
 export default function OrdersPage() {
+  const { user } = useAuth()
+  
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -107,7 +57,9 @@ export default function OrdersPage() {
 
       {/* Orders List */}
       <section className="p-4 space-y-4">
-        {orders.map((order) => (
+        {orders.length > 0 ? (
+              <div className="space-y-4">
+                {orders.map((order) => (
           <Card key={order.id} className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -154,9 +106,20 @@ export default function OrdersPage() {
                 </div>
               </div>
             </div>
-          </Card>
-        ))}
-      </section>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground" />
+          <h3 className="mt-4 text-lg font-medium">暂无订单</h3>
+          <p className="mt-2 text-sm text-muted-foreground">您还没有任何订单记录</p>
+          <Link href="/shop">
+            <Button className="mt-4">去逛逛</Button>
+          </Link>
+        </div>
+      )}
+        </section>
 
       <BottomNav />
     </div>

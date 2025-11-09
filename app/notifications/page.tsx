@@ -13,54 +13,6 @@ import { useGlobalState } from '@/hooks/use-global-state';
 import { useNotifications } from '@/hooks/use-notifications';
 import { NotificationType, Notification } from '@/hooks/use-notifications';
 
-// 模拟通知数据
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'activity',
-    title: '李师傅回复了您的评论',
-    description: '感谢您对蓝染艺术的热爱，期待您的更多作品分享！',
-    isRead: false,
-    timestamp: '2024-01-20T09:30:00',
-    actionUrl: '/community/comment/123',
-  },
-  {
-    id: '2',
-    type: 'reminder',
-    title: '课程即将开始',
-    description: '您报名的「扎染进阶技法」课程将在30分钟后开始',
-    isRead: false,
-    timestamp: '2024-01-20T08:00:00',
-    actionUrl: '/teaching/course/456',
-  },
-  {
-    id: '3',
-    type: 'promotion',
-    title: '限时优惠',
-    description: '蓝染材料包限时8折，仅限今明两天！',
-    isRead: true,
-    timestamp: '2024-01-19T14:20:00',
-    actionUrl: '/store/promotions',
-  },
-  {
-    id: '4',
-    type: 'alert',
-    title: '系统维护通知',
-    description: '系统将于2024年1月21日凌晨2:00-4:00进行维护，期间部分功能可能暂时无法使用。',
-    isRead: true,
-    timestamp: '2024-01-18T10:15:00',
-  },
-  {
-    id: '5',
-    type: 'activity',
-    title: '新粉丝关注',
-    description: '用户「蓝染爱好者」关注了您',
-    isRead: false,
-    timestamp: '2024-01-17T16:45:00',
-    actionUrl: '/profile/followers',
-  },
-];
-
 export default function NotificationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
@@ -70,7 +22,7 @@ export default function NotificationsPage() {
     deleteNotification,
     markAllAsRead,
     unreadCount
-  } = useNotifications(mockNotifications);
+  } = useNotifications();
 
   // 筛选通知
   const filteredNotifications = notifications.filter(notification => 
