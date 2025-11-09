@@ -11,26 +11,22 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ShoppingBag, BookOpen, Heart, FileText, MapPin, MessageCircle, Settings, LogOut, User, Star, Trophy, TrendingUp, Gift, Bell } from "lucide-react"
 import { useGlobalState } from "@/hooks/use-global-state"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
-  // 初始状态总是设置为false，确保服务器端和客户端首次渲染一致
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { user, loading, signOut } = useAuth()
+  const router = useRouter()
   const [showLoginForm, setShowLoginForm] = useState(false)
   
   // 获取全局状态中的未读消息和通知数量
   const { unreadMessages, unreadNotifications } = useGlobalState()
 
-  // 在客户端渲染完成后，使用useEffect从localStorage获取实际的登录状态
-  useEffect(() => {
-    const savedLoggedInState = localStorage.getItem('isLoggedIn') === 'true'
-    setIsLoggedIn(savedLoggedInState)
-  }, [])
-
   // Mock user data
   const userData = {
-    name: "张艺术",
-    email: "zhang@example.com",
-    avatar: "/placeholder.svg",
+    name: user?.user_metadata?.display_name || user?.email?.split("@")[0] || "用户",
+    email: user?.email || "",
+    avatar: user?.user_metadata?.avatar_url || "",
     signature: "热爱传统文化，专注蓝染艺术",
     stats: {
       orders: 12,
@@ -44,13 +40,18 @@ export default function ProfilePage() {
     setShowLoginForm(true)
   }
 
+  const handleLogout = async () => {
+    await signOut()
+    router.push("/")
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="bg-gradient-to-b from-primary/5 to-transparent pt-12 pb-6">
         <div className="px-4">
           <Card className="p-6">
-            {isLoggedIn ? (
+            {user ? (
               <div className="flex items-center gap-4 mb-4">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name} />
@@ -79,7 +80,7 @@ export default function ProfilePage() {
             )}
 
             {/* Stats */}
-            {isLoggedIn && (
+            {user && (
               <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
                 <div className="text-center">
                   <div className="text-lg font-bold text-primary">{userData.stats.orders}</div>
@@ -104,14 +105,14 @@ export default function ProfilePage() {
       </header>
 
       {/* 会员卡片 */}
-      {isLoggedIn && (
+      {user && (
         <section className="px-4 mb-6">
           <CouponCard count={3} href="/profile/coupons" />
         </section>
       )}
 
       {/* 用户成就 */}
-      {isLoggedIn && (
+      {user && (
         <section className="px-4 mb-6">
           <Card className="p-5 border-0 bg-gradient-to-br from-primary/5 to-background shadow-sm">
             <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
@@ -148,10 +149,10 @@ export default function ProfilePage() {
       {/* 功能菜单 */}
       <section className="px-4 mb-6">
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <ProfileMenuItem href="/profile/orders" icon={ShoppingBag} title="我的订单" showArrow={false} onClick={isLoggedIn ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/courses" icon={BookOpen} title="我的课程" showArrow={false} onClick={isLoggedIn ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/favorites" icon={Heart} title="我的收藏" showArrow={false} onClick={isLoggedIn ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/assignments" icon={FileText} title="我的作业" showArrow={false} onClick={isLoggedIn ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/orders" icon={ShoppingBag} title="我的订单" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/courses" icon={BookOpen} title="我的课程" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/favorites" icon={Heart} title="我的收藏" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/assignments" icon={FileText} title="我的作业" showArrow={false} onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
         </div>
 
         <div className="space-y-3">
@@ -161,7 +162,7 @@ export default function ProfilePage() {
             title="消息中心" 
             subtitle="查看所有消息"
             badge={unreadMessages > 0 ? unreadMessages : undefined}
-            onClick={isLoggedIn ? undefined : handleLoginRequired} 
+            onClick={user ? undefined : handleLoginRequired} 
             className="bg-white hover:bg-primary/5 transition-colors" 
           />
           <ProfileMenuItem 
@@ -170,15 +171,15 @@ export default function ProfilePage() {
             title="通知中心" 
             subtitle="查看所有通知"
             badge={unreadNotifications > 0 ? unreadNotifications : undefined}
-            onClick={isLoggedIn ? undefined : handleLoginRequired} 
+            onClick={user ? undefined : handleLoginRequired} 
             className="bg-white hover:bg-primary/5 transition-colors" 
           />
-          <ProfileMenuItem href="/profile/addresses" icon={MapPin} title="地址管理" onClick={isLoggedIn ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
-          {!isLoggedIn && (
+          <ProfileMenuItem href="/profile/addresses" icon={MapPin} title="地址管理" onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          {!user && (
             <ProfileMenuItem href="/profile/coupons" icon={Gift} title="优惠券" subtitle="3张可用" onClick={handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
           )}
           <ProfileMenuItem href="/profile/support" icon={MessageCircle} title="联系客服" className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/settings" icon={Settings} title="设置" onClick={isLoggedIn ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/settings" icon={Settings} title="设置" onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
         </div>
       </section>
 

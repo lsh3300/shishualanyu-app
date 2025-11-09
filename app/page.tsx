@@ -11,6 +11,7 @@ import {
   LazyMiniProfilePopover 
 } from "@/components/ui/lazy-load"
 import { usePerformanceMonitor } from "@/components/ui/performance-monitor"
+import { HeaderAuth } from "@/components/auth/header-auth"
 import { Palette, Droplets, Package, Wrench, Mail, User, ChevronRight, Bell } from "lucide-react"
 import Link from "next/link"
 import { useEffect } from "react"
@@ -156,6 +157,7 @@ export default function HomePage() {
             
             {/* Right side - Icons */}
             <div className="flex items-center gap-3">
+              <HeaderAuth />
               <Link href="/messages" className="p-2.5 rounded-full hover:bg-muted/80 hover:scale-105 transition-all duration-200 group relative">
                 <Mail className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 {unreadMessages > 0 && (
@@ -172,9 +174,6 @@ export default function HomePage() {
                   </span>
                 )}
               </Link>
-              <div className="p-1.5">
-                <LazyMiniProfilePopover />
-              </div>
             </div>
           </div>
         </div>

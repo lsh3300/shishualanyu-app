@@ -1,14 +1,14 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, AlertCircle } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 interface RegisterFormProps {
   onSuccess: () => void
@@ -24,13 +24,65 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
     confirmPassword: "",
     agreeToTerms: false,
   })
+  const [errors, setErrors] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const { signUp } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setErrors("请输入姓名")
+      return false
+    }
+    if (!formData.email.trim()) {
+      setErrors("请输入邮箱")
+      return false
+    }
+    if (!formData.password) {
+      setErrors("请输入密码")
+      return false
+    }
+    if (formData.password.length < 6) {
+      setErrors("密码长度至少为6位")
+      return false
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setErrors("两次输入的密码不一致")
+      return false
+    }
+    if (!formData.agreeToTerms) {
+      setErrors("请同意用户协议和隐私政策")
+      return false
+    }
+    return true
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Simulate registration
-    setTimeout(() => {
-      onSuccess()
-    }, 1000)
+    setErrors(null)
+    setSuccessMessage(null)
+
+    if (!validateForm()) {
+      return
+    }
+
+    setIsLoading(true)
+
+    const { error } = await signUp(formData.email, formData.password, {
+      display_name: formData.name,
+    })
+
+    if (error) {
+      setErrors(error.message || "注册失败，请稍后再试")
+      setIsLoading(false)
+    } else {
+      setSuccessMessage("注册成功！请检查您的邮箱并点击确认链接以激活账户。")
+      setIsLoading(false)
+      // 延迟切换到登录页面，让用户看到成功消息
+      setTimeout(() => {
+        onSuccess()
+      }, 3000)
+    }
   }
 
   return (
@@ -39,6 +91,19 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
         <h2 className="heading-secondary mb-2">加入我们</h2>
         <p className="text-sm text-muted-foreground">创建账户，开启蓝染文化之旅</p>
       </div>
+
+      {errors && (
+        <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md flex items-center gap-2">
+          <AlertCircle className="h-4 w-4" />
+          <span className="text-sm">{errors}</span>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md">
+          <span className="text-sm">{successMessage}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -71,7 +136,7 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="请输入密码"
+              placeholder="请输入密码（至少6位）"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
@@ -118,8 +183,8 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
           </Label>
         </div>
 
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={!formData.agreeToTerms}>
-          注册
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading || !formData.agreeToTerms}>
+          {isLoading ? "注册中..." : "注册"}
         </Button>
       </form>
 

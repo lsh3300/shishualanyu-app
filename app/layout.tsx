@@ -4,6 +4,7 @@ import { Noto_Sans_SC } from "next/font/google"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { AuthLayout } from "@/components/auth/auth-layout"
 import "./globals.css"
 
 const notoSansSC = Noto_Sans_SC({
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`font-sans ${notoSansSC.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={null}>{children}</Suspense>
+        <AuthLayout>
+          <Suspense fallback={null}>{children}</Suspense>
+        </AuthLayout>
         <Analytics />
       </body>
     </html>

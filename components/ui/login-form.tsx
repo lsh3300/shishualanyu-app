@@ -1,13 +1,13 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, AlertCircle } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 interface LoginFormProps {
   onSuccess: () => void
@@ -20,13 +20,24 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
     email: "",
     password: "",
   })
+  const [errors, setErrors] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const { signIn } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // 简化登录规则：只要输入了账号和密码就可以登录，例如账号1密码1
-    setTimeout(() => {
+    setErrors(null)
+    setIsLoading(true)
+
+    const { error } = await signIn(formData.email, formData.password)
+
+    if (error) {
+      setErrors(error.message || "登录失败，请检查您的邮箱和密码")
+      setIsLoading(false)
+    } else {
+      setIsLoading(false)
       onSuccess()
-    }, 500)
+    }
   }
 
   return (
@@ -36,13 +47,20 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
         <p className="text-sm text-muted-foreground">登录您的账户，继续探索蓝染文化</p>
       </div>
 
+      {errors && (
+        <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-md flex items-center gap-2">
+          <AlertCircle className="h-4 w-4" />
+          <span className="text-sm">{errors}</span>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">账号</Label>
+          <Label htmlFor="email">邮箱</Label>
           <Input
             id="email"
-            type="text"
-            placeholder="请输入账号（示例：1）"
+            type="email"
+            placeholder="请输入邮箱"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
@@ -55,7 +73,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="请输入密码（示例：1）"
+              placeholder="请输入密码"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
@@ -72,8 +90,8 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
           </div>
         </div>
 
-        <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-          登录
+        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+          {isLoading ? "登录中..." : "登录"}
         </Button>
       </form>
 
