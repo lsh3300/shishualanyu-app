@@ -47,6 +47,8 @@ export interface Database {
           price: number
           category: string
           image_url: string | null
+          images: string[] | null
+          videos: Json | null  // 视频数组，包含id、url、thumbnail、title、duration等字段
           in_stock: boolean
           created_at: string
           updated_at: string
@@ -58,6 +60,8 @@ export interface Database {
           price: number
           category: string
           image_url?: string | null
+          images?: string[] | null
+          videos?: Json | null
           in_stock?: boolean
           created_at?: string
           updated_at?: string
@@ -69,6 +73,8 @@ export interface Database {
           price?: number
           category?: string
           image_url?: string | null
+          images?: string[] | null
+          videos?: Json | null
           in_stock?: boolean
           created_at?: string
           updated_at?: string

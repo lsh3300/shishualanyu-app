@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS products (
   category TEXT NOT NULL,
   image_url TEXT,
   in_stock BOOLEAN DEFAULT true,
+  images TEXT[] DEFAULT '{}',
+  videos JSONB DEFAULT '[]',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

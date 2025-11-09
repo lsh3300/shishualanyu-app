@@ -18,6 +18,13 @@ export interface ProductDetailTemplateProps {
     price: number
     originalPrice?: number
     images: string[]
+    videos?: Array<{
+      id: string
+      url: string
+      thumbnail: string
+      title: string
+      duration: string
+    }>
     sales: number
     isNew?: boolean
     discount?: number
@@ -27,13 +34,13 @@ export interface ProductDetailTemplateProps {
       author: string
       title: string
     }
-    specs: {
-      colors: Array<{
+    specs?: {
+      colors?: Array<{
         id: string
         label: string
         available: boolean
       }>
-      sizes: Array<{
+      sizes?: Array<{
         id: string
         label: string
         available: boolean
@@ -71,7 +78,11 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
 
       {/* Product Images */}
       <section className="p-4">
-        <ProductImageGallery images={product.images} productName={product.name} />
+        <ProductImageGallery 
+          images={product.images} 
+          videos={product.videos}
+          productName={product.name} 
+        />
       </section>
 
       {/* Product Info */}
@@ -115,8 +126,15 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
       <section className="px-4 mb-6">
         <div className="bg-card rounded-xl p-4 space-y-4">
           <h3 className="font-semibold text-foreground">请选择规格</h3>
-          <SpecSelector title="颜色" options={product.specs.colors} onSelect={setSelectedColor} />
-          <SpecSelector title="尺寸" options={product.specs.sizes} onSelect={setSelectedSize} />
+          {product.specs && product.specs.colors && (
+            <SpecSelector title="颜色" options={product.specs.colors} onSelect={setSelectedColor} />
+          )}
+          {product.specs && product.specs.sizes && (
+            <SpecSelector title="尺寸" options={product.specs.sizes} onSelect={setSelectedSize} />
+          )}
+          {(!product.specs || (!product.specs.colors && !product.specs.sizes)) && (
+            <p className="text-muted-foreground">暂无可选规格</p>
+          )}
         </div>
       </section>
 

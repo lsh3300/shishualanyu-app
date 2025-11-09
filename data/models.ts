@@ -300,6 +300,15 @@ export const productsData = {
     price: 168,
     originalPrice: 228,
     images: ["/handmade-tie-dye-silk-scarf.jpg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
+    videos: [
+      {
+        id: "v1",
+        url: "/videos/silk-scarf-making.mp4",
+        thumbnail: "/videos/silk-scarf-making-thumb.jpg",
+        title: "手工扎染丝巾制作过程",
+        duration: "3:45"
+      }
+    ],
     sales: 234,
     isNew: true,
     discount: 26,
@@ -328,6 +337,15 @@ export const productsData = {
     name: "扎染帆布包",
     price: 128,
     images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
+    videos: [
+      {
+        id: "v2",
+        url: "/videos/canvas-bag-making.mp4",
+        thumbnail: "/videos/canvas-bag-making-thumb.jpg",
+        title: "扎染帆布包制作过程",
+        duration: "4:20"
+      }
+    ],
     sales: 456,
     description: "实用与艺术结合的帆布包，采用环保材料，手工扎染图案，适合日常使用。",
     craftsmanStory: {
@@ -353,6 +371,15 @@ export const productsData = {
     price: 98,
     originalPrice: 138,
     images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
+    videos: [
+      {
+        id: "v3",
+        url: "/videos/tie-dye-tshirt-making.mp4",
+        thumbnail: "/videos/tie-dye-tshirt-making-thumb.jpg",
+        title: "扎染T恤制作过程",
+        duration: "5:15"
+      }
+    ],
     sales: 789,
     discount: 29,
     description: "纯棉T恤，结合传统扎染工艺，每件都是独一无二的艺术品，舒适透气，适合日常穿着。",
@@ -381,6 +408,15 @@ export const productsData = {
     name: "扎染抱枕",
     price: 88,
     images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
+    videos: [
+      {
+        id: "v4",
+        url: "/videos/cushion-making.mp4",
+        thumbnail: "/videos/cushion-making-thumb.jpg",
+        title: "扎染抱枕制作过程",
+        duration: "3:30"
+      }
+    ],
     sales: 345,
     description: "家居装饰抱枕，采用扎染工艺制作的枕套，内芯为高弹力海绵，为您的家居增添艺术气息。",
     craftsmanStory: {
@@ -406,6 +442,15 @@ export const productsData = {
     name: "扎染桌布",
     price: 198,
     images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
+    videos: [
+      {
+        id: "v5",
+        url: "/videos/tablecloth-making.mp4",
+        thumbnail: "/videos/tablecloth-making-thumb.jpg",
+        title: "扎染桌布制作过程",
+        duration: "4:45"
+      }
+    ],
     sales: 123,
     description: "餐桌装饰桌布，采用传统扎染工艺，图案自然流畅，为您的用餐环境增添艺术氛围。",
     craftsmanStory: {
@@ -430,6 +475,15 @@ export const productsData = {
     name: "扎染壁挂",
     price: 268,
     images: ["/placeholder.svg", "/placeholder.svg", "/placeholder.svg", "/placeholder.svg"],
+    videos: [
+      {
+        id: "v6",
+        url: "/videos/wall-hanging-making.mp4",
+        thumbnail: "/videos/wall-hanging-making-thumb.jpg",
+        title: "扎染壁挂制作过程",
+        duration: "6:10"
+      }
+    ],
     sales: 67,
     description: "家居装饰壁挂，采用扎染工艺制作，图案独特，是您家居装饰的艺术亮点。",
     craftsmanStory: {

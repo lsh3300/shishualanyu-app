@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .file-preview {
+            max-height: 200px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">文件上传测试</h1>
+        
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <!-- 文件上传表单 -->
+            <form id="uploadForm" class="space-y-4">
+                <div>
+                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2">选择文件</label>
+                    <input type="file" id="file" name="file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                
+                <div>
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-2">文件类型</label>
+                    <select id="type" name="type" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="product">产品图片/视频</option>
+                        <option value="course">课程图片/视频</option>
+                        <option value="avatar">用户头像</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="destination" class="block text-sm font-medium text-gray-700 mb-2">上传目标</label>
+                    <select id="destination" name="destination" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="local">本地存储</option>
+                        <option value="supabase">Supabase存储</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        上传文件
+                    </button>
+                </div>
+            </form>
+            
+            <!-- 进度条 -->
+            <div id="progressContainer" class="mt-4 hidden">
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="text-center mt-2 text-sm text-gray-600">上传中... 0%</p>
+            </div>
+            
+            <!-- 文件预览 -->
+            <div id="previewContainer" class="mt-6 hidden">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">文件预览</h3>
+                <div id="preview" class="border rounded-md p-4 bg-gray-50"></div>
+            </div>
+            
+            <!-- 上传结果 -->
+            <div id="resultContainer" class="mt-6 hidden">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">上传结果</h3>
+                <div id="result" class="border rounded-md p-4 bg-gray-50"></div>
+            </div>
+        </div>
+        
+        <!-- 文件列表 -->
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-xl font-bold mb-4">文件列表</h2>
+            
+            <div class="mb-4">
+                <label for="bucket" class="block text-sm font-medium text-gray-700 mb-2">存储桶</label>
+                <select id="bucket" name="bucket" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="products-images">产品图片</option>
+                    <option value="courses-images">课程图片</option>
+                    <option value="avatars">用户头像</option>
+                    <option value="courses-videos">课程视频</option>
+                    <option value="products-videos">产品视频</option>
+                </select>
+            </div>
+            
+            <button id="listFiles" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 mb-4">
+                获取文件列表
+            </button>
+            
+            <div id="fileListContainer" class="hidden">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">文件列表</h3>
+                <div id="fileList" class="border rounded-md p-4 bg-gray-50 max-h-96 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('file');
+        const typeSelect = document.getElementById('type');
+        const destinationSelect = document.getElementById('destination');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const previewContainer = document.getElementById('previewContainer');
+        const preview = document.getElementById('preview');
+        const resultContainer = document.getElementById('resultContainer');
+        const result = document.getElementById('result');
+        const bucketSelect = document.getElementById('bucket');
+        const listFilesBtn = document.getElementById('listFiles');
+        const fileListContainer = document.getElementById('fileListContainer');
+        const fileList = document.getElementById('fileList');
+
+        // 文件选择预览
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                previewContainer.classList.remove('hidden');
+                
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.innerHTML = `<img src="${e.target.result}" alt="${file.name}" class="file-preview mx-auto">`;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('video/')) {
+                    preview.innerHTML = `<video controls class="file-preview mx-auto"><source src="${URL.createObjectURL(file)}" type="${file.type}"></video>`;
+                } else {
+                    preview.innerHTML = `<p class="text-center">文件名: ${file.name}<br>文件大小: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>`;
+                }
+            } else {
+                previewContainer.classList.add('hidden');
+            }
+        });
+
+        // 表单提交
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请选择文件');
+                return;
+            }
+            
+            const type = typeSelect.value;
+            const destination = destinationSelect.value;
+            
+            // 显示进度条
+            progressContainer.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            
+            // 创建FormData
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', type);
+            
+            // 发送请求
+            try {
+                const xhr = new XMLHttpRequest();
+                
+                // 监听上传进度
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percentComplete = (e.loaded / e.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressText.textContent = `上传中... ${Math.round(percentComplete)}%`;
+                    }
+                });
+                
+                // 请求完成
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        resultContainer.classList.remove('hidden');
+                        
+                        if (response.success) {
+                            result.innerHTML = `
+                                <div class="text-green-600">
+                                    <p class="font-bold">上传成功!</p>
+                                    <p>文件名: ${response.file.filename}</p>
+                                    <p>原始文件名: ${response.file.originalname}</p>
+                                    <p>文件大小: ${(response.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                    ${response.file.publicUrl ? `<p>公共URL: <a href="${response.file.publicUrl}" target="_blank" class="text-blue-600 underline">${response.file.publicUrl}</a></p>` : ''}
+                                    ${response.file.path ? `<p>路径: ${response.file.path}</p>` : ''}
+                                </div>
+                            `;
+                        } else {
+                            result.innerHTML = `
+                                <div class="text-red-600">
+                                    <p class="font-bold">上传失败!</p>
+                                    <p>${response.error}</p>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        resultContainer.classList.remove('hidden');
+                        result.innerHTML = `
+                            <div class="text-red-600">
+                                <p class="font-bold">上传失败!</p>
+                                <p>HTTP错误: ${xhr.status}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    // 隐藏进度条
+                    progressContainer.classList.add('hidden');
+                });
+                
+                // 请求错误
+                xhr.addEventListener('error', function() {
+                    resultContainer.classList.remove('hidden');
+                    result.innerHTML = `
+                        <div class="text-red-600">
+                            <p class="font-bold">上传失败!</p>
+                            <p>网络错误</p>
+                        </div>
+                    `;
+                    
+                    // 隐藏进度条
+                    progressContainer.classList.add('hidden');
+                });
+                
+                // 发送请求
+                xhr.open('POST', `/api/upload${destination === 'local' ? '?local=true' : ''}`);
+                xhr.send(formData);
+                
+            } catch (error) {
+                console.error('上传错误:', error);
+                resultContainer.classList.remove('hidden');
+                result.innerHTML = `
+                    <div class="text-red-600">
+                        <p class="font-bold">上传失败!</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                
+                // 隐藏进度条
+                progressContainer.classList.add('hidden');
+            }
+        });
+
+        // 获取文件列表
+        listFilesBtn.addEventListener('click', async function() {
+            const bucket = bucketSelect.value;
+            const destination = destinationSelect.value;
+            
+            fileListContainer.classList.remove('hidden');
+            fileList.innerHTML = '<div class="text-center py-4 text-gray-500">加载中...</div>';
+            
+            try {
+                const localParam = destination === 'local' ? '&local=true' : '';
+                const response = await fetch(`/api/upload/list?bucket=${bucket}${localParam}`);
+                const data = await response.json();
+                
+                if (data.success && data.files.length > 0) {
+                    let html = '';
+                    
+                    data.files.forEach(file => {
+                        const fileUrl = destination === 'local' 
+                            ? `/local-storage/${bucket.replace('-', '/')}/${file.name}`
+                            : `https://your-project-ref.supabase.co/storage/v1/object/public/${bucket}/${file.name}`;
+                        
+                        html += `
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                                <div class="flex items-center">
+                                    <i class="fas fa-file text-blue-500 mr-3"></i>
+                                    <div>
+                                        <div class="font-medium text-sm">${file.name}</div>
+                                        <div class="text-xs text-gray-500">${formatFileSize(file.size || 0)} · ${new Date(file.created_at).toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:text-blue-800">查看</a>
+                                    <button class="text-red-600 hover:text-red-800 delete-file" data-bucket="${bucket}" data-filename="${file.name}">删除</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    fileList.innerHTML = html;
+                    
+                    // 添加删除事件监听器
+                    document.querySelectorAll('.delete-file').forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            const bucket = this.getAttribute('data-bucket');
+                            const filename = this.getAttribute('data-filename');
+                            
+                            if (confirm(`确定要删除文件 "${filename}" 吗?`)) {
+                                try {
+                                    const response = await fetch(`/api/upload?bucket=${bucket}&filename=${filename}`, {
+                                        method: 'DELETE'
+                                    });
+                                    
+                                    const result = await response.json();
+                                    
+                                    if (result.success) {
+                                        showMessage('文件删除成功', 'success');
+                                        listFilesBtn.click(); // 刷新文件列表
+                                    } else {
+                                        showMessage(result.error || '删除失败', 'error');
+                                    }
+                                } catch (error) {
+                                    console.error('删除文件失败:', error);
+                                    showMessage('删除文件失败', 'error');
+                                }
+                            }
+                        });
+                    });
+                } else {
+                    fileList.innerHTML = '<div class="text-center py-4 text-gray-500">暂无文件</div>';
+                }
+            } catch (error) {
+                console.error('获取文件列表失败:', error);
+                fileList.innerHTML = '<div class="text-center py-4 text-red-500">加载失败</div>';
+            }
+        });
+    </script>
+</body>
+</html>

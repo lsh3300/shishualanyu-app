@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseClient'
+import { createServiceClient } from '@/lib/supabaseClient'
 
 // 获取所有产品
 export async function GET() {
   try {
-    const supabase = createClient()
+    const supabase = createServiceClient()
     
     const { data, error } = await supabase
       .from('products')
@@ -25,10 +25,10 @@ export async function GET() {
 // 创建新产品
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceClient()
     const body = await request.json()
     
-    const { name, description, price, category, image_url, in_stock } = body
+    const { name, description, price, category, image_url, in_stock, images, videos } = body
     
     if (!name || !price || !category) {
       return NextResponse.json({ error: '缺少必要字段' }, { status: 400 })
@@ -42,7 +42,9 @@ export async function POST(request: NextRequest) {
         price,
         category,
         image_url,
-        in_stock: in_stock !== undefined ? in_stock : true
+        in_stock: in_stock !== undefined ? in_stock : true,
+        images,
+        videos
       })
       .select()
     

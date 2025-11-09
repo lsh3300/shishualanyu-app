@@ -1,5 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabaseClient'
+import { createServiceClient } from '@/lib/supabaseClient'
+
+// 获取单个产品详情
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createServiceClient()
+    const { id } = params
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single()
+    
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    
+    if (!data) {
+      return NextResponse.json({ error: '产品不存在' }, { status: 404 })
+    }
+    
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('获取产品详情失败:', error)
+    return NextResponse.json({ error: '获取产品详情失败' }, { status: 500 })
+  }
+}
 
 // 更新产品
 export async function PUT(
@@ -7,11 +37,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceClient()
     const body = await request.json()
     const { id } = params
     
-    const { name, description, price, category, image_url, in_stock } = body
+    const { name, description, price, category, image_url, in_stock, images, videos } = body
     
     const updateData: any = {}
     if (name !== undefined) updateData.name = name
@@ -20,6 +50,8 @@ export async function PUT(
     if (category !== undefined) updateData.category = category
     if (image_url !== undefined) updateData.image_url = image_url
     if (in_stock !== undefined) updateData.in_stock = in_stock
+    if (images !== undefined) updateData.images = images
+    if (videos !== undefined) updateData.videos = videos
     
     const { data, error } = await supabase
       .from('products')
@@ -35,7 +67,7 @@ export async function PUT(
       return NextResponse.json({ error: '产品不存在' }, { status: 404 })
     }
     
-    return NextResponse.json({ product: data[0] })
+    return NextResponse.json(data[0])
   } catch (error) {
     console.error('更新产品失败:', error)
     return NextResponse.json({ error: '更新产品失败' }, { status: 500 })
@@ -48,7 +80,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createServiceClient()
     const { id } = params
     
     const { error } = await supabase
