@@ -89,10 +89,11 @@ export function BannerCarousel({ items }: BannerCarouselProps) {
         className="flex transition-transform duration-700 ease-out h-full"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <Link 
             key={item.id} 
             href={item.href} 
+            prefetch={false}
             className="w-full h-full flex-shrink-0 relative group-hover:scale-[1.02] transition-transform duration-700 hover:shadow-xl"
           >
             <Image 
@@ -100,7 +101,10 @@ export function BannerCarousel({ items }: BannerCarouselProps) {
               alt={item.title} 
               fill 
               className="object-cover transition-transform duration-700 ease-out"
-              priority={true}
+              priority={index === 0}
+              loading={index === 0 ? "eager" : "lazy"}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+              quality={index === 0 ? 85 : 70}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
             

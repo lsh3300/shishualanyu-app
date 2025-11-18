@@ -1,30 +1,65 @@
-import { createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
-import { headers } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// 生成一个固定的UUID作为测试用户ID
-const TEST_USER_ID = '12345678-1234-1234-1234-123456789abc';
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     console.log('API: /api/user/stats called');
     
-    // 暂时跳过认证，使用固定用户ID进行测试
-    const userId = TEST_USER_ID;
-    console.log('使用测试用户ID:', userId);
+    // 从请求头中获取Authorization token
+    const authHeader = request.headers.get('Authorization');
+    let userId: string | null = null;
+    let supabase: ReturnType<typeof createClient>;
     
-    // 使用匿名密钥创建客户端，而不是服务密钥
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      console.log('从请求头获取到token');
+      
+      // 使用token创建Supabase客户端
+      supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          },
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
         }
+      );
+      
+      // 验证token并获取用户信息
+      // 由于token已经在global headers中设置，getUser()会自动使用它
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error('用户认证失败:', userError);
+        return NextResponse.json({ error: '未授权访问' }, { status: 401 });
       }
-    );
+      
+      userId = user.id;
+      console.log('获取到真实用户ID:', userId);
+    } else {
+      console.log('未找到Authorization token，返回空统计数据');
+      // 如果没有token，返回空统计数据
+      return NextResponse.json({
+        stats: {
+          orders: 0,
+          courses: 0,
+          favorites: 0,
+          assignments: 0,
+          learningDays: 0,
+          completedCourses: 0
+        }
+      });
+    }
+    
+    if (!userId) {
+      return NextResponse.json({ error: '无法获取用户ID' }, { status: 401 });
+    }
     
     // 获取用户订单数量
     const { data: ordersData, error: ordersError } = await supabase
@@ -44,26 +79,11 @@ export async function GET() {
   const learningDays = 0;
   const completedCoursesCount = 0;
     
-    // 获取用户收藏数量 - 只使用count查询
-    console.log('开始查询收藏数据...');
-    
-    // 先尝试直接查询数据，看看是否有问题
-    const { data: favoritesData, error: favoritesError } = await supabase
-      .from('favorites')
-      .select('id, created_at')
-      .eq('user_id', userId);
-    
-    console.log('收藏数据查询结果:', favoritesData);
-    console.log('收藏数据查询错误:', favoritesError);
-    
-    // 使用count查询获取准确的收藏数量
+    // 获取用户收藏数量
     const { count: favoritesCount, error: countError } = await supabase
       .from('favorites')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId);
-    
-    console.log('收藏数量查询结果:', favoritesCount);
-    console.log('收藏数量查询错误:', countError);
     
     if (countError) {
       console.error('获取收藏数据失败:', countError);
@@ -71,7 +91,6 @@ export async function GET() {
     }
     
     const finalFavoritesCount = favoritesCount || 0;
-    console.log('最终使用的收藏数量:', finalFavoritesCount);
     
     // 计算学习天数 - 暂时返回固定值，因为没有相关数据
   // let learningDays = 0;

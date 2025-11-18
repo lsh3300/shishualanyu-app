@@ -134,7 +134,7 @@ export function CoursePageTemplate({
         {/* Course List */}
         <div className="space-y-4">
           {filteredCourses.map((course) => (
-            <CourseListCard key={course.id} {...course} />
+            <CourseListCard key={course.id} {...course} showFavorite={true} />
           ))}
         </div>
       </div>

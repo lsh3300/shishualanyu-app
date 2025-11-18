@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Heart, Share2 } from "lucide-react"
 import Link from "next/link"
 import { usePerformanceMonitor } from "@/components/ui/performance-monitor"
+import { useFavorites } from "@/hooks/use-favorites"
+import { useAuth } from "@/contexts/auth-context"
+import { toast } from "@/hooks/use-toast"
 import { LazyCourseInfoSection, LazyCourseTabsSection, LazyCourseMaterialsSection } from "./lazy-components"
 
 export interface CourseDetailTemplateProps {
@@ -46,6 +49,31 @@ export interface CourseDetailTemplateProps {
 export function CourseDetailTemplate({ course, courseType = "course" }: CourseDetailTemplateProps) {
   // 添加性能监控
   usePerformanceMonitor(`/teaching/[id]`, 4) // 4个主要区块
+  
+  const { isCourseFavorite, addCourseToFavorites, removeCourseFromFavorites, loading } = useFavorites()
+  const { user } = useAuth()
+  const isFavorite = isCourseFavorite(course.id)
+  
+  const handleFavoriteClick = async () => {
+    if (!user) {
+      toast({
+        title: "请先登录",
+        description: "登录后可以收藏课程",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      if (isFavorite) {
+        await removeCourseFromFavorites(course.id)
+      } else {
+        await addCourseToFavorites(course.id)
+      }
+    } catch (error) {
+      console.error('收藏操作失败:', error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -58,6 +86,21 @@ export function CourseDetailTemplate({ course, courseType = "course" }: CourseDe
             </Button>
           </Link>
           <h1 className="heading-secondary flex-1 line-clamp-1">课程详情</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleFavoriteClick}
+            disabled={loading}
+            className="relative"
+          >
+            <Heart 
+              className={`h-5 w-5 transition-colors duration-200 ${
+                isFavorite 
+                  ? "text-red-500 fill-red-500" 
+                  : "text-muted-foreground hover:text-red-500"
+              }`} 
+            />
+          </Button>
         </div>
       </header>
 

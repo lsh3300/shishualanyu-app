@@ -3,6 +3,49 @@
 ## 项目概述
 "世说蓝语"是一个专注于蓝染文化传承与推广的综合性平台，致力于将传统蓝染工艺与现代设计相结合，通过教学课程、文创产品销售、AI创作和文化传播，让更多人了解和喜爱这一古老而美丽的工艺。项目融合了传统文化与现代技术，为用户提供沉浸式的蓝染文化体验。
 
+---
+
+## ⚡ 快速上手（开发者速览）
+
+| 步骤 | 操作 | 说明 |
+| --- | --- | --- |
+| 1 | `cp .env.example .env.local` | 填写 Supabase URL/Key（必须） |
+| 2 | `npm install` 或 `pnpm install` | 安装依赖 |
+| 3 | `npm run init-db` | 初始化数据库/运行 RLS 脚本 |
+| 4 | `npm run dev` | 启动 Next.js App Router |
+| 5 | 访问 `http://localhost:3000` | 首次加载需 Supabase 正常运行 |
+
+**核心命令速查**
+```bash
+npm run dev        # 开发调试
+npm run build      # 生产构建
+npm run lint       # 手动触发 ESLint（默认构建忽略）
+npm run init-db    # 同步本地 Supabase schema
+```
+
+**关键环境变量（.env.local）**
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_KEY=
+```
+> 若启用 S3 上传，再补充 `AWS_*` 相关变量；其余变量见 `Supabase环境变量配置指南.md`。
+
+---
+
+## 🆕 最近重要变更（2025-11）
+
+- **收藏系统重构**：引入 `FavoritesProvider` 共享上下文，课程/商品收藏、数量统计与“我的收藏”页同步刷新；支持课程与商品共用 `favorites` 表（含 `item_type` / `course_id`）。
+- **课程收藏功能完善**：教学页、课程详情页、收藏列表等全面支持课程收藏/取消收藏；`favorites` API 支持课程与商品的增删查。
+- **性能优化**：
+  - 首页、课程页关键组件懒加载、图片按需加载（`OptimizedImage` + Next 图片配置）。
+  - 禁用 Link 预取减少客户端空耗请求。
+  - `next.config.mjs` 启用 `optimizePackageImports`、AVIF/WebP 输出、远程图片白名单。
+- **数据库脚本**：`fix-favorites-for-courses.sql` 使 `favorites` 表兼容课程收藏（`item_type`、`course_id`、部分唯一索引）。
+- **错误修复**：解决“未知课程”“收藏数量不一致”“课程无法取消收藏”“React key 警告”等问题。
+
+> ⚠️ 升级代码后请务必重新执行 `fix-favorites-for-courses.sql` 并重启开发服务，否则收藏接口会报错。
+
 ## 技术架构
 
 ### 前端技术栈

@@ -74,7 +74,7 @@ export function ProductCard({
   }
 
   return (
-    <Link href={`/store/${id}`} className="group">
+    <Link href={`/store/${id}`} prefetch={false} className="group">
       <Card className={cn(
         "cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-white relative",
         className

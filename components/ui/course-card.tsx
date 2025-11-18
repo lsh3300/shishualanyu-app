@@ -32,15 +32,17 @@ export function CourseCard({
   showFavorite = false,
   isFavorite: propIsFavorite
 }: CourseCardProps) {
-  const { isFavorite: contextIsFavorite, toggleFavorite, loading } = useFavorites()
+  const { isCourseFavorite, addCourseToFavorites, removeCourseFromFavorites, loading } = useFavorites()
   const { user } = useAuth()
   
   // 如果没有传入isFavorite属性，从context获取
-  const isFavorite = propIsFavorite !== undefined ? propIsFavorite : contextIsFavorite(id)
+  const isFavorite = propIsFavorite !== undefined ? propIsFavorite : isCourseFavorite(id)
   
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    
+    console.log('收藏按钮被点击:', { id, isFavorite, user: user ? '已登录' : '未登录' })
     
     if (!user) {
       toast({
@@ -52,12 +54,16 @@ export function CourseCard({
     }
     
     try {
-      await toggleFavorite(id)
-      toast({
-        title: isFavorite ? "取消收藏成功" : "收藏成功",
-        description: isFavorite ? "已从收藏夹移除" : "已添加到收藏夹"
-      })
+      console.log('开始执行收藏操作:', isFavorite ? '取消收藏' : '添加收藏')
+      if (isFavorite) {
+        const result = await removeCourseFromFavorites(id)
+        console.log('取消收藏结果:', result)
+      } else {
+        const result = await addCourseToFavorites(id)
+        console.log('添加收藏结果:', result)
+      }
     } catch (error) {
+      console.error('收藏操作失败:', error)
       toast({
         title: "操作失败",
         description: error instanceof Error ? error.message : "请稍后重试",
@@ -67,8 +73,8 @@ export function CourseCard({
   }
   return (
     <div className="relative group">
-      <Link href={`/teaching/${id}`} className="block">
-        <Card className="cultural-card hover:scale-105 transition-all duration-300 w-64 flex-shrink-0 shadow-md hover:shadow-lg bg-white">
+      <Card className="cultural-card hover:scale-105 transition-all duration-300 w-64 flex-shrink-0 shadow-md hover:shadow-lg bg-white">
+        <Link href={`/teaching/${id}`} prefetch={false} className="block">
           <div className="relative overflow-hidden rounded-t-xl">
             <OptimizedImage
               src={thumbnail || "/placeholder.svg"}
@@ -85,25 +91,6 @@ export function CourseCard({
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm rounded-full p-3 transition-all duration-300 opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100">
               <Play className="h-6 w-6 text-white fill-white transition-transform duration-300 group-hover:scale-110" />
             </div>
-            
-            {/* 收藏按钮 */}
-            {showFavorite && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100"
-                onClick={handleFavoriteClick}
-                disabled={loading}
-              >
-                <Heart 
-                  className={`h-4 w-4 transition-colors duration-200 ${
-                    isFavorite 
-                      ? "text-red-500 fill-red-500" 
-                      : "text-muted-foreground hover:text-red-500"
-                  }`} 
-                />
-              </Button>
-            )}
           </div>
           <div className="p-4">
             <h3 className="font-semibold text-foreground mb-2 line-clamp-2 transition-colors duration-200 group-hover:text-primary">{title}</h3>
@@ -116,8 +103,30 @@ export function CourseCard({
               <div className="text-sm font-semibold text-accent">{isFree ? "免费" : `¥${price}`}</div>
             </div>
           </div>
-        </Card>
-      </Link>
+        </Link>
+        
+        {/* 收藏按钮 - 放在Link外面，避免事件冲突 */}
+        {showFavorite && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/95 hover:bg-white backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 z-20 shadow-lg hover:shadow-xl"
+            onClick={handleFavoriteClick}
+            onMouseDown={(e) => e.stopPropagation()}
+            disabled={loading}
+            type="button"
+            aria-label={isFavorite ? "取消收藏" : "收藏课程"}
+          >
+            <Heart 
+              className={`h-4 w-4 transition-colors duration-200 ${
+                isFavorite 
+                  ? "text-red-500 fill-red-500" 
+                  : "text-muted-foreground hover:text-red-500"
+              }`} 
+            />
+          </Button>
+        )}
+      </Card>
     </div>
   )
 }

@@ -1,8 +1,12 @@
-import { Play, Clock, Users, Star } from "lucide-react"
+import { Play, Clock, Users, Star, Heart } from "lucide-react"
 import { OptimizedImage } from "@/components/ui/optimized-image"
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { useFavorites } from "@/hooks/use-favorites"
+import { useAuth } from "@/contexts/auth-context"
+import { toast } from "@/hooks/use-toast"
 
 interface CourseListCardProps {
   id: string
@@ -16,6 +20,7 @@ interface CourseListCardProps {
   isFree?: boolean
   difficulty: "入门" | "进阶" | "高级"
   category: string
+  showFavorite?: boolean
 }
 
 export function CourseListCard({
@@ -30,10 +35,50 @@ export function CourseListCard({
   isFree,
   difficulty,
   category,
+  showFavorite = false,
 }: CourseListCardProps) {
+  const { isCourseFavorite, addCourseToFavorites, removeCourseFromFavorites, loading } = useFavorites()
+  const { user } = useAuth()
+  
+  const isFavorite = isCourseFavorite(id)
+  
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    console.log('收藏按钮被点击:', { id, isFavorite, user: user ? '已登录' : '未登录' })
+    
+    if (!user) {
+      toast({
+        title: "请先登录",
+        description: "登录后可以收藏课程",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      console.log('开始执行收藏操作:', isFavorite ? '取消收藏' : '添加收藏')
+      if (isFavorite) {
+        const result = await removeCourseFromFavorites(id)
+        console.log('取消收藏结果:', result)
+      } else {
+        const result = await addCourseToFavorites(id)
+        console.log('添加收藏结果:', result)
+      }
+    } catch (error) {
+      console.error('收藏操作失败:', error)
+      toast({
+        title: "操作失败",
+        description: error instanceof Error ? error.message : "请稍后重试",
+        variant: "destructive"
+      })
+    }
+  }
+  
   return (
-    <Link href={`/teaching/${id}`}>
-      <Card className="cultural-card hover:scale-105 transition-transform">
+    <Card className="cultural-card hover:scale-105 transition-transform group relative">
+      <Link href={`/teaching/${id}`} prefetch={false} className="block">
         <div className="flex gap-4">
           <div className="relative w-32 h-24 flex-shrink-0">
             <OptimizedImage src={thumbnail || "/placeholder.svg"} alt={title} fill className="object-cover rounded-lg" lazy={true} />
@@ -74,7 +119,29 @@ export function CourseListCard({
             </div>
           </div>
         </div>
-      </Card>
-    </Link>
+      </Link>
+      
+      {/* 收藏按钮 - 放在Link外面，避免事件冲突 */}
+      {showFavorite && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 h-7 w-7 rounded-full bg-white/95 hover:bg-white backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 z-20 shadow-lg hover:shadow-xl"
+          onClick={handleFavoriteClick}
+          onMouseDown={(e) => e.stopPropagation()}
+          disabled={loading}
+          type="button"
+          aria-label={isFavorite ? "取消收藏" : "收藏课程"}
+        >
+          <Heart 
+            className={`h-3.5 w-3.5 transition-colors duration-200 ${
+              isFavorite 
+                ? "text-red-500 fill-red-500" 
+                : "text-muted-foreground hover:text-red-500"
+            }`} 
+          />
+        </Button>
+      )}
+    </Card>
   )
 }

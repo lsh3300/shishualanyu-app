@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { useFavorites } from "@/hooks/use-favorites"
 import { ProductCard } from "@/components/ui/product-card"
-import { Loader2, Heart, ShoppingBag } from "lucide-react"
+import { Loader2, Heart, ShoppingBag, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -17,9 +17,22 @@ type Favorite = Database['public']['Tables']['favorites']['Row']
 
 export default function FavoritesPage() {
   const { user, isLoading: authLoading } = useAuth()
-  const { favoriteProducts, isLoading: favoritesLoading, error: favoritesError, fetchFavorites } = useFavorites()
+  const { favoriteProducts, favoriteCourses, isLoading: favoritesLoading, error: favoritesError, fetchFavorites } = useFavorites()
   const [activeTab, setActiveTab] = useState("products")
   const router = useRouter()
+  const renderHeader = () => (
+    <div className="mb-8 flex items-center gap-4">
+      <Link href="/profile">
+        <Button variant="ghost" size="icon">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+      </Link>
+      <div>
+        <h1 className="text-3xl font-bold mb-2">我的收藏</h1>
+        <p className="text-muted-foreground">管理您收藏的商品和内容</p>
+      </div>
+    </div>
+  )
 
   // 移除自动重定向，改为显示登录提示
   // useEffect(() => {
@@ -40,9 +53,12 @@ export default function FavoritesPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
-        <div className="text-center">
+        <div className="w-full">
+          {renderHeader()}
+          <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
           <p className="text-muted-foreground">加载收藏内容中...</p>
+        </div>
         </div>
       </div>
     )
@@ -51,10 +67,7 @@ export default function FavoritesPage() {
   if (favoritesError) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">我的收藏</h1>
-          <p className="text-muted-foreground">管理您收藏的商品和内容</p>
-        </div>
+        {renderHeader()}
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-red-500 mb-4">
@@ -75,10 +88,7 @@ export default function FavoritesPage() {
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">我的收藏</h1>
-          <p className="text-muted-foreground">管理您收藏的商品和内容</p>
-        </div>
+        {renderHeader()}
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Heart className="h-12 w-12 text-muted-foreground mb-4" />
@@ -115,9 +125,16 @@ export default function FavoritesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">我的收藏</h1>
-        <p className="text-muted-foreground">管理您收藏的商品和内容</p>
+      <div className="mb-8 flex items-center gap-4">
+        <Link href="/profile">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold mb-2">我的收藏</h1>
+          <p className="text-muted-foreground">管理您收藏的商品和内容</p>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -128,7 +145,7 @@ export default function FavoritesPage() {
           </TabsTrigger>
           <TabsTrigger value="courses" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
-            课程收藏 (0)
+            课程收藏 ({favoriteCourses.length})
           </TabsTrigger>
         </TabsList>
 
@@ -166,18 +183,44 @@ export default function FavoritesPage() {
         </TabsContent>
 
         <TabsContent value="courses" className="space-y-4">
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Heart className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">还没有收藏任何课程</h3>
-              <p className="text-muted-foreground mb-6 text-center max-w-md">
-                浏览我们的课程目录，点击心形图标将您喜欢的课程添加到收藏夹
-              </p>
-              <Link href="/courses">
-                <Button>浏览课程</Button>
-              </Link>
-            </CardContent>
-          </Card>
+          {favoriteCourses.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Heart className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">还没有收藏任何课程</h3>
+                <p className="text-muted-foreground mb-6 text-center max-w-md">
+                  浏览我们的课程目录，点击心形图标将您喜欢的课程添加到收藏夹
+                </p>
+                <Link href="/teaching">
+                  <Button>浏览课程</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {favoriteCourses.filter(course => course && course.id).map((course) => (
+                <Card key={course.id || `course-${course.title}-${Math.random()}`} className="overflow-hidden">
+                  <Link href={`/teaching/${course.id}`}>
+                    <div className="relative aspect-video w-full">
+                      <img
+                        src={course.image_url || '/placeholder.svg'}
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-sm mb-2 line-clamp-2">{course.title}</h3>
+                      <p className="text-xs text-muted-foreground mb-2">{course.instructor}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-primary">¥{course.price}</span>
+                        <span className="text-xs text-muted-foreground">{course.duration}分钟</span>
+                      </div>
+                    </CardContent>
+                  </Link>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

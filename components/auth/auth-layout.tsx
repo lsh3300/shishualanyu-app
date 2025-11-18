@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react"
 import { AuthProvider } from "@/contexts/auth-context"
+import { FavoritesProvider } from "@/hooks/use-favorites"
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -10,7 +11,9 @@ interface AuthLayoutProps {
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <AuthProvider>
-      {children}
+      <FavoritesProvider>
+        {children}
+      </FavoritesProvider>
     </AuthProvider>
   )
 }

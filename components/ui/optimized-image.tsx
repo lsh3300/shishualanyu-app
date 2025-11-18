@@ -133,7 +133,7 @@ export function OptimizedImage({
   }
 
   return (
-    <div className={cn("relative overflow-hidden", className)}>
+    <div className={cn("relative overflow-hidden", props.fill ? "w-full h-full" : undefined, className)}>
       {isLoading && (
         <div
           className={cn(

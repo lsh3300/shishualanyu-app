@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useState, useEffect, useMemo } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 interface FileCacheItem {
   url: string;
@@ -33,7 +33,8 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
   } = options;
 
   const [cache, setCache] = useState<Map<string, FileCacheItem>>(new Map());
-  const supabase = createClient();
+  // 使用共享的supabase客户端实例，避免创建多个实例
+  const supabaseClient = useMemo(() => supabase, []);
 
   // 生成缓存键
   const generateCacheKey = (path: string, bucket?: string, isLocal?: boolean): string => {
@@ -99,7 +100,7 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
       url = `/local-storage/${path}`;
     } else if (bucket) {
       // Supabase文件URL
-      const { data } = supabase.storage
+      const { data } = supabaseClient.storage
         .from(bucket)
         .getPublicUrl(path);
       
@@ -144,7 +145,7 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
       if (isLocal) {
         url = `/local-storage/${path}`;
       } else if (bucket) {
-        const { data } = supabase.storage
+        const { data } = supabaseClient.storage
           .from(bucket)
           .getPublicUrl(path);
         
@@ -209,7 +210,7 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
       const filePath = path || `${Date.now()}-${file.name}`;
       
       // 上传到Supabase
-      const { data, error } = await supabase.storage
+      const { data, error } = await supabaseClient.storage
         .from(bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -252,7 +253,7 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
         return response.ok;
       } else {
         // Supabase文件删除
-        const { error } = await supabase.storage
+        const { error } = await supabaseClient.storage
           .from(bucket)
           .remove([path]);
         

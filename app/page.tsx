@@ -194,7 +194,7 @@ export default function HomePage() {
         <SectionHeader title="教学精选" href="/teaching" />
         <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
           {featuredCourses.map((course) => (
-            <LazyCourseCard key={course.id} {...course} />
+            <LazyCourseCard key={course.id} {...course} showFavorite={true} />
           ))}
         </div>
       </section>
