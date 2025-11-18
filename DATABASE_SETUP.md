@@ -1,87 +1,91 @@
-# 数据库初始化指南
+# 数据库初始化与迁移指南
 
-## 步骤1：登录Supabase控制台
+项目使用 **Supabase CLI** 管理 schema。推荐始终通过迁移文件维护数据库，避免直接手写 SQL 导致环境不一致。
 
-1. 访问 [https://app.supabase.com](https://app.supabase.com)
-2. 使用您的账户登录
-3. 选择您的项目
+---
 
-## 步骤2：执行SQL脚本
+## 1. 前置准备
 
-1. 在左侧导航栏中，点击"SQL Editor"
-2. 点击"New query"创建新查询
-3. 复制以下SQL代码并粘贴到编辑器中：
+1. 安装 [Supabase CLI](https://supabase.com/docs/guides/cli)（Node.js 18+）。
+2. 在项目根目录执行：
+   ```bash
+   supabase login
+   supabase link --project-ref <your-project-ref>
+   ```
+3. 确保 `.env.local` 已填好 `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY` 等变量。
 
-```sql
--- 创建products表
-CREATE TABLE public.products (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT,
-  price DECIMAL(10,2) NOT NULL,
-  image_url TEXT,
-  category TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+---
 
--- 创建更新时间戳函数
-CREATE OR REPLACE FUNCTION public.handle_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+## 2. 初始化/重置数据库（本地）
 
--- 创建触发器
-CREATE TRIGGER handle_products_updated_at
-  BEFORE UPDATE ON public.products
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_updated_at();
-
--- 插入示例数据
-INSERT INTO public.products (name, description, price, image_url, category) VALUES
-('智能手表', '高端智能手表，支持心率监测和GPS定位', 1299.99, 'https://picsum.photos/seed/smartwatch/400/300.jpg', '电子产品'),
-('无线耳机', '降噪蓝牙耳机，续航24小时', 599.99, 'https://picsum.photos/seed/earbuds/400/300.jpg', '电子产品'),
-('咖啡机', '全自动咖啡机，支持多种咖啡制作', 2499.99, 'https://picsum.photos/seed/coffee/400/300.jpg', '家用电器'),
-('瑜伽垫', '环保材质瑜伽垫，防滑设计', 199.99, 'https://picsum.photos/seed/yoga/400/300.jpg', '运动健身'),
-('护肤套装', '天然植物成分护肤套装', 399.99, 'https://picsum.photos/seed/skincare/400/300.jpg', '美容护肤');
-```
-
-4. 点击"Run"执行SQL脚本
-
-## 步骤3：验证表创建
-
-1. 在左侧导航栏中，点击"Table Editor"
-2. 您应该能看到"products"表
-3. 点击表名，您应该能看到5条示例数据
-
-## 步骤4：测试API
-
-执行完SQL脚本后，您可以测试API：
+> ⚠️ 此操作会清空数据库，仅供本地或测试环境使用。
 
 ```bash
-# 测试连接
-curl http://localhost:3000/api/test-connection
-
-# 初始化数据库（如果表已存在，将返回成功消息）
-curl -X POST http://localhost:3000/api/init-database
+supabase db reset
 ```
 
-## 故障排除
+该命令会重建数据库并按顺序执行 `supabase/migrations/*.sql`：
 
-如果遇到问题，请检查：
+- 基础 schema（`profiles/products/orders/...`）  
+- RLS 策略及触发器  
+- 最新收藏扩展脚本 `20241118-favorites-support-courses.sql` 等  
 
-1. 确保您已正确登录Supabase并选择了正确的项目
-2. 确保SQL脚本执行成功，没有错误消息
-3. 确保您的环境变量(.env.local)中的Supabase配置正确
-4. 确保您的开发服务器正在运行
+执行完即可获得与当前代码一致的本地数据库。
 
-## 注意事项
+---
 
-- 如果表已存在，SQL脚本可能会报错。在这种情况下，您可能需要先删除现有表：
-  ```sql
-  DROP TABLE IF EXISTS public.products CASCADE;
-  ```
-  然后再执行上面的创建脚本
+## 3. 生产环境应用迁移
+
+若无法使用 CLI，可在 Supabase 控制台 SQL Editor 中 **按文件名顺序** 手动运行 `supabase/migrations/` 目录下的 SQL。提示 “对象已存在” 可忽略（脚本均带 `IF NOT EXISTS` 判断）。  
+执行完全部迁移后，再运行 `supabase/policies.sql` 以确保最新 RLS 生效。
+
+---
+
+## 4. 收藏表迁移重点
+
+迁移文件：`supabase/migrations/20241118-favorites-support-courses.sql`
+
+- 新增 `item_type`、`course_id` 字段与 `CHECK` 约束；
+- 允许 `product_id` 为空并重新创建外键；
+- 添加课程/商品各自的部分唯一索引；
+- 新增 `(user_id, item_type)` 复合索引，提升查询性能。
+
+若收藏功能出现 “未知课程/无法取消” 等问题，请确认该迁移已执行。
+
+---
+
+## 5. 新增或修改 Schema 的流程
+
+1. 使用本地 Supabase 实例（`supabase db start`）进行 DDL 试验；
+2. 运行 `supabase db diff -f <name>` 生成迁移文件；
+3. 审查 SQL，必要时手动优化并添加注释；
+4. 将迁移文件提交，并更新相关文档（README / 本指南）。
+
+---
+
+## 6. 常用命令速查
+
+| 命令 | 说明 |
+| --- | --- |
+| `supabase db start` | 启动本地数据库与 Studio |
+| `supabase db stop` | 停止本地实例 |
+| `supabase db reset` | 清空并重新执行全部迁移 |
+| `supabase db diff -f <name>` | 生成新的迁移文件 |
+| `supabase db push` | 将本地迁移推送到远程项目 |
+
+---
+
+## 7. 故障排查
+
+1. **迁移冲突/失败**：使用 `supabase db reset` 回滚到最新迁移状态后重新执行。
+2. **收藏 API 报错**：确认 `20241118-favorites-support-courses.sql` 已执行成功。
+3. **RLS 拒绝访问**：检查 `supabase/policies.sql` 是否同步，必要时重新执行。
+4. **CLI 无法连接**：确认 `.supabase/config.toml` 中 `project_ref` 正确，或重新 `supabase link`。
+
+---
+
+## 8. 参考资料
+
+- [Supabase CLI 文档](https://supabase.com/docs/guides/cli)
+- [Supabase RLS 指南](https://supabase.com/docs/guides/auth/row-level-security)
+- 仓库内 `supabase/schemas.sql`、`supabase/policies.sql`、`supabase/migrations/`

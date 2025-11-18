@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, createContext, useContext, ReactNode,
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { getCourseById, getProductById } from "@/data/models"
+import { normalizeCourseId, denormalizeCourseId } from "@/lib/course-id"
 
 interface Product {
   id: string
@@ -35,6 +36,7 @@ interface Course {
   price: number
   image_url: string | null
   category: string
+  backendId?: string
 }
 
 interface FavoriteCourseItem {
@@ -290,13 +292,24 @@ function useFavoritesData(): UseFavoritesReturn {
         return false
       }
 
+      const normalizedCourseId = normalizeCourseId(courseId)
+
+      if (!normalizedCourseId) {
+        toast({
+          title: "添加失败",
+          description: "课程ID无效",
+          variant: "destructive",
+        })
+        return false
+      }
+
       const response = await fetch('/api/user/favorites', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ courseId, itemType: 'course' }),
+        body: JSON.stringify({ courseId: normalizedCourseId, itemType: 'course' }),
       })
 
       let data;
@@ -384,13 +397,24 @@ function useFavoritesData(): UseFavoritesReturn {
         return false
       }
 
+      const normalizedCourseId = normalizeCourseId(courseId)
+
+      if (!normalizedCourseId) {
+        toast({
+          title: "移除失败",
+          description: "课程ID无效",
+          variant: "destructive",
+        })
+        return false
+      }
+
       const response = await fetch('/api/user/favorites', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ courseId, itemType: 'course' }),
+        body: JSON.stringify({ courseId: normalizedCourseId, itemType: 'course' }),
       })
 
       let data;
@@ -448,12 +472,18 @@ function useFavoritesData(): UseFavoritesReturn {
 
   // 检查课程是否已收藏
   const isCourseFavorite = useCallback((courseId: string): boolean => {
+    const normalizedCourseId = normalizeCourseId(courseId)
+
+    if (!normalizedCourseId) {
+      return false
+    }
+
     return favorites.some(favorite => {
       const fav = favorite as any
-      if (fav.course_id === courseId) {
+      if (fav.course_id === normalizedCourseId) {
         return true
       }
-      if (fav.item_type === 'course' && fav.product_id === courseId) {
+      if (fav.item_type === 'course' && fav.product_id === normalizedCourseId) {
         return true
       }
       return false
@@ -527,11 +557,21 @@ function useFavoritesData(): UseFavoritesReturn {
     })
     .map(fav => {
       const favAny = fav as any
-      const courseId = favAny.course_id || favAny.product_id
+      const rawCourseId: string | undefined = favAny.course_id || favAny.product_id
+      const normalizedCourseId = rawCourseId ? normalizeCourseId(rawCourseId) : null
+      const denormalizedCourseId = rawCourseId ? denormalizeCourseId(rawCourseId) : ""
       let course = favAny.courses || null
 
-      if (!course && courseId) {
-        course = getCourseById(courseId)
+      if (!course && denormalizedCourseId) {
+        course = getCourseById(denormalizedCourseId)
+      }
+
+      if (!course && normalizedCourseId) {
+        course = getCourseById(normalizedCourseId)
+      }
+
+      if (!course && rawCourseId) {
+        course = getCourseById(rawCourseId)
       }
       
       if (!course || !course.id) {
@@ -539,8 +579,11 @@ function useFavoritesData(): UseFavoritesReturn {
         return null
       }
       
+      const displayId = denormalizeCourseId(course.id || denormalizedCourseId || rawCourseId || "")
+
       return {
-        id: course.id,
+        id: displayId,
+        backendId: course.id || normalizedCourseId || rawCourseId,
         title: course.title,
         description: course.description,
         instructor: course.instructor?.name || course.instructor || '未知讲师',

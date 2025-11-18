@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { normalizeCourseId } from '@/lib/course-id';
 
 // GET: 获取用户收藏列表
 export async function GET(request: NextRequest) {
@@ -269,7 +270,8 @@ export async function POST(request: NextRequest) {
     }
     
     const { productId, courseId, itemType = 'product' } = body;
-    const itemId = itemType === 'course' ? courseId : productId;
+    const normalizedCourseId = itemType === 'course' ? normalizeCourseId(courseId) : null;
+    const itemId = itemType === 'course' ? normalizedCourseId : productId;
     console.log('解析后的收藏请求:', { itemType, itemId, productId, courseId });
     
     if (!itemId) {
@@ -604,7 +606,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { productId, courseId, itemType = 'product' } = await request.json();
-    const itemId = itemType === 'course' ? courseId : productId;
+    const normalizedCourseId = itemType === 'course' ? normalizeCourseId(courseId) : null;
+    const itemId = itemType === 'course' ? normalizedCourseId : productId;
     
     if (!itemId) {
       return NextResponse.json({ error: itemType === 'course' ? '缺少课程ID' : '缺少商品ID' }, { status: 400 });

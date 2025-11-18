@@ -1,3 +1,5 @@
+import { denormalizeCourseId, normalizeCourseId } from "@/lib/course-id"
+
 // 模拟课程数据
 export const coursesData = {
   "1": {
@@ -505,9 +507,56 @@ export const productsData = {
   },
 }
 
+type CourseRecord = (typeof coursesData)[keyof typeof coursesData]
+
+const courseLookupMap: Record<string, CourseRecord> = {}
+
+for (const [key, course] of Object.entries(coursesData)) {
+  if (!key) continue
+
+  courseLookupMap[key] = course
+
+  const normalizedId = normalizeCourseId(key)
+  if (normalizedId) {
+    courseLookupMap[normalizedId] = course
+  }
+
+  const denormalizedId = denormalizeCourseId(key)
+  if (denormalizedId) {
+    courseLookupMap[denormalizedId] = course
+  }
+}
+
 // 获取课程数据的函数
-export function getCourseById(id: string) {
-  return coursesData[id as keyof typeof coursesData] || null
+export function getCourseById(id?: string | null) {
+  if (!id) {
+    return null
+  }
+
+  const sanitizedId = id.trim()
+  if (!sanitizedId) {
+    return null
+  }
+
+  const directCourse = courseLookupMap[sanitizedId]
+  if (directCourse) {
+    return directCourse
+  }
+
+  const denormalizedId = denormalizeCourseId(sanitizedId)
+  if (denormalizedId && denormalizedId !== sanitizedId) {
+    const denormalizedCourse = courseLookupMap[denormalizedId]
+    if (denormalizedCourse) {
+      return denormalizedCourse
+    }
+  }
+
+  const normalizedId = normalizeCourseId(sanitizedId)
+  if (normalizedId && normalizedId !== sanitizedId) {
+    return courseLookupMap[normalizedId] || null
+  }
+
+  return null
 }
 
 // 获取产品数据的函数
