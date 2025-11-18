@@ -42,11 +42,10 @@ export default function ProfilePage() {
     const fetchUserStats = async () => {
     console.log('fetchUserStats called, user:', user ? 'User exists' : 'No user')
     
-    // 暂时移除用户检查，总是尝试获取数据
-    // if (!user) {
-    //   console.log('No user found, skipping stats fetch')
-    //   return
-    // }
+    if (!user) {
+      console.log('No user found, skipping stats fetch')
+      return
+    }
     
     setStatsLoading(true)
     try {
@@ -55,17 +54,15 @@ export default function ProfilePage() {
         
         console.log('Token retrieved:', token ? 'Token exists' : 'No token')
         
-        // 暂时移除令牌检查，总是发送请求
-        // if (!token) {
-        //   console.error('无法获取访问令牌')
-        //   return
-        // }
+        if (!token) {
+          console.error('无法获取访问令牌')
+          return
+        }
         
         console.log('Making request to /api/user/stats')
         const response = await fetch('/api/user/stats', {
           headers: {
-            // 暂时不添加授权头
-            // 'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`
           }
         })
         
@@ -100,10 +97,20 @@ export default function ProfilePage() {
     fetchUserStats()
   }, [user, getToken, fetchTrigger]) // 添加fetchTrigger到依赖项
   
-  // 在组件挂载后触发一次数据获取
+  // 监听统计数据更新事件
   useEffect(() => {
-    console.log('Component mounted, triggering fetch')
-    setFetchTrigger(prev => prev + 1)
+    const handleStatsUpdate = () => {
+      console.log('Stats update event received, refreshing stats')
+      setFetchTrigger(prev => prev + 1)
+    }
+
+    // 添加事件监听器
+    window.addEventListener('statsUpdateRequired', handleStatsUpdate)
+    
+    // 清理函数
+    return () => {
+      window.removeEventListener('statsUpdateRequired', handleStatsUpdate)
+    }
   }, [])
 
   // 用户数据
@@ -158,66 +165,72 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* Stats - 暂时移除用户检查，总是显示统计 */}
-            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
-              <div className="text-center">
-                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.orders}</div>
-                <div className="text-xs text-muted-foreground">订单</div>
+            {/* Stats - 只在用户登录时显示统计 */}
+            {user && (
+              <div className="grid grid-cols-4 gap-4 pt-4 border-t border-border">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.orders}</div>
+                  <div className="text-xs text-muted-foreground">订单</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.courses}</div>
+                  <div className="text-xs text-muted-foreground">课程</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.favorites}</div>
+                  <div className="text-xs text-muted-foreground">收藏</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.assignments}</div>
+                  <div className="text-xs text-muted-foreground">作业</div>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.courses}</div>
-                <div className="text-xs text-muted-foreground">课程</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.favorites}</div>
-                <div className="text-xs text-muted-foreground">收藏</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-primary">{statsLoading ? "..." : userStats.assignments}</div>
-                <div className="text-xs text-muted-foreground">作业</div>
-              </div>
-            </div>
+            )}
           </Card>
         </div>
       </header>
 
-      {/* 会员卡片 - 暂时移除用户检查，总是显示 */}
-      <section className="px-4 mb-6">
-        <CouponCard count={user ? 3 : 0} href="/profile/coupons" />
-      </section>
+      {/* 会员卡片 - 只在用户登录时显示 */}
+      {user && (
+        <section className="px-4 mb-6">
+          <CouponCard count={3} href="/profile/coupons" />
+        </section>
+      )}
 
-      {/* 用户成就 - 暂时移除用户检查，总是显示 */}
-      <section className="px-4 mb-6">
-        <Card className="p-5 border-0 bg-gradient-to-br from-primary/5 to-background shadow-sm">
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-            <Trophy className="h-5 w-5 mr-2 text-primary" />
-            最近成就
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                <Star className="h-4 w-4 text-primary" />
+      {/* 用户成就 - 只在用户登录时显示 */}
+      {user && (
+        <section className="px-4 mb-6">
+          <Card className="p-5 border-0 bg-gradient-to-br from-primary/5 to-background shadow-sm">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+              <Trophy className="h-5 w-5 mr-2 text-primary" />
+              最近成就
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                  <Star className="h-4 w-4 text-primary" />
+                </div>
+                <p className="text-sm font-medium text-foreground">完成课程</p>
+                <p className="text-xl font-bold text-primary">{statsLoading ? "..." : userStats.completedCourses}</p>
               </div>
-              <p className="text-sm font-medium text-foreground">完成课程</p>
-              <p className="text-xl font-bold text-primary">{statsLoading ? "..." : userStats.completedCourses}</p>
-            </div>
-            <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
-                <TrendingUp className="h-4 w-4 text-secondary" />
+              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
+                  <TrendingUp className="h-4 w-4 text-secondary" />
+                </div>
+                <p className="text-sm font-medium text-foreground">学习天数</p>
+                <p className="text-xl font-bold text-secondary">{statsLoading ? "..." : userStats.learningDays}</p>
               </div>
-              <p className="text-sm font-medium text-foreground">学习天数</p>
-              <p className="text-xl font-bold text-secondary">{statsLoading ? "..." : userStats.learningDays}</p>
-            </div>
-            <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
-                <Trophy className="h-4 w-4 text-accent" />
+              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
+                  <Trophy className="h-4 w-4 text-accent" />
+                </div>
+                <p className="text-sm font-medium text-foreground">收藏夹</p>
+                <p className="text-xl font-bold text-accent">{statsLoading ? "..." : userStats.favorites}</p>
               </div>
-              <p className="text-sm font-medium text-foreground">收藏夹</p>
-              <p className="text-xl font-bold text-accent">{statsLoading ? "..." : userStats.favorites}</p>
             </div>
-          </div>
-        </Card>
-      </section>
+          </Card>
+        </section>
+      )}
 
       {/* 功能菜单 */}
       <section className="px-4 mb-6">

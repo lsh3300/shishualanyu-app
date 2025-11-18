@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BottomNav } from "@/components/navigation/bottom-nav"
 import { AddressSelector } from "@/components/ui/address-selector"
 import { PaymentMethodSelector } from "@/components/ui/payment-method"
@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image"
+import { useCart } from "@/hooks/use-cart"
 
 const addresses = [
   {
@@ -51,39 +52,82 @@ const paymentMethods = [
   },
 ]
 
-const orderItems = [
-  {
-    id: "1",
-    name: "手工扎染丝巾",
-    price: 168,
-    image: "/handmade-tie-dye-silk-scarf.jpg",
-    specs: "靛蓝色 · 90×90cm",
-    quantity: 1,
-  },
-  {
-    id: "2",
-    name: "蓝染棉麻茶席",
-    price: 298,
-    image: "/indigo-dyed-linen-tea-mat.jpg",
-    specs: "经典款 · 30×120cm",
-    quantity: 1,
-  },
-]
-
 export default function CheckoutPage() {
+  const { cartData } = useCart()
   const [selectedAddress, setSelectedAddress] = useState(addresses[0].id)
   const [selectedPayment, setSelectedPayment] = useState(paymentMethods[0].id)
   const [couponCode, setCouponCode] = useState("")
   const [remarks, setRemarks] = useState("")
+
+  // 从购物车获取商品数据
+  const cartItems = cartData?.items || []
+  const orderItems = cartItems.filter(item => item.selected).map(item => ({
+    id: item.product_id,
+    cartItemId: item.id,
+    name: item.products.name,
+    price: item.products.price,
+    image: item.products.image_url || "/placeholder.svg",
+    specs: `${item.color || '默认'} · ${item.size || '默认规格'}`,
+    quantity: item.quantity,
+  }))
 
   const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const shipping = 0 // Free shipping
   const discount = 0 // No coupon applied
   const total = subtotal + shipping - discount
 
-  const handlePlaceOrder = () => {
-    // Simulate order placement
-    window.location.href = "/checkout/success"
+  const handlePlaceOrder = async () => {
+    try {
+      // 获取选中的购物车商品
+      const selectedCartItems = cartItems.filter(item => item.selected)
+      
+      if (selectedCartItems.length === 0) {
+        alert("请选择要结算的商品")
+        return
+      }
+      
+      // 准备订单数据
+      const orderData = {
+        items: selectedCartItems.map(item => ({
+          id: item.product_id,
+          cartItemId: item.id,
+          name: item.products.name,
+          price: item.products.price,
+          quantity: item.quantity,
+          specs: `${item.color || '默认'} · ${item.size || '默认规格'}`,
+        })),
+        address: addresses.find(addr => addr.id === selectedAddress),
+        paymentMethod: paymentMethods.find(method => method.id === selectedPayment)?.name,
+        totalAmount: selectedCartItems.reduce((sum, item) => sum + item.products.price * item.quantity, 0),
+      }
+      
+      // 调用创建订单API
+      const response = await fetch('/api/user/orders/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      })
+      
+      const result = await response.json()
+      
+      if (response.ok && result.success) {
+        // 如果需要更新统计数据，触发全局状态更新
+        if (result.statsUpdateRequired) {
+          // 这里可以触发全局状态更新，例如通过事件总线或状态管理
+          window.dispatchEvent(new CustomEvent('statsUpdateRequired'))
+        }
+        
+        // 跳转到订单成功页面
+        window.location.href = "/checkout/success"
+      } else {
+        alert(result.error || "创建订单失败")
+      }
+    } catch (error) {
+      console.error("提交订单错误:", error)
+      alert("提交订单失败，请重试")
+    }
   }
 
   return (
@@ -229,9 +273,9 @@ export default function CheckoutPage() {
             <div className="text-lg font-bold text-accent">¥{total}</div>
           </div>
         </div>
-        <Button className="w-full bg-primary hover:bg-primary/90" onClick={handlePlaceOrder}>
-          提交订单
-        </Button>
+        <Button className="w-full bg-primary hover:bg-primary/90" onClick={handlePlaceOrder} disabled={orderItems.length === 0}>
+        提交订单 ({orderItems.length})
+      </Button>
       </div>
 
       <BottomNav />

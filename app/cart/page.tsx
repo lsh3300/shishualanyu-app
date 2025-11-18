@@ -1,80 +1,125 @@
 "use client"
 
-import { useState } from "react"
 import { BottomNav } from "@/components/navigation/bottom-nav"
 import { CartItem } from "@/components/ui/cart-item"
-import { ArrowLeft, ShoppingBag } from "lucide-react"
+import { ArrowLeft, ShoppingBag, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-
-interface CartItemData {
-  id: string
-  name: string
-  price: number
-  originalPrice?: number
-  image: string
-  specs: string
-  quantity: number
-  selected: boolean
-}
+import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/contexts/auth-context"
+import { useEffect } from "react"
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState<CartItemData[]>([
-    {
-      id: "1",
-      name: "手工扎染丝巾",
-      price: 168,
-      originalPrice: 228,
-      image: "/handmade-tie-dye-silk-scarf.jpg",
-      specs: "靛蓝色 · 90×90cm",
-      quantity: 1,
-      selected: true,
-    },
-    {
-      id: "2",
-      name: "蓝染棉麻茶席",
-      price: 298,
-      image: "/indigo-dyed-linen-tea-mat.jpg",
-      specs: "经典款 · 30×120cm",
-      quantity: 1,
-      selected: true,
-    },
-    {
-      id: "3",
-      name: "传统蜡染抱枕",
-      price: 128,
-      originalPrice: 168,
-      image: "/traditional-wax-resist-cushion.jpg",
-      specs: "花鸟图案 · 45×45cm",
-      quantity: 2,
-      selected: false,
-    },
-  ])
+  const { user } = useAuth()
+  const {
+    cartData,
+    loading,
+    error,
+    updateQuantity,
+    removeFromCart,
+    toggleSelection,
+    toggleSelectAll,
+    getTotalPrice,
+    refetch
+  } = useCart()
 
-  const handleQuantityChange = (id: string, quantity: number) => {
-    setCartItems((items) => items.map((item) => (item.id === id ? { ...item, quantity } : item)))
+  // 如果用户未登录，显示登录提示
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <header className="bg-card border-b border-border sticky top-0 z-40">
+          <div className="flex items-center gap-4 p-4">
+            <Link href="/store">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <h1 className="heading-secondary flex-1">购物车</h1>
+          </div>
+        </header>
+
+        <div className="flex flex-col items-center justify-center h-96">
+          <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">请先登录</h3>
+          <p className="text-sm text-muted-foreground mb-6">登录后即可查看购物车</p>
+          <Link href="/auth">
+            <Button className="bg-primary hover:bg-primary/90">去登录</Button>
+          </Link>
+        </div>
+
+        <BottomNav />
+      </div>
+    )
   }
 
-  const handleSelectionChange = (id: string, selected: boolean) => {
-    setCartItems((items) => items.map((item) => (item.id === id ? { ...item, selected } : item)))
+  // 加载状态
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <header className="bg-card border-b border-border sticky top-0 z-40">
+          <div className="flex items-center gap-4 p-4">
+            <Link href="/store">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <h1 className="heading-secondary flex-1">购物车</h1>
+          </div>
+        </header>
+
+        <div className="flex flex-col items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+          <p className="text-sm text-muted-foreground">加载购物车数据...</p>
+        </div>
+
+        <BottomNav />
+      </div>
+    )
   }
 
-  const handleRemove = (id: string) => {
-    setCartItems((items) => items.filter((item) => item.id !== id))
+  // 错误状态
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <header className="bg-card border-b border-border sticky top-0 z-40">
+          <div className="flex items-center gap-4 p-4">
+            <Link href="/store">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <h1 className="heading-secondary flex-1">购物车</h1>
+          </div>
+        </header>
+
+        <div className="flex flex-col items-center justify-center h-96">
+          <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">加载失败</h3>
+          <p className="text-sm text-muted-foreground mb-6">{error}</p>
+          <Button onClick={refetch} className="bg-primary hover:bg-primary/90">
+            重新加载
+          </Button>
+        </div>
+
+        <BottomNav />
+      </div>
+    )
   }
 
-  const handleSelectAll = (checked: boolean) => {
-    setCartItems((items) => items.map((item) => ({ ...item, selected: checked })))
-  }
-
-  const selectedItems = cartItems.filter((item) => item.selected)
-  const totalPrice = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const totalSavings = selectedItems.reduce(
-    (sum, item) => sum + (item.originalPrice ? (item.originalPrice - item.price) * item.quantity : 0),
-    0,
-  )
+  const cartItems = cartData?.items || []
   const allSelected = cartItems.length > 0 && cartItems.every((item) => item.selected)
+
+  // 转换数据格式以适配CartItem组件
+  const adaptedCartItems = cartItems.map((item) => ({
+    id: item.id,
+    name: item.products.name,
+    price: item.products.price,
+    image: item.products.image_url || "/placeholder.svg",
+    specs: `${item.color || '默认'} · ${item.size || '默认规格'}`,
+    quantity: item.quantity,
+    selected: item.selected || false, // 如果API没有selected字段，默认false
+  }))
 
   if (cartItems.length === 0) {
     return (
@@ -104,6 +149,25 @@ export default function CartPage() {
     )
   }
 
+  // 处理函数
+  const handleQuantityChange = async (id: string, quantity: number) => {
+    await updateQuantity(id, quantity)
+  }
+
+  const handleSelectionChange = (id: string, selected: boolean) => {
+    toggleSelection(id, selected)
+  }
+
+  const handleRemove = async (id: string) => {
+    await removeFromCart(id)
+  }
+
+  const handleSelectAll = (checked: boolean) => {
+    toggleSelectAll(checked)
+  }
+
+  const totalPrice = getTotalPrice()
+
   return (
     <div className="min-h-screen bg-background pb-32">
       {/* Header */}
@@ -129,7 +193,7 @@ export default function CartPage() {
 
       {/* Cart Items */}
       <section className="px-4 space-y-4">
-        {cartItems.map((item) => (
+        {adaptedCartItems.map((item) => (
           <CartItem
             key={item.id}
             {...item}
@@ -150,15 +214,14 @@ export default function CartPage() {
           <div className="text-right">
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">合计:</span>
-              <span className="text-lg font-bold text-accent">¥{totalPrice}</span>
+              <span className="text-lg font-bold text-accent">¥{totalPrice.toFixed(2)}</span>
             </div>
-            {totalSavings > 0 && <div className="text-xs text-green-600">已省¥{totalSavings}</div>}
           </div>
         </div>
 
         <Link href="/checkout">
-          <Button className="w-full bg-primary hover:bg-primary/90" disabled={selectedItems.length === 0}>
-            结算 ({selectedItems.length})
+          <Button className="w-full bg-primary hover:bg-primary/90" disabled={cartItems.filter(item => item.selected).length === 0}>
+            结算 ({cartItems.filter(item => item.selected).length})
           </Button>
         </Link>
       </div>

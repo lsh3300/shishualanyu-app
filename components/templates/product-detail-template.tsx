@@ -1,15 +1,20 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BottomNav } from "@/components/navigation/bottom-nav"
 import { ProductImageGallery } from "@/components/ui/product-image-gallery"
 import { CraftsmanStory } from "@/components/ui/craftsman-story"
 import { SpecSelector } from "@/components/ui/spec-selector"
-import { ArrowLeft, Heart, Share, MessageCircle, ShoppingCart } from "lucide-react"
+import { ArrowLeft, Heart, Share, MessageCircle, ShoppingCart, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { useFavorites } from "@/hooks/use-favorites"
+import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/contexts/auth-context"
+import { toast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 export interface ProductDetailTemplateProps {
   product: {
@@ -52,8 +57,89 @@ export interface ProductDetailTemplateProps {
 }
 
 export function ProductDetailTemplate({ product, productType = "product" }: ProductDetailTemplateProps) {
+  const { addToFavorites, removeFromFavorites, isFavorite: checkIsFavorite } = useFavorites()
+  const { addToCart } = useCart()
+  const { user } = useAuth()
   const [selectedColor, setSelectedColor] = useState("")
   const [selectedSize, setSelectedSize] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isCurrentlyFavorite, setIsCurrentlyFavorite] = useState(false)
+
+  // 检查收藏状态
+  useEffect(() => {
+    setIsCurrentlyFavorite(checkIsFavorite(product.id))
+  }, [product.id, checkIsFavorite])
+
+  const handleFavoriteClick = async () => {
+    if (!user) {
+      toast({
+        title: "请先登录",
+        description: "登录后可以收藏产品",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      if (isCurrentlyFavorite) {
+        await removeFromFavorites(product.id)
+        setIsCurrentlyFavorite(false)
+        toast({
+          title: "取消收藏成功",
+          description: "已从收藏夹移除"
+        })
+      } else {
+        await addToFavorites(product.id)
+        setIsCurrentlyFavorite(true)
+        toast({
+          title: "收藏成功",
+          description: "已添加到收藏夹"
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "操作失败",
+        description: error instanceof Error ? error.message : "请稍后重试",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast({
+        title: "请先登录",
+        description: "登录后可以添加购物车",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await addToCart({ 
+        product_id: product.id, 
+        quantity: 1,
+        color: selectedColor,
+        size: selectedSize
+      })
+      toast({
+        title: "添加成功",
+        description: "商品已添加到购物车"
+      })
+    } catch (error) {
+      toast({
+        title: "添加失败",
+        description: error instanceof Error ? error.message : "请稍后重试",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -65,12 +151,32 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
-              <Share className="h-5 w-5" />
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={cn(
+                "flex-1",
+                isCurrentlyFavorite && "text-red-500"
+              )}
+              onClick={handleFavoriteClick}
+              disabled={isLoading}
+            >
+              <Heart 
+                className={cn(
+                  "h-4 w-4 mr-2",
+                  isCurrentlyFavorite && "fill-current"
+                )} 
+              />
+              {isCurrentlyFavorite ? "已收藏" : "收藏"}
             </Button>
-            <Button variant="ghost" size="icon">
-              <Heart className="h-5 w-5" />
+            <Button variant="ghost" size="sm" className="flex-1">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              咨询
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1">
+              <Share className="h-4 w-4 mr-2" />
+              分享
             </Button>
           </div>
         </div>
@@ -169,11 +275,25 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
           <Button variant="outline" size="icon" className="flex-shrink-0 bg-transparent">
             <MessageCircle className="h-5 w-5" />
           </Button>
-          <Button variant="outline" className="flex-1 bg-transparent">
-            <ShoppingCart className="h-4 w-4 mr-2" />
+          <Button 
+            variant="outline" 
+            className="flex-1 bg-transparent"
+            onClick={handleAddToCart}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <ShoppingCart className="h-4 w-4 mr-2" />
+            )}
             加入购物车
           </Button>
-          <Button className="flex-1 bg-primary hover:bg-primary/90">立即购买</Button>
+          <Button 
+            className="flex-1 bg-primary hover:bg-primary/90"
+            disabled={isLoading}
+          >
+            立即购买
+          </Button>
         </div>
       </div>
 

@@ -14,11 +14,7 @@ export function PublicRoute({ children, redirectTo = "/" }: PublicRouteProps) {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  useEffect(() => {
-    if (!loading && user) {
-      router.push(redirectTo)
-    }
-  }, [user, loading, router, redirectTo])
+
 
   if (loading) {
     return (
@@ -26,10 +22,6 @@ export function PublicRoute({ children, redirectTo = "/" }: PublicRouteProps) {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
-  }
-
-  if (user) {
-    return null
   }
 
   return <>{children}</>

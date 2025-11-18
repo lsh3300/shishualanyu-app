@@ -24,12 +24,7 @@ export function AuthModal() {
     }
   }, [searchParams])
 
-  // 如果用户已登录，重定向到主页
-  useEffect(() => {
-    if (!loading && user) {
-      router.push("/")
-    }
-  }, [user, loading, router])
+
 
   const handleAuthSuccess = () => {
     // 身份验证成功后，关闭模态框或重定向
@@ -55,11 +50,6 @@ export function AuthModal() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     )
-  }
-
-  // 如果用户已登录，不显示任何内容（将重定向）
-  if (user) {
-    return null
   }
 
   return (

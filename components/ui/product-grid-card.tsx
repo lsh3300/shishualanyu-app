@@ -7,7 +7,9 @@ import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useGlobalState } from "@/hooks/use-global-state"
+import { useFavorites } from "@/hooks/use-favorites"
+import { useAuth } from "@/contexts/auth-context"
+import { toast } from "sonner"
 
 interface ProductGridCardProps {
   id: string
@@ -30,22 +32,45 @@ export function ProductGridCard({
   isNew,
   discount,
 }: ProductGridCardProps) {
-  const { isFavorited, addToFavorites, removeFromFavorites } = useGlobalState();
+  const { user } = useAuth();
+  const { isFavorite, addToFavorites, removeFromFavorites, loading } = useFavorites();
   const [isFav, setIsFav] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // 初始化时检查是否已收藏
   useEffect(() => {
-    setIsFav(isFavorited(id));
-  }, [id, isFavorited]);
-  
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isFav) {
-      removeFromFavorites(id);
-    } else {
-      addToFavorites(id);
+    if (user) {
+      setIsFav(isFavorite(id));
     }
-    setIsFav(!isFav);
+  }, [id, user, isFavorite]);
+  
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast.error("请先登录后再收藏商品");
+      return;
+    }
+    
+    if (isLoading || loading) return;
+    
+    setIsLoading(true);
+    try {
+      if (isFav) {
+        await removeFromFavorites(id);
+        setIsFav(false);
+        toast.success("已取消收藏");
+      } else {
+        await addToFavorites(id);
+        setIsFav(true);
+        toast.success("已添加到收藏");
+      }
+    } catch (error) {
+      console.error("收藏操作失败:", error);
+      toast.error("操作失败，请重试");
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <Link href={`/store/${id}`}>
@@ -70,6 +95,7 @@ export function ProductGridCard({
           size="icon"
           className={`absolute top-2 right-2 z-10 ${isFav ? 'bg-pink-100' : 'bg-white/80'} hover:bg-white/90 rounded-full h-8 w-8`}
           onClick={handleFavorite}
+          disabled={isLoading || loading}
         >
           <Heart className={`h-4 w-4 ${isFav ? 'fill-pink-500 text-pink-500' : ''}`} />
         </Button>
