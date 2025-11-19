@@ -13,6 +13,7 @@ import { toast } from "sonner"
 
 interface ProductGridCardProps {
   id: string
+  routeId?: string
   name: string
   price: number
   originalPrice?: number
@@ -24,6 +25,7 @@ interface ProductGridCardProps {
 
 export function ProductGridCard({
   id,
+  routeId,
   name,
   price,
   originalPrice,
@@ -73,7 +75,7 @@ export function ProductGridCard({
     }
   };
   return (
-    <Link href={`/store/${id}`}>
+    <Link href={`/store/${routeId || id}`}>
       <Card className="cultural-card hover:scale-105 transition-transform relative">
         {/* Badges */}
         <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
@@ -106,6 +108,7 @@ export function ProductGridCard({
           width={200}
           height={200}
           className="w-full h-48 object-cover rounded-t-xl"
+          unoptimized
         />
         <div className="p-4">
           <h3 className="font-medium text-foreground mb-2 line-clamp-2 text-sm">{name}</h3>

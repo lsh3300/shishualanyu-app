@@ -10,14 +10,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Database } from "@/types/database"
-
-type Product = Database['public']['Tables']['products']['Row']
-type Favorite = Database['public']['Tables']['favorites']['Row']
+interface FavoriteProductCard {
+  id: string
+  name: string
+  description?: string
+  price: number
+  category?: string
+  coverImage: string
+}
 
 export default function FavoritesPage() {
-  const { user, isLoading: authLoading } = useAuth()
-  const { favoriteProducts, favoriteCourses, isLoading: favoritesLoading, error: favoritesError, fetchFavorites } = useFavorites()
+  const { user, loading: authLoading } = useAuth()
+  const { favoriteProducts, favoriteCourses, loading: favoritesLoading, error: favoritesError, fetchFavorites } = useFavorites()
   const [activeTab, setActiveTab] = useState("products")
   const router = useRouter()
   const renderHeader = () => (
@@ -106,21 +110,22 @@ export default function FavoritesPage() {
   }
 
   // 处理收藏数据，确保符合Product类型
-  const products = favoriteProducts.map((item: any) => {
-    // 确保所有必需字段都有值
+  const products: FavoriteProductCard[] = favoriteProducts.map((item: any) => {
+    const images: string[] = Array.isArray(item.images) ? item.images : []
+    const coverImage =
+      item.coverImage ||
+      images[0] ||
+      item.image_url ||
+      '/placeholder.svg'
+
     return {
       id: item.id || '',
       name: item.name || '未知商品',
       description: item.description || '暂无描述',
       price: typeof item.price === 'number' ? item.price : 0,
       category: item.category || '默认分类',
-      image_url: item.image_url || '/placeholder.svg',
-      images: item.images || null,
-      videos: item.videos || null,
-      in_stock: item.in_stock !== undefined ? item.in_stock : true,
-      created_at: item.created_at || new Date().toISOString(),
-      updated_at: item.updated_at || new Date().toISOString(),
-    } as Product
+      coverImage,
+    }
   })
 
   return (
@@ -171,7 +176,7 @@ export default function FavoritesPage() {
                   id={product.id}
                   name={product.name}
                   price={product.price}
-                  image={product.image_url || ''}
+                  image={product.coverImage}
                   sales={0}
                   showFavorite={true}
                   isFavorite={true}

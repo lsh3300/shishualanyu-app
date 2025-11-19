@@ -106,17 +106,28 @@ function useFavoritesData(): UseFavoritesReturn {
       }
 
       // 处理新的API响应格式
-      if (data.favorites) {
-        console.log('收到收藏数据:', data.favorites.length, '项')
-        console.log('收藏数据详情:', JSON.stringify(data.favorites, null, 2))
-        setFavorites(data.favorites)
-      } else {
-        // 兼容旧格式
-        console.log('使用旧格式数据:', data)
-        setFavorites(data)
+      const favoritesPayload = Array.isArray(data.favorites)
+        ? data.favorites
+        : Array.isArray(data.list)
+          ? data.list
+          : []
+
+      console.log('收到收藏数据:', favoritesPayload.length, '项')
+      console.log('收藏数据详情:', JSON.stringify(favoritesPayload.slice(0, 2), null, 2))
+      setFavorites(favoritesPayload)
+
+      if (Array.isArray(data.invalidFavorites) && data.invalidFavorites.length) {
+        toast({
+          title: "检测到失效收藏",
+          description: "部分商品已下架，已标记为失效，请手动移除。",
+        })
       }
       
-      console.log('收藏列表已更新:', data.favorites?.length || 0, '项')
+      if (data.statsUpdateRequired) {
+        window.dispatchEvent(new CustomEvent('statsUpdateRequired'))
+      }
+      
+      console.log('收藏列表已更新:', favoritesPayload.length || 0, '项')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '获取收藏列表失败'
       setError(errorMessage)
@@ -521,26 +532,22 @@ function useFavoritesData(): UseFavoritesReturn {
     })
     .map(fav => {
       const favAny = fav as any
-      let product = favAny.products || null
+      const product = favAny.products || null
 
-      if (!product && favAny.product_id) {
-        product = getProductById(favAny.product_id)
-      }
-      
       if (!product || !product.id) {
-        console.warn('商品数据无效:', fav)
+        console.warn('收藏商品已下架，需用户手动清理:', fav)
         return null
       }
-      
+
       return {
         id: product.id,
         name: product.name,
         price: product.price,
-        images: product.images,
+        images: product.images || [],
         category: product.category,
-        image_url: (product.images && product.images[0]) || product.image_url || '/placeholder.svg',
+        image_url: (product.images && product.images[0]) || product.image_url || product.coverImage || '/placeholder.svg',
+        coverImage: product.coverImage || (product.images && product.images[0]) || product.image_url || '/placeholder.svg',
         description: product.description || '',
-        in_stock: product.in_stock !== undefined ? product.in_stock : true,
         created_at: fav.created_at,
         updated_at: fav.created_at,
       };

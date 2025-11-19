@@ -127,6 +127,7 @@ export function OptimizedImage({
         alt={alt}
         className={cn("object-cover", className)}
         onError={() => setHasError(true)}
+        unoptimized
         {...props}
       />
     )
@@ -157,6 +158,7 @@ export function OptimizedImage({
         priority={priority}
         quality={quality}
         sizes={generateSizes(usage)}
+        unoptimized
         {...props}
       />
     </div>

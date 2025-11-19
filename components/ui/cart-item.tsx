@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Minus, Plus, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
+import { CheckedState } from "@radix-ui/react-checkbox"
 
 interface CartItemProps {
   id: string
@@ -36,6 +37,10 @@ export function CartItem({
 }: CartItemProps) {
   const [currentQuantity, setCurrentQuantity] = useState(quantity)
 
+  useEffect(() => {
+    setCurrentQuantity(quantity)
+  }, [quantity])
+
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity < 1) return
     setCurrentQuantity(newQuantity)
@@ -45,7 +50,7 @@ export function CartItem({
   return (
     <Card className="p-4">
       <div className="flex gap-4">
-        <Checkbox checked={selected} onCheckedChange={(checked) => onSelectionChange(id, checked as boolean)} />
+        <Checkbox checked={selected} onCheckedChange={(checked: CheckedState) => onSelectionChange(id, checked === true)} />
 
         <Image
           src={image || "/placeholder.svg"}
@@ -53,6 +58,7 @@ export function CartItem({
           width={80}
           height={80}
           className="rounded-lg object-cover"
+          unoptimized
         />
 
         <div className="flex-1 min-w-0">

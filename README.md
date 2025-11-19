@@ -12,8 +12,10 @@
 | 1 | `cp .env.example .env.local` | 填写 Supabase URL/Key（必须） |
 | 2 | `npm install` 或 `pnpm install` | 安装依赖 |
 | 3 | `npm run init-db` | 初始化数据库/运行 RLS 脚本 |
-| 4 | `npm run dev` | 启动 Next.js App Router |
-| 5 | 访问 `http://localhost:3000` | 首次加载需 Supabase 正常运行 |
+| 4 | 在 Supabase SQL Editor 执行 `supabase/products-schema.sql` | 新建产品/媒体表并写入示例结构 |
+| 5 | `npm run seed:products` | 上传 `public/` 中的示例图片到 Storage 并写入示例产品 |
+| 6 | `npm run dev` | 启动 Next.js App Router |
+| 7 | 访问 `http://localhost:3000` | 首次加载需 Supabase 正常运行 |
 
 **核心命令速查**
 ```bash
@@ -21,6 +23,7 @@ npm run dev        # 开发调试
 npm run build      # 生产构建
 npm run lint       # 手动触发 ESLint（默认构建忽略）
 npm run init-db    # 同步本地 Supabase schema
+npm run seed:products  # 上传示例媒体并写入示例产品
 ```
 
 **关键环境变量（.env.local）**
@@ -28,8 +31,14 @@ npm run init-db    # 同步本地 Supabase schema
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_KEY=
+SUPABASE_PRODUCT_BUCKET=product-media   # 可选，bucket 名与脚本保持一致
 ```
 > 若启用 S3 上传，再补充 `AWS_*` 相关变量；其余变量见 `Supabase环境变量配置指南.md`。
+
+> 🔁 **快速初始化产品与媒体**  
+> 1. 在 Supabase SQL Editor 粘贴并执行 `supabase/products-schema.sql`；  
+> 2. 本地命令行运行 `npm run seed:products`；  
+> 3. 重启 `npm run dev`，商店/收藏/购物车即可显示同一套图片。
 
 ---
 
@@ -42,6 +51,8 @@ SUPABASE_SERVICE_KEY=
   - 禁用 Link 预取减少客户端空耗请求。
   - `next.config.mjs` 启用 `optimizePackageImports`、AVIF/WebP 输出、远程图片白名单。
 - **数据库脚本**：`fix-favorites-for-courses.sql` 使 `favorites` 表兼容课程收藏（`item_type`、`course_id`、部分唯一索引）。
+- **购物车 & 立即购买打通**：`use-cart` Hook 引入授权请求头、精选状态管理与 `selectExclusiveCartItems`；`/api/cart` 与 `/api/user/orders/create` 现根据真实登录用户执行，商品详情页“立即购买”自动勾选对应购物车项并跳转结算。
+- **本地兜底数据映射增强**：`data/models.ts` 预先构建 `courseLookupMap`，支持数字ID/UUID互查；`hooks/use-favorites.ts` 在渲染收藏课程前统一做 ID 正规化/反向转换，彻底消除“未知课程”占位和刷新后状态丢失问题，后续排查同类问题可直接复用该策略。
 - **错误修复**：解决“未知课程”“收藏数量不一致”“课程无法取消收藏”“React key 警告”等问题。
 
 > ⚠️ 升级代码后请务必重新执行 `fix-favorites-for-courses.sql` 并重启开发服务，否则收藏接口会报错。
@@ -445,6 +456,7 @@ AWS_S3_BUCKET=your_s3_bucket_name
 ### 技术文档
 - [DATABASE_SETUP.md](./DATABASE_SETUP.md) - 数据库初始化指南
 - [Supabase数据库配置指南.md](./Supabase数据库配置指南.md) - 详细的数据库配置说明
+- [SUPABASE_PRODUCTS_SETUP.md](./SUPABASE_PRODUCTS_SETUP.md) - 产品与媒体数据初始化步骤
 - [FILE_UPLOAD_GUIDE.md](./FILE_UPLOAD_GUIDE.md) - 文件上传功能实现指南
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - 部署指南
 - [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md) - 备份与恢复策略

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCart } from "@/hooks/use-cart"
 import { useAuth } from "@/contexts/auth-context"
-import { useEffect } from "react"
+import { CheckedState } from "@radix-ui/react-checkbox"
 
 export default function CartPage() {
   const { user } = useAuth()
@@ -108,18 +108,26 @@ export default function CartPage() {
   }
 
   const cartItems = cartData?.items || []
-  const allSelected = cartItems.length > 0 && cartItems.every((item) => item.selected)
+  const allSelected = cartItems.length > 0 && cartItems.every((item) => item.selected !== false)
 
   // 转换数据格式以适配CartItem组件
-  const adaptedCartItems = cartItems.map((item) => ({
-    id: item.id,
-    name: item.products.name,
-    price: item.products.price,
-    image: item.products.image_url || "/placeholder.svg",
-    specs: `${item.color || '默认'} · ${item.size || '默认规格'}`,
-    quantity: item.quantity,
-    selected: item.selected || false, // 如果API没有selected字段，默认false
-  }))
+  const adaptedCartItems = cartItems.map((item) => {
+    const product = item.products || {}
+    const productImage =
+      product.image_url ||
+      (Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : null) ||
+      "/placeholder.svg"
+
+    return {
+      id: item.id,
+      name: product.name || "未知商品",
+      price: product.price || 0,
+      image: productImage,
+      specs: `${item.color || "默认"} · ${item.size || "默认规格"}`,
+      quantity: item.quantity,
+      selected: item.selected !== false,
+    }
+  })
 
   if (cartItems.length === 0) {
     return (
@@ -162,8 +170,8 @@ export default function CartPage() {
     await removeFromCart(id)
   }
 
-  const handleSelectAll = (checked: boolean) => {
-    toggleSelectAll(checked)
+  const handleSelectAll = (checked: CheckedState) => {
+    toggleSelectAll(checked === true)
   }
 
   const totalPrice = getTotalPrice()
@@ -220,8 +228,8 @@ export default function CartPage() {
         </div>
 
         <Link href="/checkout">
-          <Button className="w-full bg-primary hover:bg-primary/90" disabled={cartItems.filter(item => item.selected).length === 0}>
-            结算 ({cartItems.filter(item => item.selected).length})
+          <Button className="w-full bg-primary hover:bg-primary/90" disabled={cartItems.filter(item => item.selected !== false).length === 0}>
+            结算 ({cartItems.filter(item => item.selected !== false).length})
           </Button>
         </Link>
       </div>

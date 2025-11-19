@@ -7,11 +7,13 @@ import { useRouter } from "next/navigation"
 
 interface CartItem {
   id: string
+  product_id: string
   quantity: number
   color: string | null
   size: string | null
   created_at: string
   updated_at: string
+  selected?: boolean
   products: {
     id: string
     name: string
@@ -29,6 +31,13 @@ interface CartData {
   items: CartItem[]
 }
 
+interface CartActionResult {
+  success: boolean
+  cart?: CartData
+  addedItemId?: string
+  error?: string
+}
+
 export interface AddToCartItem {
   product_id: string
   quantity: number
@@ -40,8 +49,32 @@ export function useCart() {
   const [cartData, setCartData] = useState<CartData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { user } = useAuth()
+  const { user, getToken } = useAuth()
   const router = useRouter()
+
+  const normalizeCartResponse = useCallback((data: Partial<CartData & { items: any[] }>): CartData => {
+    const items = (data?.items || []).map((item) => ({
+      ...item,
+      selected: typeof item.selected === "boolean" ? item.selected : true,
+    }))
+
+    let totalItems = data?.totalItems ?? 0
+    let totalPrice = data?.totalPrice ?? 0
+
+    if (!data?.totalItems || !data?.totalPrice) {
+      totalItems = items.reduce((sum, item) => sum + (item.quantity || 0), 0)
+      totalPrice = items.reduce((sum, item) => {
+        const price = item.products?.price || 0
+        return sum + price * (item.quantity || 0)
+      }, 0)
+    }
+
+    return {
+      totalItems,
+      totalPrice,
+      items,
+    }
+  }, [])
 
   // 获取购物车数据
   const fetchCart = useCallback(async () => {
@@ -52,10 +85,22 @@ export function useCart() {
     }
 
     try {
+      const token = await getToken()
+      if (!token) {
+        setCartData({ totalItems: 0, totalPrice: 0, items: [] })
+        setLoading(false)
+        return
+      }
+
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/cart')
+      const response = await fetch('/api/cart', {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        cache: 'no-store',
+      })
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -69,8 +114,8 @@ export function useCart() {
       
       const data = await response.json()
       if (data) {
-        // API现在直接返回购物车数据，包含items、totalItems和totalPrice
-        setCartData(data)
+        const normalized = normalizeCartResponse(data)
+        setCartData(normalized)
       }
     } catch (err) {
       console.error('获取购物车数据错误:', err)
@@ -83,10 +128,10 @@ export function useCart() {
     } finally {
       setLoading(false)
     }
-  }, [user, router])
+  }, [user, router, getToken, normalizeCartResponse])
 
   // 添加商品到购物车
-  const addToCart = useCallback(async (item: AddToCartItem) => {
+  const addToCart = useCallback(async (item: AddToCartItem): Promise<CartActionResult> => {
     if (!user) {
       toast({
         title: "请先登录",
@@ -94,14 +139,20 @@ export function useCart() {
         variant: "destructive",
       })
       router.push('/auth')
-      return false
+      return { success: false, error: '未登录' }
     }
 
     try {
+      const token = await getToken()
+      if (!token) {
+        throw new Error('未能获取登录凭证，请重新登录')
+      }
+
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(item),
       })
@@ -112,16 +163,21 @@ export function useCart() {
       }
 
       const data = await response.json()
+      const normalized = normalizeCartResponse(data)
       
       // 更新本地购物车数据
-        setCartData(data)
+      setCartData(normalized)
 
       toast({
         title: "成功",
         description: "商品已添加到购物车",
       })
       
-      return true
+      return {
+        success: true,
+        cart: normalized,
+        addedItemId: data?.lastAddedItemId,
+      }
     } catch (err) {
       console.error('添加到购物车错误:', err)
       toast({
@@ -129,19 +185,23 @@ export function useCart() {
         description: err instanceof Error ? err.message : '添加到购物车失败',
         variant: "destructive",
       })
-      return false
+      return { success: false, error: err instanceof Error ? err.message : '添加购物车失败' }
     }
-  }, [user, router])
+  }, [user, router, getToken, normalizeCartResponse])
 
   // 更新商品数量
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     if (!user) return false
 
     try {
+      const token = await getToken()
+      if (!token) throw new Error('未登录')
+
       const response = await fetch('/api/cart', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ id: itemId, quantity }),
       })
@@ -153,8 +213,8 @@ export function useCart() {
 
       // 使用API返回的数据更新本地状态
       const data = await response.json()
-      // API现在直接返回购物车数据，包含items、totalItems和totalPrice
-      setCartData(data)
+      const normalized = normalizeCartResponse(data)
+      setCartData(normalized)
       
       return true
     } catch (err) {
@@ -166,17 +226,21 @@ export function useCart() {
       })
       return false
     }
-  }, [user])
+  }, [user, getToken, normalizeCartResponse])
 
   // 删除商品
   const removeFromCart = useCallback(async (itemId: string) => {
     if (!user) return false
 
     try {
+      const token = await getToken()
+      if (!token) throw new Error('未登录')
+
       const response = await fetch('/api/cart', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ id: itemId }),
       })
@@ -188,8 +252,8 @@ export function useCart() {
 
       // 使用API返回的数据更新本地状态
       const data = await response.json()
-      // API现在直接返回购物车数据，包含items、totalItems和totalPrice
-      setCartData(data)
+      const normalized = normalizeCartResponse(data)
+      setCartData(normalized)
 
       toast({
         title: "已删除",
@@ -206,7 +270,7 @@ export function useCart() {
       })
       return false
     }
-  }, [user])
+  }, [user, getToken, normalizeCartResponse])
 
   // 切换商品选择状态（用于结算）
   const toggleSelection = useCallback((itemId: string, selected: boolean) => {
@@ -236,23 +300,37 @@ export function useCart() {
     })
   }, [])
 
+  const selectExclusiveCartItems = useCallback((itemIds: string[]) => {
+    setCartData(prev => {
+      if (!prev) return prev
+      const idSet = new Set(itemIds)
+      return {
+        ...prev,
+        items: prev.items.map(item => ({
+          ...item,
+          selected: idSet.size === 0 ? false : idSet.has(item.id),
+        })),
+      }
+    })
+  }, [])
+
   // 计算选中商品的价格
   const getSelectedItems = useCallback(() => {
     if (!cartData) return []
-    return cartData.items.filter(item => item.selected)
+    return cartData.items.filter(item => item.selected !== false)
   }, [cartData])
 
   const getTotalPrice = useCallback(() => {
     if (!cartData) return 0
     return cartData.items
-      .filter(item => item.selected)
-      .reduce((sum, item) => sum + item.products.price * item.quantity, 0)
+      .filter(item => item.selected !== false)
+      .reduce((sum, item) => sum + (item.products?.price || 0) * item.quantity, 0)
   }, [cartData])
 
   const getTotalSavings = useCallback(() => {
     if (!cartData) return 0
     return cartData.items
-      .filter(item => item.selected)
+      .filter(item => item.selected !== false)
       .reduce((sum, item) => {
         // 这里可以根据需要计算节省金额，例如与原价比较
         return sum
@@ -284,6 +362,7 @@ export function useCart() {
     removeFromCart,
     toggleSelection,
     toggleSelectAll,
+    selectExclusiveCartItems,
     getSelectedItems,
     getTotalPrice,
     getTotalSavings,

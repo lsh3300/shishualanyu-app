@@ -1,52 +1,153 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 
-// 生成一个固定的UUID作为测试用户ID
-const TEST_USER_ID = '12345678-1234-1234-1234-123456789abc';
+type CartItemWithProduct = {
+  id: string
+  user_id: string
+  product_id: string
+  quantity: number
+  color: string | null
+  size: string | null
+  created_at: string
+  updated_at: string
+  products: {
+    id: string
+    name: string
+    price: number | null
+    description: string | null
+    image_url: string | null
+    category: string | null
+    in_stock: boolean | null
+    images: string[] | null
+  } | null
+}
+
+async function resolveUserId(request: NextRequest, supabase: ReturnType<typeof createServerClient>) {
+  const authHeader = request.headers.get('authorization');
+  let token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : undefined;
+
+  if (!token) {
+    token = request.cookies.get('sb-access-token')?.value;
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) {
+    console.error('认证失败:', error);
+    return null;
+  }
+
+  return data.user.id;
+}
+
+async function fetchProductsMap(
+  supabase: ReturnType<typeof createServerClient>,
+  productIds: string[],
+) {
+  const map: Record<string, any> = {}
+  if (!productIds.length) return map
+
+  const { data: productsData, error: productsError } = await supabase
+    .from('products')
+    .select('id, name, price, description, image_url, category, metadata')
+    .in('id', productIds)
+
+  if (productsError) {
+    console.error('获取购物车商品详情失败:', productsError)
+    return map
+  }
+
+  const { data: mediaData, error: mediaError } = await supabase
+    .from('product_media')
+    .select('product_id, type, url, cover, position')
+    .in('product_id', productIds)
+    .eq('type', 'image')
+    .order('position', { ascending: true })
+
+  const coverMap: Record<string, string> = {}
+  if (mediaError) {
+    console.warn('获取购物车商品图片失败:', mediaError)
+  } else {
+    mediaData?.forEach((media) => {
+      const current = coverMap[media.product_id]
+      if (!current || media.cover || media.position === 0) {
+        coverMap[media.product_id] = media.url
+      }
+    })
+  }
+
+  ;(productsData || []).forEach((product) => {
+    map[product.id] = {
+      ...product,
+      image_url: coverMap[product.id] || product.image_url || '/placeholder.jpg',
+    }
+  })
+
+  return map
+}
+
+async function buildCartPayload(supabase: ReturnType<typeof createServerClient>, userId: string) {
+  const { data, error } = await supabase
+    .from('cart_items')
+    .select('id, user_id, product_id, quantity, color, size, created_at, updated_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  const rawItems = (data as any[]) ?? [];
+  const productIds = Array.from(new Set(rawItems.map((item) => item.product_id).filter(Boolean)))
+  const productsMap = await fetchProductsMap(supabase, productIds)
+
+  const items: CartItemWithProduct[] = rawItems.map((item) => {
+    const product = productsMap[item.product_id] || null
+
+    return {
+    ...item,
+      products: product
+        ? {
+            ...product,
+            image_url: product.image_url || '/placeholder.jpg',
+          }
+        : null,
+    }
+  });
+  const totalItems = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const totalPrice = items.reduce((sum, item) => {
+    const price = item.products?.price || 0;
+    return sum + price * (item.quantity || 0);
+  }, 0);
+
+  return {
+    items,
+    totalItems,
+    totalPrice
+  };
+}
+
+function formatNullableValue(value?: string | null) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
+}
 
 // GET: 获取用户购物车数据
 export async function GET(request: NextRequest) {
   try {
-    console.log('开始处理GET /api/cart请求');
-    
-    // 暂时跳过认证，使用固定用户ID进行测试
-    const userId = TEST_USER_ID;
-    console.log('使用测试用户ID:', userId);
-    
     const supabase = createServerClient();
+    const userId = await resolveUserId(request, supabase);
 
-    // 获取购物车数据
-    const { data: cartItems, error: cartError } = await supabase
-      .from('cart_items')
-      .select(`
-        *,
-        products:product_id(*)
-      `)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-
-    if (cartError) {
-      console.error('获取购物车数据错误:', cartError);
-      return NextResponse.json(
-        { error: '获取购物车数据失败' },
-        { status: 500 }
-      );
+    if (!userId) {
+      return NextResponse.json({ error: '未登录，无法获取购物车' }, { status: 401 });
     }
 
-    // 计算购物车统计信息
-    const totalItems = cartItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-    const totalPrice = cartItems?.reduce((sum, item) => {
-      const product = item.products as any;
-      return sum + (product?.price || 0) * item.quantity;
-    }, 0) || 0;
-
-    console.log('获取购物车成功，商品数量:', totalItems);
-    return NextResponse.json({
-      items: cartItems || [],
-      totalItems,
-      totalPrice
-    });
-
+    const payload = await buildCartPayload(supabase, userId);
+    return NextResponse.json(payload);
   } catch (error) {
     console.error('获取购物车错误:', error);
     return NextResponse.json(
@@ -59,144 +160,107 @@ export async function GET(request: NextRequest) {
 // POST: 添加商品到购物车
 export async function POST(request: NextRequest) {
   try {
-    console.log('开始处理POST /api/cart请求');
-    
-    // 暂时跳过认证，使用固定用户ID进行测试
-    const userId = TEST_USER_ID;
-    console.log('使用测试用户ID:', userId);
-    
     const supabase = createServerClient();
+    const userId = await resolveUserId(request, supabase);
+
+    if (!userId) {
+      return NextResponse.json({ error: '未登录，无法添加购物车' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { product_id, quantity = 1, color, size } = body;
 
-    console.log('收到请求数据:', { product_id, quantity, color, size });
-
-    // 验证必填字段
     if (!product_id) {
-      return NextResponse.json(
-        { error: '缺少商品ID' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '缺少商品ID' }, { status: 400 });
     }
 
-    // 验证商品是否存在
+    if (quantity < 1) {
+      return NextResponse.json({ error: '数量必须大于0' }, { status: 400 });
+    }
+
+    const normalizedColor = formatNullableValue(color);
+    const normalizedSize = formatNullableValue(size);
+
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, price, in_stock')
       .eq('id', product_id)
       .single();
 
     if (productError || !product) {
-      console.error('商品不存在错误:', productError);
-      return NextResponse.json(
-        { error: '商品不存在' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: '商品不存在或已下架' }, { status: 404 });
     }
 
-    // 检查库存
-    if (product.stock < quantity) {
-      return NextResponse.json(
-        { error: '库存不足' },
-        { status: 400 }
-      );
+    if (product.in_stock === false) {
+      return NextResponse.json({ error: '该商品已售罄' }, { status: 400 });
     }
 
-    // 检查购物车中是否已存在该商品
-    const { data: existingItem, error: checkError } = await supabase
+    let existingQuery = supabase
       .from('cart_items')
-      .select('*')
+      .select('id, quantity')
       .eq('user_id', userId)
-      .eq('product_id', product_id)
-      .eq('color', color || '')
-      .eq('size', size || '')
-      .single();
+      .eq('product_id', product_id);
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('检查购物车商品错误:', checkError);
-      return NextResponse.json(
-        { error: '检查购物车失败' },
-        { status: 500 }
-      );
+    if (normalizedColor) {
+      existingQuery = existingQuery.eq('color', normalizedColor);
+    } else {
+      existingQuery = existingQuery.is('color', null);
+    }
+
+    if (normalizedSize) {
+      existingQuery = existingQuery.eq('size', normalizedSize);
+    } else {
+      existingQuery = existingQuery.is('size', null);
+    }
+
+    const { data: existingItem, error: existingError } = await existingQuery.single();
+
+    let lastAddedItemId: string | undefined;
+
+    if (existingError && existingError.code !== 'PGRST116') {
+      console.error('检查购物车商品错误:', existingError);
+      return NextResponse.json({ error: '检查购物车失败' }, { status: 500 });
     }
 
     if (existingItem) {
-      // 更新数量
       const newQuantity = existingItem.quantity + quantity;
-      
-      if (newQuantity > product.stock) {
-        return NextResponse.json(
-          { error: '库存不足' },
-          { status: 400 }
-        );
-      }
-
       const { error: updateError } = await supabase
         .from('cart_items')
         .update({ quantity: newQuantity })
-        .eq('id', existingItem.id);
+        .eq('id', existingItem.id)
+        .eq('user_id', userId);
 
       if (updateError) {
         console.error('更新购物车错误:', updateError);
-        return NextResponse.json(
-          { error: '更新购物车失败' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: '更新购物车失败' }, { status: 500 });
       }
+      lastAddedItemId = existingItem.id;
     } else {
-      // 添加新商品到购物车
-      const { error: insertError } = await supabase
+      const { data: insertedItem, error: insertError } = await supabase
         .from('cart_items')
         .insert({
           user_id: userId,
           product_id,
           quantity,
-          color: color || '',
-          size: size || '',
-          created_at: new Date().toISOString()
-        });
+          color: normalizedColor,
+          size: normalizedSize,
+        })
+        .select('id')
+        .single();
 
-      if (insertError) {
+      if (insertError || !insertedItem) {
         console.error('添加购物车错误:', insertError);
-        return NextResponse.json(
-          { error: '添加购物车失败' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: '添加购物车失败' }, { status: 500 });
       }
+      lastAddedItemId = insertedItem.id;
     }
 
-    // 返回更新后的购物车数据
-    const { data: cartData, error: fetchError } = await supabase
-      .from('cart_items')
-      .select(`
-        *,
-        products:product_id(*)
-      `)
-      .eq('user_id', userId);
-
-    if (fetchError) {
-      console.error('获取购物车数据错误:', fetchError);
-      return NextResponse.json(
-        { error: '获取购物车数据失败' },
-        { status: 500 }
-      );
-    }
-
-    // 计算购物车统计信息
-    const totalItems = cartData?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-    const totalPrice = cartData?.reduce((sum, item) => {
-      const product = item.products as any;
-      return sum + (product?.price || 0) * item.quantity;
-    }, 0) || 0;
-
-    console.log('添加到购物车成功');
+    const payload = await buildCartPayload(supabase, userId);
     return NextResponse.json({
-      items: cartData || [],
-      totalItems,
-      totalPrice,
-      statsUpdateRequired: true // 标记需要更新统计数据
+      ...payload,
+      lastAddedItemId,
+      statsUpdateRequired: true,
     });
-
   } catch (error) {
     console.error('添加到购物车错误:', error);
     return NextResponse.json(
@@ -209,24 +273,20 @@ export async function POST(request: NextRequest) {
 // PUT: 更新购物车商品数量
 export async function PUT(request: NextRequest) {
   try {
-    console.log('开始处理PUT /api/cart请求');
-    
-    // 暂时跳过认证，使用固定用户ID进行测试
-    const userId = TEST_USER_ID;
-    console.log('使用测试用户ID:', userId);
-    
     const supabase = createServerClient();
+    const userId = await resolveUserId(request, supabase);
+
+    if (!userId) {
+      return NextResponse.json({ error: '未登录，无法更新购物车' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { id, quantity } = body;
 
-    if (!id || !quantity || quantity < 1) {
-      return NextResponse.json(
-        { error: '无效的参数' },
-        { status: 400 }
-      );
+    if (!id || typeof quantity !== 'number' || quantity < 1) {
+      return NextResponse.json({ error: '无效的参数' }, { status: 400 });
     }
 
-    // 更新购物车项数量
     const { error: updateError } = await supabase
       .from('cart_items')
       .update({ quantity })
@@ -235,44 +295,14 @@ export async function PUT(request: NextRequest) {
 
     if (updateError) {
       console.error('更新购物车项错误:', updateError);
-      return NextResponse.json(
-        { error: '更新购物车项失败' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: '更新购物车项失败' }, { status: 500 });
     }
 
-    // 返回更新后的购物车数据
-    const { data: cartData, error: fetchError } = await supabase
-      .from('cart_items')
-      .select(`
-        *,
-        products:product_id(*)
-      `)
-      .eq('user_id', userId);
-
-    if (fetchError) {
-      console.error('获取购物车数据错误:', fetchError);
-      return NextResponse.json(
-        { error: '获取购物车数据失败' },
-        { status: 500 }
-      );
-    }
-
-    // 计算购物车统计信息
-    const totalItems = cartData?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-    const totalPrice = cartData?.reduce((sum, item) => {
-      const product = item.products as any;
-      return sum + (product?.price || 0) * item.quantity;
-    }, 0) || 0;
-
-    console.log('更新购物车成功');
+    const payload = await buildCartPayload(supabase, userId);
     return NextResponse.json({
-      items: cartData || [],
-      totalItems,
-      totalPrice,
-      statsUpdateRequired: true // 标记需要更新统计数据
+      ...payload,
+      statsUpdateRequired: true,
     });
-
   } catch (error) {
     console.error('更新购物车项错误:', error);
     return NextResponse.json(
@@ -285,24 +315,20 @@ export async function PUT(request: NextRequest) {
 // DELETE: 从购物车删除商品
 export async function DELETE(request: NextRequest) {
   try {
-    console.log('开始处理DELETE /api/cart请求');
-    
-    // 暂时跳过认证，使用固定用户ID进行测试
-    const userId = TEST_USER_ID;
-    console.log('使用测试用户ID:', userId);
-    
     const supabase = createServerClient();
+    const userId = await resolveUserId(request, supabase);
+
+    if (!userId) {
+      return NextResponse.json({ error: '未登录，无法删除购物车项' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { id } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { error: '缺少购物车项ID' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '缺少购物车项ID' }, { status: 400 });
     }
 
-    // 删除购物车项
     const { error: deleteError } = await supabase
       .from('cart_items')
       .delete()
@@ -311,44 +337,14 @@ export async function DELETE(request: NextRequest) {
 
     if (deleteError) {
       console.error('删除购物车项错误:', deleteError);
-      return NextResponse.json(
-        { error: '删除购物车项失败' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: '删除购物车项失败' }, { status: 500 });
     }
 
-    // 返回更新后的购物车数据
-    const { data: cartData, error: fetchError } = await supabase
-      .from('cart_items')
-      .select(`
-        *,
-        products:product_id(*)
-      `)
-      .eq('user_id', userId);
-
-    if (fetchError) {
-      console.error('获取购物车数据错误:', fetchError);
-      return NextResponse.json(
-        { error: '获取购物车数据失败' },
-        { status: 500 }
-      );
-    }
-
-    // 计算购物车统计信息
-    const totalItems = cartData?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-    const totalPrice = cartData?.reduce((sum, item) => {
-      const product = item.products as any;
-      return sum + (product?.price || 0) * item.quantity;
-    }, 0) || 0;
-
-    console.log('删除购物车项成功');
+    const payload = await buildCartPayload(supabase, userId);
     return NextResponse.json({
-      items: cartData || [],
-      totalItems,
-      totalPrice,
-      statsUpdateRequired: true // 标记需要更新统计数据
+      ...payload,
+      statsUpdateRequired: true,
     });
-
   } catch (error) {
     console.error('删除购物车项错误:', error);
     return NextResponse.json(

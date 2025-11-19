@@ -1,12 +1,35 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@/lib/supabase/server"
 
-// 测试用户ID，实际应用中应该从认证中获取
-const TEST_USER_ID = "test-user-id"
+async function resolveUserId(request: NextRequest, supabase: ReturnType<typeof createServerClient>) {
+  const authHeader = request.headers.get('authorization')
+  let token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : undefined
+
+  if (!token) {
+    token = request.cookies.get('sb-access-token')?.value
+  }
+
+  if (!token) {
+    return null
+  }
+
+  const { data, error } = await supabase.auth.getUser(token)
+  if (error || !data?.user) {
+    console.error('订单创建认证失败:', error)
+    return null
+  }
+
+  return data.user.id
+}
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerClient()
+    const userId = await resolveUserId(request, supabase)
+
+    if (!userId) {
+      return NextResponse.json({ error: "未登录，无法创建订单" }, { status: 401 })
+    }
     
     // 解析请求数据
     const { items, address, paymentMethod, totalAmount } = await request.json()
@@ -25,22 +48,34 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    if (typeof totalAmount !== "number" || totalAmount <= 0) {
+      return NextResponse.json(
+        { error: "订单金额无效" },
+        { status: 400 }
+      )
+    }
+
+    const orderNumber = `BL${Date.now()}${Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0')}`
     
     // 创建订单
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
-        user_id: TEST_USER_ID,
+        user_id: userId,
+        order_number: orderNumber,
         status: "pending",
+        payment_status: "pending",
         total_amount: totalAmount,
         shipping_address: address,
-        payment_method: paymentMethod,
-        created_at: new Date().toISOString(),
+        payment_method: paymentMethod || "unknown",
       })
-      .select()
+      .select('id')
       .single()
     
-    if (orderError) {
+    if (orderError || !order) {
       console.error("创建订单失败:", orderError)
       return NextResponse.json(
         { error: "创建订单失败" },
@@ -52,8 +87,8 @@ export async function POST(request: NextRequest) {
     const orderItems = items.map((item: any) => ({
       order_id: order.id,
       product_id: item.id,
-      quantity: item.quantity,
-      price: item.price,
+      quantity: item.quantity || 1,
+      price: item.price || 0,
       specs: item.specs || "",
     }))
     
@@ -78,6 +113,7 @@ export async function POST(request: NextRequest) {
       await supabase
         .from("cart_items")
         .delete()
+        .eq('user_id', userId)
         .in("id", cartItemIds)
     }
     

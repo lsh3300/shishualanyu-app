@@ -19,9 +19,32 @@ const filterOptions = [
   { id: "wax-resist", label: "蜡染" },
 ]
 
+const resolveProductImage = (product: any) => {
+  const candidates: string[] = []
+
+  if (Array.isArray(product.images)) {
+    candidates.push(...product.images)
+  }
+  if (typeof product.coverImage === "string") {
+    candidates.unshift(product.coverImage)
+  }
+  if (typeof product.image_url === "string") {
+    candidates.push(product.image_url)
+  }
+
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "string") continue
+    const trimmed = candidate.trim()
+    if (!trimmed) continue
+    return trimmed.startsWith("/") ? trimmed : trimmed
+  }
+
+  return "/placeholder.jpg"
+}
+
 export default function StorePage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<any[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -37,22 +60,34 @@ export default function StorePage() {
         const data = await response.json()
         
         // 处理产品数据，确保属性名正确
-        const processedProducts = (data.products || []).map((product: any) => ({
-          ...product,
-          // 确保有originalPrice属性，即使数据库中没有这个字段
-          originalPrice: product.originalPrice || null
-        }))
+        const processedProducts = (data.products || []).map((product: any) => {
+          const imagesArray = Array.isArray(product.images)
+            ? product.images
+            : product.image_url
+              ? [product.image_url]
+              : []
+
+          const coverImage = resolveProductImage({
+            ...product,
+            images: imagesArray,
+          })
+
+          return {
+            ...product,
+            images: imagesArray,
+            coverImage,
+            sales: product.sales ?? 0,
+            originalPrice: product.originalPrice ?? null,
+          }
+        })
         
         setProducts(processedProducts)
         setFilteredProducts(processedProducts)
       } catch (error) {
         console.error('获取产品数据失败:', error)
-        // 如果API失败，使用静态数据作为备用
-        const { productsData } = await import('@/data/models')
-        const staticProducts = Object.values(productsData)
-        setProducts(staticProducts)
-        setFilteredProducts(staticProducts)
-        setError('无法连接到数据库，正在显示本地示例数据。请运行 open-supabase.bat 初始化数据库。')
+        setProducts([])
+        setFilteredProducts([])
+        setError('无法连接到 Supabase，文创商店暂时不可用。请先执行 `supabase/products-schema.sql` 并运行 `npm run seed:products` 后重新加载。')
       } finally {
         setLoading(false)
       }
@@ -153,8 +188,7 @@ export default function StorePage() {
       <section className="p-4">
         <SearchBar 
           placeholder="搜索商品..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onSearch={(query) => setSearchTerm(query)}
         />
       </section>
 
@@ -174,19 +208,25 @@ export default function StorePage() {
           </div>
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product: any) => {
+              const coverImage = resolveProductImage(product)
+              const routeId = product.slug || product.id
+
+              return (
               <ProductGridCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                price={product.price}
-                originalPrice={product.originalPrice}
-                image={product.images[0]} // 使用images数组的第一个元素作为主图
-                sales={product.sales}
-                isNew={product.isNew}
-                discount={product.discount}
-              />
-            ))}
+                  key={product.id}
+                  id={product.id}
+                  routeId={routeId}
+                  name={product.name}
+                  price={product.price}
+                  originalPrice={product.originalPrice}
+                  image={coverImage}
+                  sales={product.sales}
+                  isNew={product.isNew}
+                  discount={product.discount}
+                />
+              )
+            })}
           </div>
         ) : (
           <div className="text-center py-12">

@@ -29,6 +29,45 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const [product, setProduct] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("details")
 
+  const buildCompleteProductData = (productData: any) => {
+    if (!productData) return null
+    return {
+      ...productData,
+      images: Array.isArray(productData.images)
+        ? productData.images
+        : productData.coverImage
+          ? [productData.coverImage]
+          : productData.image_url
+            ? [productData.image_url]
+            : [],
+      coverImage:
+        productData.coverImage ||
+        productData.image_url ||
+        (Array.isArray(productData.images) ? productData.images[0] : null) ||
+        "/placeholder.svg",
+      craftsmanStory: productData.craftsmanStory || {
+        story: "这是一件精心制作的传统工艺品，融合了现代设计与传统技艺，展现了独特的文化魅力。",
+        author: "世说蓝语",
+        title: "匠心之作"
+      },
+      details: productData.details || [
+        "精选优质材料，确保产品质量",
+        "传统工艺制作，保留文化特色",
+        "现代设计理念，符合当代审美",
+        "严格品质控制，保证每一件产品都达到高标准"
+      ],
+      specs: productData.specs || {
+        colors: [
+          { id: "color-1", label: "经典蓝", available: true },
+          { id: "color-2", label: "自然白", available: true }
+        ],
+        sizes: [
+          { id: "size-1", label: "均码", available: true }
+        ]
+      }
+    }
+  }
+
   // 加载产品数据
   useEffect(() => {
     const productId = params?.id || useParams().id
@@ -45,31 +84,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           })
           .then(productData => {
             if (productData) {
-              // 确保产品数据包含ProductDetailTemplate组件所需的字段
-              const completeProductData = {
-                ...productData,
-                // 添加缺失的字段，设置默认值
-                craftsmanStory: productData.craftsmanStory || {
-                  story: "这是一件精心制作的传统工艺品，融合了现代设计与传统技艺，展现了独特的文化魅力。",
-                  author: "世说蓝语",
-                  title: "匠心之作"
-                },
-                details: productData.details || [
-                  "精选优质材料，确保产品质量",
-                  "传统工艺制作，保留文化特色",
-                  "现代设计理念，符合当代审美",
-                  "严格品质控制，保证每一件产品都达到高标准"
-                ],
-                specs: productData.specs || {
-                  colors: [
-                    { id: "color-1", label: "经典蓝", available: true },
-                    { id: "color-2", label: "自然白", available: true }
-                  ],
-                  sizes: [
-                    { id: "size-1", label: "均码", available: true }
-                  ]
-                }
-              }
+              const completeProductData = buildCompleteProductData(productData)
               setProduct(completeProductData)
             } else {
               toast.error("产品不存在")
@@ -78,7 +93,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           })
           .catch(error => {
             console.error("加载产品数据失败:", error)
-            toast.error("加载产品数据失败")
+            toast.error("加载产品数据失败，请先初始化 Supabase 数据。")
             router.push("/store")
           })
           .finally(() => {

@@ -105,6 +105,7 @@ export function BannerCarousel({ items }: BannerCarouselProps) {
               loading={index === 0 ? "eager" : "lazy"}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
               quality={index === 0 ? 85 : 70}
+              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
             

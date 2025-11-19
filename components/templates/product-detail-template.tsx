@@ -15,6 +15,7 @@ import { useCart } from "@/hooks/use-cart"
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 export interface ProductDetailTemplateProps {
   product: {
@@ -58,8 +59,9 @@ export interface ProductDetailTemplateProps {
 
 export function ProductDetailTemplate({ product, productType = "product" }: ProductDetailTemplateProps) {
   const { addToFavorites, removeFromFavorites, isFavorite: checkIsFavorite } = useFavorites()
-  const { addToCart } = useCart()
+  const { addToCart, selectExclusiveCartItems } = useCart()
   const { user } = useAuth()
+  const router = useRouter()
   const [selectedColor, setSelectedColor] = useState("")
   const [selectedSize, setSelectedSize] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -126,16 +128,38 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
         color: selectedColor,
         size: selectedSize
       })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleBuyNow = async () => {
+    if (!user) {
       toast({
-        title: "添加成功",
-        description: "商品已添加到购物车"
-      })
-    } catch (error) {
-      toast({
-        title: "添加失败",
-        description: error instanceof Error ? error.message : "请稍后重试",
+        title: "请先登录",
+        description: "登录后可以购买商品",
         variant: "destructive"
       })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const result = await addToCart({
+        product_id: product.id,
+        quantity: 1,
+        color: selectedColor,
+        size: selectedSize
+      })
+
+      if (result.success) {
+        if (result.addedItemId) {
+          selectExclusiveCartItems([result.addedItemId])
+          router.push(`/checkout?mode=buy-now&cartItem=${result.addedItemId}`)
+        } else {
+          router.push('/checkout')
+        }
+      }
     } finally {
       setIsLoading(false)
     }
@@ -291,6 +315,7 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
           <Button 
             className="flex-1 bg-primary hover:bg-primary/90"
             disabled={isLoading}
+            onClick={handleBuyNow}
           >
             立即购买
           </Button>

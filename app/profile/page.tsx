@@ -9,7 +9,7 @@ import { CouponCard } from "@/components/ui/coupon-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { ShoppingBag, BookOpen, Heart, FileText, MapPin, MessageCircle, Settings, LogOut, User, Star, Trophy, TrendingUp, Gift, Bell } from "lucide-react"
+import { ShoppingBag, BookOpen, Heart, FileText, MapPin, MessageCircle, Settings, LogOut, User, Star, Trophy, TrendingUp, Gift, Bell, ShoppingCart } from "lucide-react"
 import { useGlobalState } from "@/hooks/use-global-state"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
@@ -243,6 +243,14 @@ export default function ProfilePage() {
             badge={statsLoading ? "..." : userStats.orders}
             onClick={user ? undefined : handleLoginRequired} 
             className="bg-white hover:bg-primary/5 transition-colors" 
+          />
+          <ProfileMenuItem
+            href="/cart"
+            icon={ShoppingCart}
+            title="我的购物车"
+            showArrow={false}
+            onClick={user ? undefined : handleLoginRequired}
+            className="bg-white hover:bg-primary/5 transition-colors"
           />
           <ProfileMenuItem 
             href="/profile/courses" 

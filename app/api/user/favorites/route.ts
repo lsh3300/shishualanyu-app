@@ -1,6 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { normalizeCourseId } from '@/lib/course-id';
+
+async function fetchProductsMap(supabase: SupabaseClient, productIds: string[]) {
+  const productsMap: Record<string, any> = {};
+  if (!productIds.length) {
+    return productsMap;
+  }
+
+  const { data: productsData, error: productsError } = await supabase
+    .from('products')
+    .select('id, name, price, image_url, category, description, metadata')
+    .in('id', productIds);
+
+  if (productsError) {
+    console.error('查询产品失败:', productsError);
+    return productsMap;
+  }
+
+  const { data: mediaData, error: mediaError } = await supabase
+    .from('product_media')
+    .select('product_id, type, url, cover, position')
+    .in('product_id', productIds)
+    .eq('type', 'image')
+    .order('position', { ascending: true });
+
+  const coverMap: Record<string, string> = {};
+  const imagesMap: Record<string, string[]> = {};
+  
+  if (mediaError) {
+    console.warn('查询产品媒体失败:', mediaError);
+  } else if (mediaData) {
+    mediaData.forEach((item) => {
+      const current = coverMap[item.product_id];
+      if (!current || item.cover || item.position === 0) {
+        coverMap[item.product_id] = item.url;
+      }
+      // 构建所有图片的数组
+      if (!imagesMap[item.product_id]) {
+        imagesMap[item.product_id] = [];
+      }
+      imagesMap[item.product_id].push(item.url);
+    });
+  }
+
+  const productRows: any[] = Array.isArray(productsData) ? productsData : [];
+
+  productRows.forEach((product) => {
+    const coverImage = coverMap[product.id] || product.image_url || '/placeholder.svg';
+    const images = imagesMap[product.id] || (product.image_url ? [product.image_url] : [coverImage]);
+    productsMap[product.id] = {
+      ...product,
+      image_url: coverImage,
+      coverImage,
+      images, // 添加 images 数组
+    };
+  });
+
+  return productsMap;
+}
 
 // GET: 获取用户收藏列表
 export async function GET(request: NextRequest) {
@@ -74,27 +132,16 @@ export async function GET(request: NextRequest) {
         .eq('user_id', userId);
       
       // 如果查询成功，分别获取products和courses数据
-      if (dataWithType && !errorWithType) {
+      const favoritesList: any[] = Array.isArray(dataWithType) ? dataWithType : [];
+
+      if (favoritesList.length && !errorWithType) {
         // 获取所有product_id和course_id
-        const productIds = dataWithType.filter(f => f.product_id).map(f => f.product_id);
-        const courseIds = dataWithType.filter(f => f.course_id).map(f => f.course_id);
+        const productIds = favoritesList.filter(f => f.product_id).map(f => f.product_id as string);
+        const courseIds = favoritesList.filter(f => f.course_id).map(f => f.course_id as string);
         
         // 分别查询products和courses
-        let productsMap: Record<string, any> = {};
+        let productsMap: Record<string, any> = await fetchProductsMap(supabase, productIds);
         let coursesMap: Record<string, any> = {};
-        
-        if (productIds.length > 0) {
-          const { data: productsData } = await supabase
-            .from('products')
-            .select('id, name, price, images, category, description, in_stock')
-            .in('id', productIds);
-          
-          if (productsData) {
-            productsData.forEach(p => {
-              productsMap[p.id] = p;
-            });
-          }
-        }
         
         if (courseIds.length > 0) {
           const { data: coursesData } = await supabase
@@ -102,15 +149,14 @@ export async function GET(request: NextRequest) {
             .select('id, title, description, instructor, duration, price, image_url, category')
             .in('id', courseIds);
           
-          if (coursesData) {
-            coursesData.forEach(c => {
-              coursesMap[c.id] = c;
-            });
-          }
+          const courseRows: any[] = Array.isArray(coursesData) ? coursesData : [];
+          courseRows.forEach(c => {
+            coursesMap[c.id] = c;
+          });
         }
         
         // 合并数据
-        const enrichedData = dataWithType.map(fav => ({
+        const enrichedData = favoritesList.map((fav: any) => ({
           ...fav,
           products: fav.product_id ? productsMap[fav.product_id] || null : null,
           courses: fav.course_id ? coursesMap[fav.course_id] || null : null
@@ -139,24 +185,12 @@ export async function GET(request: NextRequest) {
           favoritesError = errorWithoutType;
         } else if (dataWithoutType) {
           // 同样需要分别查询products和courses
-          const productIds = dataWithoutType.filter(f => f.product_id).map(f => f.product_id);
-          const courseIds = dataWithoutType.filter(f => f.course_id).map(f => f.course_id);
+          const fallbackList: any[] = Array.isArray(dataWithoutType) ? dataWithoutType : [];
+          const productIds = fallbackList.filter(f => f.product_id).map(f => f.product_id as string);
+          const courseIds = fallbackList.filter(f => f.course_id).map(f => f.course_id as string);
           
-          let productsMap: Record<string, any> = {};
+          let productsMap: Record<string, any> = await fetchProductsMap(supabase, productIds);
           let coursesMap: Record<string, any> = {};
-          
-          if (productIds.length > 0) {
-            const { data: productsData } = await supabase
-              .from('products')
-              .select('id, name, price, images, category, description, in_stock')
-              .in('id', productIds);
-            
-            if (productsData) {
-              productsData.forEach(p => {
-                productsMap[p.id] = p;
-              });
-            }
-          }
           
           if (courseIds.length > 0) {
             const { data: coursesData } = await supabase
@@ -164,15 +198,14 @@ export async function GET(request: NextRequest) {
               .select('id, title, description, instructor, duration, price, image_url, category')
               .in('id', courseIds);
             
-            if (coursesData) {
-              coursesData.forEach(c => {
-                coursesMap[c.id] = c;
-              });
-            }
+            const courseRows: any[] = Array.isArray(coursesData) ? coursesData : [];
+            courseRows.forEach(c => {
+              coursesMap[c.id] = c;
+            });
           }
           
           // 合并数据
-          const enrichedData = dataWithoutType.map(fav => ({
+          const enrichedData = fallbackList.map((fav: any) => ({
             ...fav,
             products: fav.product_id ? productsMap[fav.product_id] || null : null,
             courses: fav.course_id ? coursesMap[fav.course_id] || null : null
@@ -214,10 +247,32 @@ export async function GET(request: NextRequest) {
       });
       
       console.log('获取收藏列表成功，数量:', processedFavorites?.length || 0);
-      console.log('处理后的收藏数据示例:', JSON.stringify(processedFavorites.slice(0, 2), null, 2));
+      const favoritesArray: any[] = Array.isArray(processedFavorites) ? processedFavorites : [];
+      const validFavorites: any[] = [];
+      const invalidFavoriteIds: string[] = [];
+
+      favoritesArray.forEach((fav) => {
+        const isCourse = fav.item_type === 'course';
+        if (!isCourse && fav.product_id && !fav.products) {
+          invalidFavoriteIds.push(fav.id);
+          validFavorites.push({
+            ...fav,
+            invalid: true,
+          });
+        } else {
+          validFavorites.push({
+            ...fav,
+            invalid: false,
+          });
+        }
+      });
+
+      console.log('处理后的收藏数据示例:', JSON.stringify(validFavorites.slice(0, 2), null, 2));
       return NextResponse.json({ 
-        favorites: processedFavorites || [],
-        source: 'supabase'
+        favorites: validFavorites,
+        source: 'supabase',
+        statsUpdateRequired: invalidFavoriteIds.length > 0,
+        invalidFavorites: invalidFavoriteIds,
       });
     } catch (supabaseError) {
       console.error('Supabase连接错误:', supabaseError);

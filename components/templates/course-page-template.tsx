@@ -121,6 +121,7 @@ export function CoursePageTemplate({
             className="w-full h-48 object-cover"
             width={1200}
             height={300}
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex flex-col justify-center p-6">
             <h3 className="text-white text-2xl font-bold mb-2">{bannerTitle}</h3>

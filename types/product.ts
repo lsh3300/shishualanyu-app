@@ -1,17 +1,31 @@
+export interface ProductMedia {
+  id: string
+  product_id?: string
+  type: 'image' | 'video'
+  url: string
+  thumbnail?: string | null
+  position: number
+  cover?: boolean
+  metadata?: Record<string, any>
+}
+
 export interface Product {
   id: string
+  slug?: string | null
   name: string
-  description?: string
+  description?: string | null
   price: number
-  originalPrice?: number
-  category?: string
-  image_url?: string
+  originalPrice?: number | null
+  category?: string | null
+  inventory?: number
+  status?: string | null
+  isNew?: boolean
+  discount?: number | null
+  metadata?: Record<string, any>
+  coverImage?: string | null
   images: string[]
   videos?: string[]
-  in_stock?: boolean
-  sales?: number
-  isNew?: boolean
-  discount?: number
-  created_at?: string
-  updated_at?: string
+  media?: ProductMedia[]
+  createdAt?: string
+  updatedAt?: string
 }

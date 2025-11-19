@@ -142,6 +142,6 @@ export function CourseListCard({
           />
         </Button>
       )}
-    </Card>
+      </Card>
   )
 }
