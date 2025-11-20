@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils"
 import { Separator } from "./separator"
 import { Badge } from "./badge"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import { SearchEntityType } from "@/types/search"
 
 interface SearchBarProps {
   placeholder?: string
@@ -25,16 +27,28 @@ export function SearchBar({
   const [showCategories, setShowCategories] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
   
   // 搜索分类选项
   const categories = [
     { id: 'all', name: '全部' },
+    { id: 'products', name: '商品' },
     { id: 'courses', name: '课程' },
-    { id: 'products', name: '产品' },
+    { id: 'videos', name: '视频' },
     { id: 'articles', name: '文章' },
     { id: 'materials', name: '材料' },
     { id: 'techniques', name: '技法' }
   ]
+
+  const categoryEntityMap: Record<string, SearchEntityType | null> = {
+    all: null,
+    products: 'product',
+    materials: 'product',
+    courses: 'course',
+    videos: 'course',
+    articles: 'article',
+    techniques: 'article',
+  }
   
   // 热点搜索数据
   const hotSearches = [
@@ -77,13 +91,14 @@ export function SearchBar({
     if (onSearch) {
       onSearch(query, category || selectedCategory || 'all')
     } else {
-      // 简单的搜索提示，实际项目中这里会导航到搜索结果页或执行搜索
-      toast({
-        title: "搜索执行",
-        description: `搜索内容: ${query}${category ? `, 分类: ${category}` : ''}`,
-        variant: "default",
-      })
-      console.log('搜索:', { query, category: category || selectedCategory || 'all' })
+      const params = new URLSearchParams()
+      params.set('q', query.trim())
+      const inferredCategory = category || selectedCategory || 'all'
+      const entityType = categoryEntityMap[inferredCategory || 'all']
+      if (entityType) {
+        params.append('type', entityType)
+      }
+      router.push(`/search?${params.toString()}`)
     }
     
     setShowSuggestions(false)
