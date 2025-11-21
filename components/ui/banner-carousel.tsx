@@ -120,7 +120,7 @@ export function BannerCarousel({ items }: BannerCarouselProps) {
               
               {/* 查看详情按钮 */}
               <div className="animate-fadeIn animation-delay-400">
-                <Button className="bg-white text-primary hover:bg-white/90 transition-all group rounded-full px-6 py-2 shadow-md hover:shadow-lg">
+                <Button className="bg-background text-primary hover:bg-background/90 transition-all group rounded-full px-6 py-2 shadow-md hover:shadow-lg">
                   查看详情
                   <svg className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />

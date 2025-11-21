@@ -148,7 +148,7 @@ export default function ProfilePage() {
                   <p className="text-sm text-muted-foreground mb-2">{userData.email}</p>
                   <p className="text-sm text-foreground">{userData.signature}</p>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => router.push("/profile/settings")}>
                   编辑
                 </Button>
               </div>
@@ -206,21 +206,21 @@ export default function ProfilePage() {
               最近成就
             </h3>
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-card/80 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
                   <Star className="h-4 w-4 text-primary" />
                 </div>
                 <p className="text-sm font-medium text-foreground">完成课程</p>
                 <p className="text-xl font-bold text-primary">{statsLoading ? "..." : userStats.completedCourses}</p>
               </div>
-              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-card/80 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
                   <TrendingUp className="h-4 w-4 text-secondary" />
                 </div>
                 <p className="text-sm font-medium text-foreground">学习天数</p>
                 <p className="text-xl font-bold text-secondary">{statsLoading ? "..." : userStats.learningDays}</p>
               </div>
-              <div className="bg-white/70 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-card/80 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
                   <Trophy className="h-4 w-4 text-accent" />
                 </div>
@@ -242,7 +242,7 @@ export default function ProfilePage() {
             showArrow={false} 
             badge={statsLoading ? "..." : userStats.orders}
             onClick={user ? undefined : handleLoginRequired} 
-            className="bg-white hover:bg-primary/5 transition-colors" 
+            className="bg-card hover:bg-primary/5 transition-colors" 
           />
           <ProfileMenuItem
             href="/cart"
@@ -250,7 +250,7 @@ export default function ProfilePage() {
             title="我的购物车"
             showArrow={false}
             onClick={user ? undefined : handleLoginRequired}
-            className="bg-white hover:bg-primary/5 transition-colors"
+            className="bg-card hover:bg-primary/5 transition-colors"
           />
           <ProfileMenuItem 
             href="/profile/courses" 
@@ -259,7 +259,7 @@ export default function ProfilePage() {
             showArrow={false} 
             badge={statsLoading ? "..." : userStats.courses}
             onClick={user ? undefined : handleLoginRequired} 
-            className="bg-white hover:bg-primary/5 transition-colors" 
+            className="bg-card hover:bg-primary/5 transition-colors" 
           />
           <ProfileMenuItem 
             href="/profile/favorites" 
@@ -268,7 +268,7 @@ export default function ProfilePage() {
             showArrow={false} 
             badge={statsLoading ? "..." : userStats.favorites}
             onClick={user ? undefined : handleLoginRequired} 
-            className="bg-white hover:bg-primary/5 transition-colors" 
+            className="bg-card hover:bg-primary/5 transition-colors" 
           />
           <ProfileMenuItem 
             href="/profile/assignments" 
@@ -277,7 +277,7 @@ export default function ProfilePage() {
             showArrow={false} 
             badge={statsLoading ? "..." : userStats.assignments}
             onClick={user ? undefined : handleLoginRequired} 
-            className="bg-white hover:bg-primary/5 transition-colors" 
+            className="bg-card hover:bg-primary/5 transition-colors" 
           />
         </div>
 
@@ -289,7 +289,7 @@ export default function ProfilePage() {
             subtitle="查看所有消息"
             badge={unreadMessages > 0 ? unreadMessages : undefined}
             onClick={user ? undefined : handleLoginRequired} 
-            className="bg-white hover:bg-primary/5 transition-colors" 
+            className="bg-card hover:bg-primary/5 transition-colors" 
           />
           <ProfileMenuItem 
             href="/notifications" 
@@ -298,14 +298,14 @@ export default function ProfilePage() {
             subtitle="查看所有通知"
             badge={unreadNotifications > 0 ? unreadNotifications : undefined}
             onClick={user ? undefined : handleLoginRequired} 
-            className="bg-white hover:bg-primary/5 transition-colors" 
+            className="bg-card hover:bg-primary/5 transition-colors" 
           />
-          <ProfileMenuItem href="/profile/addresses" icon={MapPin} title="地址管理" onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/addresses" icon={MapPin} title="地址管理" onClick={user ? undefined : handleLoginRequired} className="bg-card hover:bg-primary/5 transition-colors" />
           {!user && (
-            <ProfileMenuItem href="/profile/coupons" icon={Gift} title="优惠券" subtitle="0张可用" onClick={handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+            <ProfileMenuItem href="/profile/coupons" icon={Gift} title="优惠券" subtitle="0张可用" onClick={handleLoginRequired} className="bg-card hover:bg-primary/5 transition-colors" />
           )}
-          <ProfileMenuItem href="/profile/support" icon={MessageCircle} title="联系客服" className="bg-white hover:bg-primary/5 transition-colors" />
-          <ProfileMenuItem href="/profile/settings" icon={Settings} title="设置" onClick={user ? undefined : handleLoginRequired} className="bg-white hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/support" icon={MessageCircle} title="联系客服" className="bg-card hover:bg-primary/5 transition-colors" />
+          <ProfileMenuItem href="/profile/settings" icon={Settings} title="设置" onClick={user ? undefined : handleLoginRequired} className="bg-card hover:bg-primary/5 transition-colors" />
         </div>
       </section>
 
@@ -326,7 +326,7 @@ export default function ProfilePage() {
       {/* Login Modal */}
       {showLoginForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+          <div className="bg-card rounded-lg shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center p-4 border-b">
               <h3 className="text-lg font-medium">登录账户</h3>
               <Button variant="ghost" size="sm" onClick={() => setShowLoginForm(false)}>

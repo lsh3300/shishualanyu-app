@@ -320,7 +320,7 @@ function useFavoritesData(): UseFavoritesReturn {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ courseId: normalizedCourseId, itemType: 'course' }),
+        body: JSON.stringify({ courseId: normalizedCourseId }),
       })
 
       let data;
@@ -425,7 +425,7 @@ function useFavoritesData(): UseFavoritesReturn {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ courseId: normalizedCourseId, itemType: 'course' }),
+        body: JSON.stringify({ courseId: normalizedCourseId }),
       })
 
       let data;
@@ -539,14 +539,26 @@ function useFavoritesData(): UseFavoritesReturn {
         return null
       }
 
+      const imageUrl = product.image_url || product.coverImage || (product.images && product.images[0]) || '/placeholder.svg'
+      
+      console.log('🖼️ 处理收藏产品图片:', {
+        product_id: product.id,
+        product_name: product.name,
+        raw_image_url: product.image_url,
+        raw_coverImage: product.coverImage,
+        raw_images: product.images,
+        final_imageUrl: imageUrl
+      })
+      
       return {
         id: product.id,
         name: product.name,
         price: product.price,
-        images: product.images || [],
+        images: product.images || [imageUrl],
         category: product.category,
-        image_url: (product.images && product.images[0]) || product.image_url || product.coverImage || '/placeholder.svg',
-        coverImage: product.coverImage || (product.images && product.images[0]) || product.image_url || '/placeholder.svg',
+        image_url: imageUrl,
+        coverImage: imageUrl,
+        image: imageUrl,  // 添加 image 字段以兼容 ProductCard
         description: product.description || '',
         created_at: fav.created_at,
         updated_at: fav.created_at,
@@ -593,11 +605,15 @@ function useFavoritesData(): UseFavoritesReturn {
         backendId: course.id || normalizedCourseId || rawCourseId,
         title: course.title,
         description: course.description,
-        instructor: course.instructor?.name || course.instructor || '未知讲师',
+        instructor: course.instructor_name || course.instructor?.name || course.instructor || '未知讲师',
         duration: course.duration || course.lessons || 0,
         price: course.price || 0,
         image_url: course.image_url || course.thumbnail || '/placeholder.svg',
         category: course.category || 'unknown',
+        students: course.students || 0,
+        rating: course.rating || 0,
+        is_free: course.is_free || false,
+        difficulty: course.difficulty || '未知',
       };
     })
     .filter((course): course is NonNullable<typeof course> => course !== null);

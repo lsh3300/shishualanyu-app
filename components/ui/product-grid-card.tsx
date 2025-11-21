@@ -95,7 +95,7 @@ export function ProductGridCard({
         <Button
           variant="ghost"
           size="icon"
-          className={`absolute top-2 right-2 z-10 ${isFav ? 'bg-pink-100' : 'bg-white/80'} hover:bg-white/90 rounded-full h-8 w-8`}
+          className={`absolute top-2 right-2 z-10 ${isFav ? 'bg-pink-100' : 'bg-background/80'} hover:bg-background rounded-full h-8 w-8`}
           onClick={handleFavorite}
           disabled={isLoading || loading}
         >

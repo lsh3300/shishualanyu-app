@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabaseClient';
 
 type CartItemWithProduct = {
   id: string
@@ -22,7 +22,7 @@ type CartItemWithProduct = {
   } | null
 }
 
-async function resolveUserId(request: NextRequest, supabase: ReturnType<typeof createServerClient>) {
+async function resolveUserId(request: NextRequest, supabase: ReturnType<typeof createServiceClient>) {
   const authHeader = request.headers.get('authorization');
   let token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : undefined;
 
@@ -44,7 +44,7 @@ async function resolveUserId(request: NextRequest, supabase: ReturnType<typeof c
 }
 
 async function fetchProductsMap(
-  supabase: ReturnType<typeof createServerClient>,
+  supabase: ReturnType<typeof createServiceClient>,
   productIds: string[],
 ) {
   const map: Record<string, any> = {}
@@ -89,7 +89,7 @@ async function fetchProductsMap(
   return map
 }
 
-async function buildCartPayload(supabase: ReturnType<typeof createServerClient>, userId: string) {
+async function buildCartPayload(supabase: ReturnType<typeof createServiceClient>, userId: string) {
   const { data, error } = await supabase
     .from('cart_items')
     .select('id, user_id, product_id, quantity, color, size, created_at, updated_at')
@@ -139,7 +139,7 @@ function formatNullableValue(value?: string | null) {
 // GET: 获取用户购物车数据
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServiceClient();
     const userId = await resolveUserId(request, supabase);
 
     if (!userId) {
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
 // POST: 添加商品到购物车
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServiceClient();
     const userId = await resolveUserId(request, supabase);
 
     if (!userId) {
@@ -169,6 +169,16 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { product_id, quantity = 1, color, size } = body;
+
+    console.log('🛒 POST /api/cart payload:', {
+      userId,
+      product_id,
+      product_id_type: typeof product_id,
+      product_id_length: product_id?.length,
+      quantity,
+      color,
+      size,
+    });
 
     if (!product_id) {
       return NextResponse.json({ error: '缺少商品ID' }, { status: 400 });
@@ -181,15 +191,25 @@ export async function POST(request: NextRequest) {
     const normalizedColor = formatNullableValue(color);
     const normalizedSize = formatNullableValue(size);
 
+    console.log('🔍 查询产品:', product_id)
     const { data: product, error: productError } = await supabase
       .from('products')
       .select('id, name, price, in_stock')
       .eq('id', product_id)
-      .single();
+      .single()
+
+    if (productError) {
+      console.error('❌ 产品查询错误:', productError)
+    }
+    if (!product) {
+      console.error('❌ 产品不存在:', product_id)
+    }
 
     if (productError || !product) {
-      return NextResponse.json({ error: '商品不存在或已下架' }, { status: 404 });
+      return NextResponse.json({ error: '商品不存在或已下架' }, { status: 404 })
     }
+    
+    console.log('✅ 找到产品:', product.name)
 
     if (product.in_stock === false) {
       return NextResponse.json({ error: '该商品已售罄' }, { status: 400 });
@@ -273,7 +293,7 @@ export async function POST(request: NextRequest) {
 // PUT: 更新购物车商品数量
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServiceClient();
     const userId = await resolveUserId(request, supabase);
 
     if (!userId) {
@@ -315,7 +335,7 @@ export async function PUT(request: NextRequest) {
 // DELETE: 从购物车删除商品
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createServerClient();
+    const supabase = createServiceClient();
     const userId = await resolveUserId(request, supabase);
 
     if (!userId) {

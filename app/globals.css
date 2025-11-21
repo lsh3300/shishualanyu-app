@@ -41,38 +41,54 @@
 }
 
 .dark {
-  --background: oklch(0.08 0.02 240);
-  --foreground: oklch(0.95 0.01 240);
-  --card: oklch(0.12 0.02 240);
-  --card-foreground: oklch(0.95 0.01 240);
-  --popover: oklch(0.12 0.02 240);
-  --popover-foreground: oklch(0.95 0.01 240);
-  --primary: oklch(0.55 0.12 200);
-  --primary-foreground: oklch(0.08 0.02 240);
-  --secondary: oklch(0.2 0.04 240);
-  --secondary-foreground: oklch(0.95 0.01 240);
-  --muted: oklch(0.15 0.02 240);
-  --muted-foreground: oklch(0.65 0.02 240);
-  --accent: oklch(0.65 0.15 35);
-  --accent-foreground: oklch(0.08 0.02 240);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.95 0.01 240);
-  --border: oklch(0.2 0.04 240);
-  --input: oklch(0.15 0.02 240);
-  --ring: oklch(0.55 0.12 200);
-  --chart-1: oklch(0.55 0.12 200);
-  --chart-2: oklch(0.65 0.15 35);
-  --chart-3: oklch(0.45 0.1 15);
-  --chart-4: oklch(0.35 0.06 280);
+  /* Modern comfortable dark theme inspired by GitHub/VS Code/Notion
+     - Deep blue-gray base (not pure black) for reduced eye strain
+     - Warm elevated surfaces for depth perception
+     - Muted text colors for comfortable reading
+     - Low-saturation accents to avoid visual fatigue */
+  
+  --background: oklch(0.17 0.015 250); /* Deep blue-gray, warmer than pure black */
+  --foreground: oklch(0.84 0.015 250); /* Soft light gray, avoids harsh white */
+  
+  --card: oklch(0.21 0.018 250); /* Elevated surface, slightly warmer */
+  --card-foreground: oklch(0.84 0.015 250);
+  
+  --popover: oklch(0.22 0.018 250); /* Slightly more elevated than card */
+  --popover-foreground: oklch(0.84 0.015 250);
+  
+  --primary: oklch(0.62 0.09 230); /* Softer indigo-blue, less saturated */
+  --primary-foreground: oklch(0.98 0.005 240);
+  
+  --secondary: oklch(0.28 0.025 250); /* Subtle secondary with slight warmth */
+  --secondary-foreground: oklch(0.84 0.015 250);
+  
+  --muted: oklch(0.25 0.02 250); /* Muted background areas */
+  --muted-foreground: oklch(0.7 0.012 250); /* Readable but not prominent */
+  
+  --accent: oklch(0.72 0.12 45); /* Warm golden accent, less saturated */
+  --accent-foreground: oklch(0.2 0.015 250);
+  
+  --destructive: oklch(0.55 0.18 25); /* Softer red for errors */
+  --destructive-foreground: oklch(0.98 0.005 240);
+  
+  --border: oklch(0.32 0.02 250); /* Subtle borders, not harsh lines */
+  --input: oklch(0.26 0.02 250); /* Input fields slightly elevated */
+  --ring: oklch(0.62 0.09 230); /* Focus ring matches primary */
+  
+  --chart-1: oklch(0.62 0.09 230);
+  --chart-2: oklch(0.72 0.12 45);
+  --chart-3: oklch(0.58 0.1 180);
+  --chart-4: oklch(0.68 0.08 280);
   --chart-5: oklch(0.75 0.08 120);
-  --sidebar: oklch(0.08 0.02 240);
-  --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.55 0.12 200);
-  --sidebar-primary-foreground: oklch(0.08 0.02 240);
-  --sidebar-accent: oklch(0.15 0.02 240);
-  --sidebar-accent-foreground: oklch(0.95 0.01 240);
-  --sidebar-border: oklch(0.2 0.04 240);
-  --sidebar-ring: oklch(0.55 0.12 200);
+  
+  --sidebar: oklch(0.17 0.015 250);
+  --sidebar-foreground: oklch(0.88 0.01 250);
+  --sidebar-primary: oklch(0.62 0.09 230);
+  --sidebar-primary-foreground: oklch(0.98 0.005 240);
+  --sidebar-accent: oklch(0.25 0.02 250);
+  --sidebar-accent-foreground: oklch(0.88 0.01 250);
+  --sidebar-border: oklch(0.32 0.02 250);
+  --sidebar-ring: oklch(0.62 0.09 230);
 }
 
 @theme inline {

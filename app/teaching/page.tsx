@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BottomNav } from "@/components/navigation/bottom-nav"
 import { SearchBar } from "@/components/ui/search-bar"
 import { FilterBar } from "@/components/ui/filter-bar"
@@ -18,59 +18,49 @@ const filterOptions = [
   { id: "latest", label: "最新" },
 ]
 
-const courses = [
-  {
-    id: "1",
-    title: "传统扎染基础入门课程",
-    instructor: "李师傅",
-    duration: "2小时30分",
-    students: 1234,
-    rating: 4.8,
-    thumbnail: "/tie-dye-tutorial-hands-on.jpg",
-    isFree: true,
-    difficulty: "入门" as const,
-    category: "扎染",
-  },
-  {
-    id: "2",
-    title: "蜡染工艺深度解析与实践",
-    instructor: "王老师",
-    duration: "3小时15分",
-    students: 856,
-    rating: 4.9,
-    thumbnail: "/wax-resist-dyeing-technique.jpg",
-    price: 199,
-    difficulty: "进阶" as const,
-    category: "蜡染",
-  },
-  {
-    id: "3",
-    title: "现代蓝染创新技法探索",
-    instructor: "张艺术家",
-    duration: "4小时",
-    students: 567,
-    rating: 4.7,
-    thumbnail: "/modern-indigo-dyeing-art.jpg",
-    price: 299,
-    difficulty: "高级" as const,
-    category: "创新技法",
-  },
-  {
-    id: "4",
-    title: "植物染料制作与应用",
-    instructor: "陈教授",
-    duration: "2小时45分",
-    students: 432,
-    rating: 4.6,
-    thumbnail: "/traditional-indigo-dyeing-master-craftsman.jpg",
-    price: 159,
-    difficulty: "进阶" as const,
-    category: "染料制作",
-  },
-]
-
 export default function TeachingPage() {
-  const [filteredCourses, setFilteredCourses] = useState(courses)
+  const [courses, setCourses] = useState<any[]>([])
+  const [filteredCourses, setFilteredCourses] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // 从 API 获取课程数据
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch('/api/courses')
+        if (response.ok) {
+          const data = await response.json()
+          const coursesData = data.courses || []
+          // 格式化课程数据以匹配 CourseListCard 的期望
+          const formattedCourses = coursesData.map((course: any) => ({
+            id: course.id,
+            title: course.title,
+            instructor: course.instructor_name || '未知讲师',
+            duration: course.duration,
+            students: course.students || 0,
+            rating: course.rating || 0,
+            thumbnail: course.thumbnail || '/placeholder.svg',
+            isFree: course.is_free,
+            price: course.price,
+            difficulty: course.difficulty || '未知',
+            category: course.category || '未分类',
+          }))
+          setCourses(formattedCourses)
+          setFilteredCourses(formattedCourses)
+        }
+      } catch (error) {
+        console.error('获取课程失败:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCourses()
+  }, [])
+
+  useEffect(() => {
+    setFilteredCourses(courses)
+  }, [courses])
 
   const handleFilterChange = (filterId: string) => {
     if (filterId === "all") {
@@ -114,9 +104,19 @@ export default function TeachingPage() {
 
       {/* Course List */}
       <section className="px-4 space-y-4">
-        {filteredCourses.map((course) => (
-          <CourseListCard key={course.id} {...course} showFavorite={true} />
-        ))}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : filteredCourses.length > 0 ? (
+          filteredCourses.map((course) => (
+            <CourseListCard key={course.id} {...course} showFavorite={true} />
+          ))
+        ) : (
+          <div className="text-center py-12 text-muted-foreground">
+            暂无课程
+          </div>
+        )}
       </section>
 
       <BottomNav />

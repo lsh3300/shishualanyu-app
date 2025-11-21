@@ -73,7 +73,7 @@ export function CourseCard({
   }
   return (
     <div className="relative group">
-      <Card className="cultural-card hover:scale-105 transition-all duration-300 w-64 flex-shrink-0 shadow-md hover:shadow-lg bg-white">
+      <Card className="cultural-card hover:scale-105 transition-all duration-300 w-64 flex-shrink-0 shadow-md hover:shadow-lg bg-card">
         <Link href={`/teaching/${id}`} prefetch={false} className="block">
           <div className="relative overflow-hidden rounded-t-xl">
             <OptimizedImage
@@ -105,12 +105,12 @@ export function CourseCard({
           </div>
         </Link>
         
-        {/* 收藏按钮 - 放在Link外面，避免事件冲突 */}
+        {/* 收藏按钮 */}
         {showFavorite && (
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/95 hover:bg-white backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 z-20 shadow-lg hover:shadow-xl"
+            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 hover:bg-background backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 z-20 shadow-lg hover:shadow-xl"
             onClick={handleFavoriteClick}
             onMouseDown={(e) => e.stopPropagation()}
             disabled={loading}

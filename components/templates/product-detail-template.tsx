@@ -120,6 +120,14 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
       return
     }
 
+    console.log('🛒 [ProductDetail] 准备加入购物车:', {
+      product_id: product.id,
+      product_name: product.name,
+      quantity: 1,
+      color: selectedColor,
+      size: selectedSize
+    })
+
     setIsLoading(true)
     try {
       await addToCart({ 

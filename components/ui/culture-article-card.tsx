@@ -14,7 +14,7 @@ interface CultureArticleCardProps {
 export function CultureArticleCard({ id, title, excerpt, image, readTime }: CultureArticleCardProps) {
   return (
     <Link href={`/culture/${id}`} className="group">
-      <Card className="cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-white">
+      <Card className="cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-card">
         <div className="relative overflow-hidden rounded-t-xl">
           <Image
             src={image || "/placeholder.svg"}

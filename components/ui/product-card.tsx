@@ -76,7 +76,7 @@ export function ProductCard({
   return (
     <Link href={`/store/${id}`} prefetch={false} className="group">
       <Card className={cn(
-        "cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-white relative",
+        "cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-card relative",
         className
       )}>
         <div className="relative overflow-hidden rounded-t-xl">
@@ -94,7 +94,7 @@ export function ProductCard({
               variant="ghost"
               size="icon"
               className={cn(
-                "absolute top-2 right-2 h-8 w-8 rounded-full bg-white/80 hover:bg-white transition-all duration-200",
+                "absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 hover:bg-background transition-all duration-200",
                 isCurrentlyFavorite && "text-red-500 hover:text-red-600",
                 !isCurrentlyFavorite && "text-gray-600 hover:text-red-500"
               )}

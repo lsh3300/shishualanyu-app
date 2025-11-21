@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 
 export default function SettingsPage() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, getToken } = useAuth()
   const [userData, setUserData] = useState({
     name: "",
     email: "",
@@ -65,6 +65,29 @@ export default function SettingsPage() {
           notifications: parsedData.notifications || prev.notifications
         }))
       }
+
+      const fetchProfile = async () => {
+        try {
+          const token = await getToken()
+          if (!token) return
+          const response = await fetch("/api/user/profile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          if (!response.ok) return
+          const profile = await response.json()
+          setUserData(prev => ({
+            ...prev,
+            name: profile.full_name || prev.name,
+            avatar: profile.avatar_url || prev.avatar,
+          }))
+        } catch (error) {
+          console.error("获取用户资料失败", error)
+        }
+      }
+
+      fetchProfile()
     }
   }, [user])
 
@@ -74,6 +97,29 @@ export default function SettingsPage() {
     setUserData(newUserData)
     localStorage.setItem('userData', JSON.stringify(newUserData))
     
+    if (user) {
+      ;(async () => {
+        try {
+          const token = await getToken()
+          if (!token) return
+          await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              full_name: newUserData.name,
+              avatar_url: newUserData.avatar || null,
+              website: newUserData.bio || null,
+            }),
+          })
+        } catch (error) {
+          console.error('更新用户资料失败', error)
+        }
+      })()
+    }
+
     // 更新认证上下文中的用户元数据
     if (user && updatedProfile.name) {
       // 注意：实际应用中应该调用API更新用户元数据

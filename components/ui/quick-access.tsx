@@ -21,7 +21,7 @@ export function QuickAccess({ items }: QuickAccessProps) {
           <Link
             key={item.href}
             href={item.href}
-            className="flex flex-col items-center gap-2 p-3.5 rounded-xl bg-white hover:shadow-md transition-all duration-300 flex-1 group"
+            className="flex flex-col items-center gap-2 p-3.5 rounded-xl bg-card hover:shadow-md transition-all duration-300 flex-1 group"
           >
             <div className={`p-3 rounded-full ${item.color || "bg-primary/10"} shadow-sm transition-transform duration-300 group-hover:scale-105`}>
               <Icon className={`h-6 w-6 ${item.color ? "text-white" : "text-primary"} transition-transform duration-300 group-hover:rotate-12`} />
