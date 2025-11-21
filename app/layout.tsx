@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { AuthLayout } from "@/components/auth/auth-layout"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
 const notoSansSC = Noto_Sans_SC({
@@ -32,6 +33,7 @@ export default function RootLayout({
           <AuthLayout>
             <Suspense fallback={null}>{children}</Suspense>
           </AuthLayout>
+          <Toaster />
         </ThemeProvider>
         <Analytics />
       </body>

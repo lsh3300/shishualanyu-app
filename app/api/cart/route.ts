@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 查询产品:', product_id)
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('id, name, price, in_stock')
+      .select('id, name, price, inventory')
       .eq('id', product_id)
       .single()
 
@@ -211,7 +211,8 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ 找到产品:', product.name)
 
-    if (product.in_stock === false) {
+    // 检查库存（如果 inventory 字段存在且为 0 或更少）
+    if (typeof (product as any).inventory === 'number' && (product as any).inventory <= 0) {
       return NextResponse.json({ error: '该商品已售罄' }, { status: 400 });
     }
 
