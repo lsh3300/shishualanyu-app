@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -56,14 +57,9 @@ export default function NotificationsPage() {
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
         {/* 返回按钮 */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-4"
-          onClick={() => router.push('/')}
-        >
-          ← 返回首页
-        </Button>
+        <div className="mb-4">
+          <BackButton href="/" label="返回首页" />
+        </div>
         
         {/* 页面标题和操作栏 */}
         <div className="flex items-center justify-between mb-6">

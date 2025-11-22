@@ -4,12 +4,14 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { useFavorites } from "@/hooks/use-favorites"
 import { ProductCard } from "@/components/ui/product-card"
-import { Loader2, Heart, ShoppingBag, ArrowLeft } from "lucide-react"
+import { CultureArticleCard } from "@/components/ui/culture-article-card"
+import { Loader2, Heart, ShoppingBag, BookOpen, GraduationCap, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+
 interface FavoriteProductCard {
   id: string
   name: string
@@ -21,7 +23,7 @@ interface FavoriteProductCard {
 
 export default function FavoritesPage() {
   const { user, loading: authLoading } = useAuth()
-  const { favoriteProducts, favoriteCourses, loading: favoritesLoading, error: favoritesError, fetchFavorites } = useFavorites()
+  const { favoriteProducts, favoriteCourses, favoriteArticles, loading: favoritesLoading, error: favoritesError, fetchFavorites } = useFavorites()
   const [activeTab, setActiveTab] = useState("products")
   const router = useRouter()
   const renderHeader = () => (
@@ -60,9 +62,9 @@ export default function FavoritesPage() {
         <div className="w-full">
           {renderHeader()}
           <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">加载收藏内容中...</p>
-        </div>
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">加载收藏内容中...</p>
+          </div>
         </div>
       </div>
     )
@@ -130,27 +132,21 @@ export default function FavoritesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex items-center gap-4">
-        <Link href="/profile">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold mb-2">我的收藏</h1>
-          <p className="text-muted-foreground">管理您收藏的商品和内容</p>
-        </div>
-      </div>
+      {renderHeader()}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="products" className="flex items-center gap-2">
             <ShoppingBag className="h-4 w-4" />
-            商品收藏 ({products.length})
+            商品 ({products.length})
           </TabsTrigger>
           <TabsTrigger value="courses" className="flex items-center gap-2">
-            <Heart className="h-4 w-4" />
-            课程收藏 ({favoriteCourses.length})
+            <GraduationCap className="h-4 w-4" />
+            课程 ({favoriteCourses.length})
+          </TabsTrigger>
+          <TabsTrigger value="articles" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            文章 ({favoriteArticles.length})
           </TabsTrigger>
         </TabsList>
 
@@ -221,13 +217,45 @@ export default function FavoritesPage() {
                         <span className="text-xs text-muted-foreground">{course.duration}分钟</span>
                       </div>
                     </CardContent>
-                  </Link>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
+                </Link>
+              </Card>
+            ))}
+          </div>
+        )}
+      </TabsContent>
+
+      <TabsContent value="articles" className="space-y-4">
+        {favoriteArticles.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">还没有收藏任何文章</h3>
+              <p className="text-muted-foreground mb-6 text-center max-w-md">
+                浏览我们的文化速读，点击心形图标将您喜欢的文章添加到收藏夹
+              </p>
+              <Link href="/culture">
+                <Button>浏览文章</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {favoriteArticles.map((article) => (
+              <CultureArticleCard
+                key={article.id}
+                id={article.slug}
+                articleId={article.id}
+                title={article.title}
+                excerpt={article.excerpt}
+                image={article.cover_image || article.image_url || '/placeholder.svg'}
+                readTime={`${article.read_time}分钟`}
+                showFavorite={true}
+              />
+            ))}
+          </div>
+        )}
+      </TabsContent>
+    </Tabs>
+  </div>
+)
 }

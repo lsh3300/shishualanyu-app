@@ -2,6 +2,8 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { BackButton } from "@/components/ui/back-button"
+import { ArticleFavoriteButton } from "@/components/ui/article-favorite-button"
 import { createServerClient } from "@/lib/supabase/server"
 import { OptimizedImage } from "@/components/ui/optimized-image"
 
@@ -28,6 +30,7 @@ export default async function CultureArticlePage({ params }: CultureArticlePageP
   }
 
   const {
+    id,
     title,
     excerpt,
     content,
@@ -48,17 +51,20 @@ export default async function CultureArticlePage({ params }: CultureArticlePageP
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-10">
-      <Link href="/culture" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
-        ← 返回文化主页
-      </Link>
+      <div className="mb-6">
+        <BackButton href="/culture" label="返回文化速读" />
+      </div>
 
-      <div className="flex items-center gap-3 mb-6">
-        {(tags || []).map((tag: string) => (
-          <Badge key={tag} variant="secondary">{tag}</Badge>
-        ))}
-        {read_time && (
-          <Badge variant="outline">{read_time} 分钟阅读</Badge>
-        )}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          {(tags || []).map((tag: string) => (
+            <Badge key={tag} variant="secondary">{tag}</Badge>
+          ))}
+          {read_time && (
+            <Badge variant="outline">{read_time} 分钟阅读</Badge>
+          )}
+        </div>
+        <ArticleFavoriteButton articleId={id} articleTitle={title} />
       </div>
 
       <h1 className="text-3xl font-bold text-foreground mb-4">{title}</h1>

@@ -1,7 +1,13 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
-import { Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Clock, Heart } from "lucide-react"
+import { useFavorites } from "@/hooks/use-favorites"
+import { useAuth } from "@/contexts/auth-context"
+import { toast } from "@/hooks/use-toast"
 
 interface CultureArticleCardProps {
   id: string
@@ -9,12 +15,45 @@ interface CultureArticleCardProps {
   excerpt: string
   image: string
   readTime: string
+  showFavorite?: boolean
+  articleId?: string  // 文章的 UUID ID，用于收藏
 }
 
-export function CultureArticleCard({ id, title, excerpt, image, readTime }: CultureArticleCardProps) {
+export function CultureArticleCard({ id, title, excerpt, image, readTime, showFavorite = true, articleId }: CultureArticleCardProps) {
+  const { isArticleFavorite, addArticleToFavorites, removeArticleFromFavorites, loading } = useFavorites()
+  const { user } = useAuth()
+  
+  // 使用 articleId 或 id 作为收藏标识
+  const favoriteId = articleId || id
+  const isFavorite = isArticleFavorite(favoriteId)
+  
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!user) {
+      toast({
+        title: "请先登录",
+        description: "登录后可以收藏文章",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      if (isFavorite) {
+        await removeArticleFromFavorites(favoriteId)
+      } else {
+        await addArticleToFavorites(favoriteId)
+      }
+    } catch (error) {
+      console.error('收藏操作失败:', error)
+    }
+  }
   return (
-    <Link href={`/culture/${id}`} className="group">
-      <Card className="cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-card">
+    <div className="relative group">
+      <Link href={`/culture/${id}`}>
+        <Card className="cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-card">
         <div className="relative overflow-hidden rounded-t-xl">
           <Image
             src={image || "/placeholder.svg"}
@@ -34,5 +73,28 @@ export function CultureArticleCard({ id, title, excerpt, image, readTime }: Cult
         </div>
       </Card>
     </Link>
+    
+    {/* 收藏按钮 */}
+    {showFavorite && (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2 right-2 h-8 w-8 rounded-full bg-white/95 hover:bg-white backdrop-blur-sm transition-all duration-200 opacity-0 group-hover:opacity-100 z-20 shadow-lg hover:shadow-xl"
+        onClick={handleFavoriteClick}
+        onMouseDown={(e) => e.stopPropagation()}
+        disabled={loading}
+        type="button"
+        aria-label={isFavorite ? "取消收藏" : "收藏文章"}
+      >
+        <Heart 
+          className={`h-4 w-4 transition-colors duration-200 ${
+            isFavorite 
+              ? "text-red-500 fill-red-500" 
+              : "text-muted-foreground hover:text-red-500"
+          }`} 
+        />
+      </Button>
+    )}
+    </div>
   )
 }

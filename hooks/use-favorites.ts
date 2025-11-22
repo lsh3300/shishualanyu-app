@@ -47,18 +47,43 @@ interface FavoriteCourseItem {
   item_type: 'course'
 }
 
+interface Article {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  cover_image: string
+  category: string
+  tags: string[]
+  read_time: number
+  author: string
+  image_url?: string
+}
+
+interface FavoriteArticleItem {
+  id: string
+  article_id: string
+  created_at: string
+  articles: Article
+  item_type: 'article'
+}
+
 interface UseFavoritesReturn {
   favorites: FavoriteItem[]
   favoriteProducts: Product[]  // 添加favoriteProducts属性以兼容收藏页面
   favoriteCourses: Course[]  // 添加favoriteCourses属性
+  favoriteArticles: Article[]  // 添加favoriteArticles属性
   loading: boolean
   error: string | null
   addToFavorites: (productId: string) => Promise<boolean>
   removeFromFavorites: (productId: string) => Promise<boolean>
   addCourseToFavorites: (courseId: string) => Promise<boolean>
   removeCourseFromFavorites: (courseId: string) => Promise<boolean>
+  addArticleToFavorites: (articleId: string) => Promise<boolean>
+  removeArticleFromFavorites: (articleId: string) => Promise<boolean>
   isFavorite: (productId: string) => boolean
   isCourseFavorite: (courseId: string) => boolean
+  isArticleFavorite: (articleId: string) => boolean
   refreshFavorites: () => Promise<void>
   fetchFavorites: () => Promise<void>  // 添加fetchFavorites方法以供收藏页面调用
 }
@@ -501,6 +526,205 @@ function useFavoritesData(): UseFavoritesReturn {
     })
   }, [favorites])
 
+  // 添加文章到收藏
+  const addArticleToFavorites = useCallback(async (articleId: string): Promise<boolean> => {
+    if (!isLoggedIn) {
+      toast({
+        title: "请先登录",
+        description: "登录后可以收藏喜欢的文章",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    try {
+      // 获取访问令牌
+      const token = await getToken()
+      if (!token) {
+        toast({
+          title: "添加失败",
+          description: "无法获取访问令牌",
+          variant: "destructive",
+        })
+        return false
+      }
+
+      if (!articleId) {
+        toast({
+          title: "添加失败",
+          description: "文章ID无效",
+          variant: "destructive",
+        })
+        return false
+      }
+
+      console.log('📝 准备添加文章收藏:', articleId)
+
+      const response = await fetch('/api/user/favorites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ articleId }),
+      })
+
+      let data;
+      try {
+        data = await response.json()
+      } catch (e) {
+        console.error('解析响应失败:', e);
+        toast({
+          title: "添加失败",
+          description: "服务器响应格式错误",
+          variant: "destructive",
+        })
+        return false
+      }
+
+      if (!response.ok) {
+        console.error('API返回错误:', { status: response.status, data });
+        if (data.message === '已在收藏夹中' || data.error?.includes('已在收藏夹中')) {
+          toast({
+            title: "已在收藏夹中",
+            description: "这篇文章已经在您的收藏夹里了",
+            variant: "default",
+          })
+          // 即使已收藏，也返回true，因为这是正常状态
+          return true
+        } else {
+          toast({
+            title: "添加失败",
+            description: data.error || data.message || `添加到收藏夹失败 (${response.status})`,
+            variant: "destructive",
+          })
+        }
+        return false
+      }
+
+      toast({
+        title: "收藏成功",
+        description: "文章已添加到收藏夹",
+        variant: "default",
+      })
+      
+      // 刷新收藏列表以确保数据同步
+      await fetchFavorites()
+      
+      if (data.statsUpdateRequired) {
+        window.dispatchEvent(new CustomEvent('statsUpdateRequired'))
+      }
+      
+      return true
+    } catch (err) {
+      console.error('添加文章收藏错误:', err)
+      toast({
+        title: "添加失败",
+        description: "添加收藏时出现错误",
+        variant: "destructive",
+      })
+      return false
+    }
+  }, [isLoggedIn, toast, getToken, fetchFavorites])
+
+  // 从收藏移除文章
+  const removeArticleFromFavorites = useCallback(async (articleId: string): Promise<boolean> => {
+    if (!isLoggedIn) {
+      toast({
+        title: "请先登录",
+        description: "登录后可以管理收藏",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    try {
+      const token = await getToken()
+      if (!token) {
+        toast({
+          title: "移除失败",
+          description: "无法获取访问令牌",
+          variant: "destructive",
+        })
+        return false
+      }
+
+      if (!articleId) {
+        toast({
+          title: "移除失败",
+          description: "文章ID无效",
+          variant: "destructive",
+        })
+        return false
+      }
+
+      console.log('🗑️ 准备移除文章收藏:', articleId)
+
+      const response = await fetch('/api/user/favorites', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ articleId }),
+      })
+
+      let data;
+      try {
+        data = await response.json()
+      } catch (e) {
+        console.error('解析响应失败:', e);
+        toast({
+          title: "移除失败",
+          description: "服务器响应格式错误",
+          variant: "destructive",
+        })
+        return false
+      }
+
+      if (!response.ok) {
+        console.error('API返回错误:', { status: response.status, data });
+        toast({
+          title: "移除失败",
+          description: data.error || data.message || '从收藏移除失败',
+          variant: "destructive",
+        })
+        return false
+      }
+
+      toast({
+        title: "已取消收藏",
+        description: "文章已从收藏夹移除",
+        variant: "default",
+      })
+      
+      // 刷新收藏列表以确保数据同步
+      await fetchFavorites()
+      
+      if (data.statsUpdateRequired) {
+        window.dispatchEvent(new CustomEvent('statsUpdateRequired'))
+      }
+      
+      return true
+    } catch (err) {
+      console.error('移除文章收藏错误:', err)
+      toast({
+        title: "移除失败",
+        description: "移除收藏时出现错误",
+        variant: "destructive",
+      })
+      return false
+    }
+  }, [isLoggedIn, toast, getToken, fetchFavorites])
+
+  // 检查文章是否已收藏
+  const isArticleFavorite = useCallback((articleId: string): boolean => {
+    return favorites.some(favorite => {
+      const fav = favorite as any
+      return fav.item_type === 'article' && fav.article_id === articleId
+    })
+  }, [favorites])
+
   // 刷新收藏列表
   const refreshFavorites = useCallback(async () => {
     await fetchFavorites()
@@ -618,18 +842,52 @@ function useFavoritesData(): UseFavoritesReturn {
     })
     .filter((course): course is NonNullable<typeof course> => course !== null);
 
+  // 从 favorites 中提取 articles 信息，转换为 favoriteArticles
+  const favoriteArticles = favorites
+    .filter(fav => {
+      const favAny = fav as any
+      return favAny.item_type === 'article' && favAny.article_id
+    })
+    .map(fav => {
+      const favAny = fav as any
+      const article = favAny.articles || null
+
+      if (!article || !article.id) {
+        console.warn('文章数据无效:', fav)
+        return null
+      }
+
+      return {
+        id: article.id,
+        slug: article.slug,
+        title: article.title,
+        excerpt: article.excerpt || '',
+        cover_image: article.cover_image || article.image_url || '/placeholder.svg',
+        category: article.category || '未分类',
+        tags: article.tags || [],
+        read_time: article.read_time || 5,
+        author: article.author || '世说蓝语',
+        image_url: article.image_url || article.cover_image || '/placeholder.svg',
+      }
+    })
+    .filter((article): article is NonNullable<typeof article> => article !== null);
+
   return {
     favorites,
     favoriteProducts,
     favoriteCourses,
+    favoriteArticles,
     loading,
     error,
     addToFavorites,
     removeFromFavorites,
     addCourseToFavorites,
     removeCourseFromFavorites,
+    addArticleToFavorites,
+    removeArticleFromFavorites,
     isFavorite,
     isCourseFavorite,
+    isArticleFavorite,
     refreshFavorites,
     fetchFavorites,
   }

@@ -14,8 +14,9 @@ import { usePerformanceMonitor } from "@/components/ui/performance-monitor"
 import { HeaderAuth } from "@/components/auth/header-auth"
 import { Palette, Droplets, Package, Wrench, Mail, User, ChevronRight, Bell } from "lucide-react"
 import Link from "next/link"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useGlobalState } from "@/hooks/use-global-state"
+import { createClient } from "@/lib/supabase/client"
 
 const bannerItems = [
   {
@@ -113,15 +114,7 @@ const featuredProducts = [
   },
 ]
 
-const cultureArticles = [
-  {
-    id: "1",
-    title: "蓝染的历史渊源",
-    excerpt: "从古代丝绸之路到现代时尚，蓝染工艺承载着深厚的文化底蕴...",
-    image: "/ancient-indigo-dyeing-history-silk-road.jpg",
-    readTime: "5分钟",
-  },
-]
+// 文章数据从 Supabase 实时获取（见 HomePage 组件内）
 
 export default function HomePage() {
   // 使用全局状态获取未读消息和通知数量
@@ -129,6 +122,36 @@ export default function HomePage() {
   
   // 添加性能监控
   usePerformanceMonitor("/", 6) // 6个主要组件
+  
+  // 从 Supabase 获取文章数据
+  const [cultureArticles, setCultureArticles] = useState<any[]>([])
+  const [articlesLoading, setArticlesLoading] = useState(true)
+  
+  useEffect(() => {
+    async function fetchArticles() {
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('culture_articles')
+          .select('id, slug, title, excerpt, cover_image, read_time')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(3)
+        
+        if (error) {
+          console.error('获取文章失败:', error)
+        } else {
+          setCultureArticles(data || [])
+        }
+      } catch (err) {
+        console.error('获取文章异常:', err)
+      } finally {
+        setArticlesLoading(false)
+      }
+    }
+    
+    fetchArticles()
+  }, [])
   
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -214,9 +237,29 @@ export default function HomePage() {
       {/* Culture Section */}
       <section className="px-4 mb-8">
         <SectionHeader title="文化速读" href="/culture" />
-        {cultureArticles.map((article) => (
-          <LazyCultureArticleCard key={article.id} {...article} />
-        ))}
+        {articlesLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        ) : cultureArticles.length > 0 ? (
+          cultureArticles.map((article) => (
+            <LazyCultureArticleCard 
+              key={article.id} 
+              id={article.slug}
+              articleId={article.id}
+              title={article.title}
+              excerpt={article.excerpt}
+              image={article.cover_image}
+              readTime={`${article.read_time}分钟`}
+            />
+          ))
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            暂无文章
+          </div>
+        )}
       </section>
 
       <BottomNav />

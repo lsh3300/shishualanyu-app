@@ -44,16 +44,21 @@ SUPABASE_PRODUCT_BUCKET=product-media   # 可选，bucket 名与脚本保持一�
 
 ## 🆕 最近重要变更（2025-11）
 
-- **收藏系统重构**：引入 `FavoritesProvider` 共享上下文，课程/商品收藏、数量统计与“我的收藏”页同步刷新；支持课程与商品共用 `favorites` 表（含 `item_type` / `course_id`）。
+- **收藏系统重构**：引入 `FavoritesProvider` 共享上下文，课程/商品收藏、数量统计与"我的收藏"页同步刷新；支持课程与商品共用 `favorites` 表（含 `item_type` / `course_id`）。
 - **课程收藏功能完善**：教学页、课程详情页、收藏列表等全面支持课程收藏/取消收藏；`favorites` API 支持课程与商品的增删查。
+- **购物车与商品详情修复**：
+  - 统一产品表字段：使用 `inventory` 替代 `in_stock`/`stock_quantity`，避免字段不存在错误。
+  - 修复商品详情页"产品不存在"问题：`/api/products/[id]` 支持 slug 和 UUID 查询。
+  - 修复加入购物车 404 错误：`/api/cart` 使用正确的 `inventory` 字段查询库存。
+  - 全局挂载 `<Toaster />` 组件，确保所有 toast 提示正常显示。
 - **性能优化**：
   - 首页、课程页关键组件懒加载、图片按需加载（`OptimizedImage` + Next 图片配置）。
   - 禁用 Link 预取减少客户端空耗请求。
   - `next.config.mjs` 启用 `optimizePackageImports`、AVIF/WebP 输出、远程图片白名单。
 - **数据库脚本**：`fix-favorites-for-courses.sql` 使 `favorites` 表兼容课程收藏（`item_type`、`course_id`、部分唯一索引）。
-- **购物车 & 立即购买打通**：`use-cart` Hook 引入授权请求头、精选状态管理与 `selectExclusiveCartItems`；`/api/cart` 与 `/api/user/orders/create` 现根据真实登录用户执行，商品详情页“立即购买”自动勾选对应购物车项并跳转结算。
-- **本地兜底数据映射增强**：`data/models.ts` 预先构建 `courseLookupMap`，支持数字ID/UUID互查；`hooks/use-favorites.ts` 在渲染收藏课程前统一做 ID 正规化/反向转换，彻底消除“未知课程”占位和刷新后状态丢失问题，后续排查同类问题可直接复用该策略。
-- **错误修复**：解决“未知课程”“收藏数量不一致”“课程无法取消收藏”“React key 警告”等问题。
+- **购物车 & 立即购买打通**：`use-cart` Hook 引入授权请求头、精选状态管理与 `selectExclusiveCartItems`；`/api/cart` 与 `/api/user/orders/create` 现根据真实登录用户执行，商品详情页"立即购买"自动勾选对应购物车项并跳转结算。
+- **本地兜底数据映射增强**：`data/models.ts` 预先构建 `courseLookupMap`，支持数字ID/UUID互查；`hooks/use-favorites.ts` 在渲染收藏课程前统一做 ID 正规化/反向转换，彻底消除"未知课程"占位和刷新后状态丢失问题，后续排查同类问题可直接复用该策略。
+- **错误修复**：解决"未知课程""收藏数量不一致""课程无法取消收藏""React key 警告"等问题。
 - **统一搜索体验**：新增 `culture_articles` 表与 `search_content()` 函数，`/api/search` + `/search` 页面可一次检索商品 / 课程 / 文章；`SearchBar` 默认跳转搜索结果页。
 
 > ⚠️ 升级代码后请务必重新执行 `fix-favorites-for-courses.sql` 并重启开发服务，否则收藏接口会报错。
@@ -466,10 +471,12 @@ AWS_S3_BUCKET=your_s3_bucket_name
 - [FILE_UPLOAD_GUIDE.md](./FILE_UPLOAD_GUIDE.md) - 文件上传功能实现指南
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - 部署指南
 - [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md) - 备份与恢复策略
+- [docs/BACK_BUTTON_GUIDE.md](./docs/BACK_BUTTON_GUIDE.md) - 统一返回按钮使用指南
 
 ### 经验总结
 - [AI图像生成功能实现总结.md](./AI图像生成功能实现总结.md) - AI功能实现经验
 - [购物车和收藏列表功能修复经验总结.md](./购物车和收藏列表功能修复经验总结.md) - 功能修复经验
+- [文化速读功能实现经验总结.md](./文化速读功能实现经验总结.md) - 文化速读与 Supabase 调试经验
 - [Git版本管理与备份指南.md](./Git版本管理与备份指南.md) - 版本管理指南
 
 ## 注意事项
@@ -494,11 +501,175 @@ AWS_S3_BUCKET=your_s3_bucket_name
    - 用户输入数据验证和清理
    - 敏感信息使用环境变量管理
 
+---
+
+## 🔧 常见问题与解决方法
+
+### 1. 商品详情页显示"产品不存在"
+
+**症状**：访问 `/store/[slug]` 时页面显示"产品不存在"
+
+**原因**：
+- 数据库中产品表缺少 `slug` 字段或该字段为空
+- `/api/products/[id]` 路由未正确支持 slug 查询
+- 产品数据未正确初始化
+
+**解决方法**：
+1. 确认 `products` 表有 `slug` 字段（执行 `supabase/products-schema.sql`）
+2. 运行 `npm run seed:products` 初始化示例产品
+3. 检查 `/api/products/[id]/route.ts` 是否支持 slug 和 UUID 双重查询
+4. 在浏览器访问 `/api/products/[slug]` 确认返回 200
+
+### 2. 加入购物车失败（404/500错误）
+
+**症状**：点击"加入购物车"按钮后报错"商品不存在或已下架"
+
+**原因**：
+- 后端 `/api/cart` 查询了不存在的字段（如 `in_stock`、`stock_quantity`）
+- 产品表字段与 API 查询不匹配
+- 产品 ID 格式不正确（UUID vs 数字ID）
+
+**解决方法**：
+1. 确认 `products` 表使用 `inventory` 字段存储库存（而非 `in_stock` 或 `stock_quantity`）
+2. 检查 `/api/cart/route.ts` 的查询语句：
+   ```typescript
+   .select('id, name, price, inventory')  // 使用 inventory
+   ```
+3. 确保前端传递的 `product_id` 是有效的 UUID
+4. 查看开发服务器终端日志，确认产品查询成功
+
+### 3. Toast 提示不显示
+
+**症状**：执行操作（如加入购物车、收藏）后没有任何提示弹窗
+
+**原因**：
+- 全局布局未挂载 `<Toaster />` 组件
+- Toast 组件库未正确安装
+
+**解决方法**：
+1. 在 `app/layout.tsx` 中添加：
+   ```tsx
+   import { Toaster } from "@/components/ui/toaster"
+   
+   // 在 <body> 内、</ThemeProvider> 前添加
+   <Toaster />
+   ```
+2. 确认 `hooks/use-toast.ts` 和 `components/ui/toaster.tsx` 存在
+3. 重启开发服务器
+
+### 4. 数据库字段不存在错误
+
+**症状**：API 返回 `column "xxx" does not exist` 错误
+
+**原因**：
+- 本地 schema 文件与 Supabase 实际表结构不一致
+- 未执行最新的数据库迁移脚本
+
+**解决方法**：
+1. 在 Supabase SQL Editor 重新执行相关 schema 文件：
+   - `supabase/schemas.sql`（主表结构）
+   - `supabase/products-schema.sql`（产品表）
+   - `supabase/fix-favorites-for-courses.sql`（收藏表修复）
+2. 检查 API 代码中的 `.select()` 字段是否与表结构匹配
+3. 使用 Supabase Table Editor 查看实际表结构
+
+### 5. 收藏功能报错（课程/商品）
+
+**症状**：点击收藏按钮后报 500 错误或"违反唯一约束"
+
+**原因**：
+- `favorites` 表缺少 `course_id` 或 `item_type` 字段
+- 唯一索引配置不正确
+
+**解决方法**：
+1. 执行 `supabase/fix-favorites-for-courses.sql` 修复表结构
+2. 确认 `favorites` 表有以下字段：
+   - `product_id` (UUID, nullable)
+   - `course_id` (UUID, nullable)
+   - `item_type` (TEXT, 'product' or 'course')
+3. 重启开发服务器
+
+### 6. 图片无法显示或上传失败
+
+**症状**：商品/课程图片显示为占位图或上传后无法访问
+
+**原因**：
+- Supabase Storage bucket 未创建或权限配置错误
+- 环境变量中的 bucket 名称不匹配
+- 图片 URL 未正确保存到数据库
+
+**解决方法**：
+1. 在 Supabase Storage 创建 `product-media` bucket（公开访问）
+2. 检查 `.env.local` 中 `SUPABASE_PRODUCT_BUCKET` 配置
+3. 运行 `npm run seed:products` 上传示例图片
+4. 确认 `product_media` 表正确关联产品ID和图片URL
+
+### 7. 开发服务器启动失败
+
+**症状**：运行 `npm run dev` 后报错或无法访问 localhost:3000
+
+**原因**：
+- 端口 3000 被占用
+- 环境变量未正确配置
+- 依赖包未安装或版本冲突
+
+**解决方法**：
+1. 检查 `.env.local` 文件是否存在且包含必要的 Supabase 配置
+2. 删除 `node_modules` 和 `.next` 文件夹，重新安装：
+   ```bash
+   rm -rf node_modules .next
+   npm install
+   npm run dev
+   ```
+3. 更换端口运行：`npm run dev -- -p 3001`
+4. 检查终端错误日志，根据提示解决依赖问题
+
+### 8. 课程收藏失败（外键约束错误）
+
+**症状**：点击课程收藏按钮后报错 `violates foreign key constraint "favorites_course_id_fkey"`
+
+**原因**：
+- 数据库中缺少课程数据
+- 尝试收藏的课程 ID 不存在于 `courses` 表中
+- 外键约束要求 `course_id` 必须在 `courses` 表中存在
+
+**解决方法**：
+1. 执行 `supabase/fix-courses-seed.sql` 修复课程数据：
+   - 在 Supabase SQL Editor 中运行该脚本
+   - 脚本会插入 8 门标准课程数据
+2. 验证课程数据：
+   ```sql
+   SELECT COUNT(*) FROM courses;
+   -- 应该返回至少 8
+   ```
+3. 清除浏览器缓存并刷新页面
+4. 重新尝试收藏功能
+
+**详细说明**：参见 `课程收藏失败修复指南.md`
+
+### 9. 课程收藏后显示"未知课程"
+
+**症状**：收藏课程后，在收藏列表中显示为"未知课程"
+
+**原因**：
+- 课程数据未正确初始化
+- 前端 ID 映射逻辑缺失
+- 数据库中课程记录缺少必要字段
+
+**解决方法**：
+1. 执行 `supabase/fix-courses-seed.sql` 初始化完整课程数据
+2. 确认 `courses` 表包含 `title`、`instructor_name`、`thumbnail` 等字段
+3. 检查 `hooks/use-favorites.ts` 中的课程数据映射逻辑
+4. 清除浏览器缓存并刷新页面
+
+---
+
 ## 最新更新
 
-- 实现了完整的懒加载组件系统
-- 添加了性能监控功能
-- 优化了首页加载性能
+- **文章收藏功能**：完整实现文章收藏，包括 API、Hook、UI 组件，支持在文章卡片上收藏
+- **课程收藏修复**：修复外键约束错误，提供完整的课程数据 seed 脚本
+- **统一返回按钮**：创建 `BackButton` 组件，统一全站返回按钮的样式和行为
+- **文化速读数据库迁移**：完成 20 篇蓝染文章数据迁移到 Supabase
 - 完善了消息和通知系统
 - 改进了用户交互体验
 - 增加了AI图像生成功能

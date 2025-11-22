@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { SearchBar } from "@/components/ui/search-bar"
 import { Button } from "@/components/ui/button"
+import { BackButton } from "@/components/ui/back-button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { Loader2, Filter, ArrowLeft } from "lucide-react"
+import { Loader2, Filter } from "lucide-react"
 import { SearchResponse, SearchResultItem, SearchEntityType } from "@/types/search"
 import { BottomNav } from "@/components/navigation/bottom-nav"
 import { OptimizedImage } from "@/components/ui/optimized-image"
@@ -161,9 +162,7 @@ export default function SearchPage() {
     <div className="min-h-screen bg-background pb-20">
       <header className="bg-card border-b border-border sticky top-0 z-40">
         <div className="flex items-center gap-4 p-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton href="/" iconOnly />
           <h1 className="heading-secondary flex-1">全局搜索</h1>
           <Filter className="h-5 w-5 text-muted-foreground" />
         </div>

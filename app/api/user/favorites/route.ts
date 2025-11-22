@@ -31,10 +31,17 @@ export async function GET(request: NextRequest) {
     
     const supabase = createServiceClient()
     
-    // 查询收藏列表（支持商品和课程收藏）
+    // 查询收藏列表（支持商品、课程和文章收藏）
     const { data: favorites, error: favoritesError } = await supabase
       .from('favorites')
       .select('id, product_id, course_id, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+    
+    // 查询文章收藏
+    const { data: articleFavorites, error: articleFavoritesError } = await supabase
+      .from('article_favorites')
+      .select('id, article_id, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
     
@@ -111,7 +118,33 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // 组装返回数据
+    // 获取文章详情
+    const articleIds = articleFavorites?.filter(f => f.article_id).map(f => f.article_id) || []
+    let articlesMap: Record<string, any> = {}
+    
+    if (articleIds.length > 0) {
+      const { data: articles, error: articlesError } = await supabase
+        .from('culture_articles')
+        .select('id, slug, title, excerpt, cover_image, category, tags, read_time, author')
+        .in('id', articleIds)
+      
+      if (!articlesError && articles) {
+        articles.forEach(article => {
+          articlesMap[article.id] = {
+            ...article,
+            image_url: article.cover_image || '/placeholder.svg'
+          }
+        })
+        
+        console.log('📰 处理后的文章数据:', Object.values(articlesMap).map(a => ({
+          id: a.id,
+          title: a.title,
+          slug: a.slug
+        })))
+      }
+    }
+    
+    // 组装返回数据（包括文章）
     const enrichedFavorites = favorites?.map(fav => {
       if (fav.product_id) {
         return {
@@ -133,8 +166,25 @@ export async function GET(request: NextRequest) {
       return null
     }).filter(Boolean) || []
     
+    // 添加文章收藏
+    const enrichedArticleFavorites = articleFavorites?.map(fav => ({
+      id: fav.id,
+      article_id: fav.article_id,
+      created_at: fav.created_at,
+      item_type: 'article',
+      articles: articlesMap[fav.article_id] || null
+    })).filter(f => f.articles) || []
+    
+    // 合并所有收藏
+    const allFavorites = [...enrichedFavorites, ...enrichedArticleFavorites]
+      .sort((a, b) => {
+        const dateA = a?.created_at ? new Date(a.created_at).getTime() : 0
+        const dateB = b?.created_at ? new Date(b.created_at).getTime() : 0
+        return dateB - dateA
+      })
+    
     return NextResponse.json({
-      favorites: enrichedFavorites,
+      favorites: allFavorites,
       source: 'supabase'
     })
     
@@ -157,18 +207,57 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { productId, courseId } = body
+    const { productId, courseId, articleId } = body
     
-    if (!productId && !courseId) {
-      return NextResponse.json({ error: '缺少商品ID或课程ID' }, { status: 400 })
+    if (!productId && !courseId && !articleId) {
+      return NextResponse.json({ error: '缺少商品ID、课程ID或文章ID' }, { status: 400 })
     }
     
-    if (productId && courseId) {
-      return NextResponse.json({ error: '不能同时收藏商品和课程' }, { status: 400 })
+    const itemCount = [productId, courseId, articleId].filter(Boolean).length
+    if (itemCount > 1) {
+      return NextResponse.json({ error: '只能收藏一种类型的项目' }, { status: 400 })
     }
     
     const supabase = createServiceClient()
     
+    // 文章使用单独的表
+    if (articleId) {
+      // 检查文章是否已收藏
+      const { data: existing } = await supabase
+        .from('article_favorites')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('article_id', articleId)
+        .maybeSingle()
+      
+      if (existing) {
+        return NextResponse.json({
+          success: true,
+          message: '已在收藏夹中',
+          favorite: existing
+        })
+      }
+      
+      // 添加文章收藏
+      const { data: newFavorite, error: insertError } = await supabase
+        .from('article_favorites')
+        .insert({ user_id: userId, article_id: articleId })
+        .select()
+        .single()
+      
+      if (insertError) {
+        console.error('❌ 添加文章收藏失败:', insertError)
+        return NextResponse.json({ error: '添加收藏失败' }, { status: 500 })
+      }
+      
+      return NextResponse.json({
+        success: true,
+        message: '收藏成功',
+        favorite: newFavorite
+      })
+    }
+    
+    // 商品和课程使用 favorites 表
     // 检查是否已收藏
     let existingQuery = supabase
       .from('favorites')
@@ -242,14 +331,34 @@ export async function DELETE(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { productId, courseId } = body
+    const { productId, courseId, articleId } = body
     
-    if (!productId && !courseId) {
-      return NextResponse.json({ error: '缺少商品ID或课程ID' }, { status: 400 })
+    if (!productId && !courseId && !articleId) {
+      return NextResponse.json({ error: '缺少商品ID、课程ID或文章ID' }, { status: 400 })
     }
     
     const supabase = createServiceClient()
     
+    // 文章使用单独的表
+    if (articleId) {
+      const { error: deleteError } = await supabase
+        .from('article_favorites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('article_id', articleId)
+      
+      if (deleteError) {
+        console.error('删除文章收藏失败:', deleteError)
+        return NextResponse.json({ error: '删除收藏失败' }, { status: 500 })
+      }
+      
+      return NextResponse.json({
+        success: true,
+        message: '删除成功'
+      })
+    }
+    
+    // 商品和课程使用 favorites 表
     let deleteQuery = supabase
       .from('favorites')
       .delete()

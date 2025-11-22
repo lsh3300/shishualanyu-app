@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
   const learningDays = 0;
   const completedCoursesCount = 0;
     
-    // 获取用户收藏数量
+    // 获取用户收藏数量（产品和课程）
     const { count: favoritesCount, error: countError } = await supabase
       .from('favorites')
       .select('*', { count: 'exact', head: true })
@@ -90,7 +90,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '获取收藏数据失败' }, { status: 500 });
     }
     
-    const finalFavoritesCount = favoritesCount || 0;
+    // 获取用户文章收藏数量
+    const { count: articleFavoritesCount, error: articleCountError } = await supabase
+      .from('article_favorites')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+    
+    if (articleCountError) {
+      console.error('获取文章收藏数据失败:', articleCountError);
+      // 不阻断，继续执行
+    }
+    
+    // 合计总收藏数量：产品 + 课程 + 文章
+    const finalFavoritesCount = (favoritesCount || 0) + (articleFavoritesCount || 0);
+    
+    console.log(`收藏统计: 产品/课程=${favoritesCount || 0}, 文章=${articleFavoritesCount || 0}, 总计=${finalFavoritesCount}`);
     
     // 计算学习天数 - 暂时返回固定值，因为没有相关数据
   // let learningDays = 0;
