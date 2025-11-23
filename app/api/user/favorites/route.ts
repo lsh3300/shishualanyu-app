@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabaseClient'
 
+// 启用 Next.js 路由缓存优化
+export const dynamic = 'force-dynamic' // 保持动态以确保用户认证
+export const revalidate = 60 // 60秒缓存
+
 // 用户认证函数
 async function authenticateUser(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
@@ -55,39 +59,36 @@ export async function GET(request: NextRequest) {
     let productsMap: Record<string, any> = {}
     
     if (productIds.length > 0) {
-      // 查询产品基本信息
+      // 优化：查询产品基本信息（减少字段）
       const { data: products, error: productsError } = await supabase
         .from('products')
-        .select('id, name, price, image_url, category, description')
+        .select('id, name, price, image_url, category')
         .in('id', productIds)
       
-      // 查询产品图片
+      // 优化：只查询封面图
       const { data: mediaData, error: mediaError } = await supabase
         .from('product_media')
-        .select('product_id, url, type, cover, position')
+        .select('product_id, url')
         .in('product_id', productIds)
         .eq('type', 'image')
-        .order('position', { ascending: true })
+        .eq('cover', true)
+        .limit(productIds.length)
       
       if (!productsError && products) {
         products.forEach(product => {
-          // 找到该产品的所有图片
-          const productMedia = mediaData?.filter(m => m.product_id === product.id) || []
-          // 优先使用封面图，否则使用第一张图片
-          const coverImage = productMedia.find(m => m.cover)?.url || productMedia[0]?.url
+          // 优化：直接使用封面图（已经过滤了cover=true）
+          const coverImage = mediaData?.find(m => m.product_id === product.id)?.url
           
           productsMap[product.id] = {
             ...product,
-            image_url: coverImage || product.image_url || '/placeholder.svg',
-            images: productMedia.map(m => m.url)
+            image_url: coverImage || product.image_url || '/placeholder.svg'
           }
         })
         
         console.log('📦 处理后的产品数据:', Object.values(productsMap).map(p => ({
           id: p.id,
           name: p.name,
-          image_url: p.image_url,
-          images_count: p.images?.length || 0
+          image_url: p.image_url
         })))
       }
     }

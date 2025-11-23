@@ -6,6 +6,11 @@ import { useToast } from "@/hooks/use-toast"
 import { getCourseById, getProductById } from "@/data/models"
 import { normalizeCourseId, denormalizeCourseId } from "@/lib/course-id"
 
+// 请求去重：防止多个组件同时调用
+let pendingFavoritesRequest: Promise<any> | null = null
+let lastFavoritesFetchTime = 0
+const FAVORITES_FETCH_COOLDOWN = 2000 // 2秒冷却时间
+
 interface Product {
   id: string
   name: string
@@ -98,7 +103,7 @@ function useFavoritesData(): UseFavoritesReturn {
   // 检查用户是否登录
   const isLoggedIn = !!user
 
-  // 获取收藏列表
+  // 获取收藏列表 - 优化：添加去重和缓存
   const fetchFavorites = useCallback(async () => {
     if (!isLoggedIn) {
       setFavorites([])
@@ -106,9 +111,26 @@ function useFavoritesData(): UseFavoritesReturn {
       return
     }
 
+    // 防抖：如果距离上次请求不到2秒，直接返回
+    const now = Date.now()
+    if (now - lastFavoritesFetchTime < FAVORITES_FETCH_COOLDOWN) {
+      return
+    }
+
+    // 如果有正在进行的请求，直接返回
+    if (pendingFavoritesRequest) {
+      try {
+        await pendingFavoritesRequest
+      } catch (error) {
+        // 忽略错误
+      }
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
+      lastFavoritesFetchTime = now
 
       // 获取访问令牌
       const token = await getToken()
@@ -116,13 +138,17 @@ function useFavoritesData(): UseFavoritesReturn {
         throw new Error('无法获取访问令牌')
       }
 
-      const response = await fetch('/api/user/favorites', {
+      // 创建请求promise
+      pendingFavoritesRequest = fetch('/api/user/favorites', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
+        next: { revalidate: 60 }, // 60秒缓存
       })
+
+      const response = await pendingFavoritesRequest
 
       const data = await response.json()
 
@@ -159,6 +185,7 @@ function useFavoritesData(): UseFavoritesReturn {
       console.error('获取收藏列表错误:', err)
     } finally {
       setLoading(false)
+      pendingFavoritesRequest = null // 清除pending状态
     }
   }, [isLoggedIn, getToken])
 

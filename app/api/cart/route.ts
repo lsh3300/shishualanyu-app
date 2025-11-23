@@ -50,9 +50,10 @@ async function fetchProductsMap(
   const map: Record<string, any> = {}
   if (!productIds.length) return map
 
+  // 优化：减少不必要的字段
   const { data: productsData, error: productsError } = await supabase
     .from('products')
-    .select('id, name, price, description, image_url, category, metadata')
+    .select('id, name, price, image_url, category')
     .in('id', productIds)
 
   if (productsError) {
@@ -60,22 +61,22 @@ async function fetchProductsMap(
     return map
   }
 
+  // 优化：只查询封面图
   const { data: mediaData, error: mediaError } = await supabase
     .from('product_media')
-    .select('product_id, type, url, cover, position')
+    .select('product_id, url')
     .in('product_id', productIds)
     .eq('type', 'image')
-    .order('position', { ascending: true })
+    .eq('cover', true)
+    .limit(productIds.length)
 
   const coverMap: Record<string, string> = {}
   if (mediaError) {
     console.warn('获取购物车商品图片失败:', mediaError)
   } else {
+    // 优化：直接使用封面图（已过滤cover=true）
     mediaData?.forEach((media) => {
-      const current = coverMap[media.product_id]
-      if (!current || media.cover || media.position === 0) {
-        coverMap[media.product_id] = media.url
-      }
+      coverMap[media.product_id] = media.url
     })
   }
 

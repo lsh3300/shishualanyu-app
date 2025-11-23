@@ -5,6 +5,8 @@ import { BottomNav } from "@/components/navigation/bottom-nav"
 import { ProductImageGallery } from "@/components/ui/product-image-gallery"
 import { CraftsmanStory } from "@/components/ui/craftsman-story"
 import { SpecSelector } from "@/components/ui/spec-selector"
+import { LikeButton } from "@/components/ui/like-button"
+import { CommentSection } from "@/components/ui/comment-section"
 import { ArrowLeft, Heart, Share, MessageCircle, ShoppingCart, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -299,6 +301,27 @@ export function ProductDetailTemplate({ product, productType = "product" }: Prod
             <div key={i} className="aspect-square bg-muted rounded-lg"></div>
           ))}
         </div>
+      </section>
+
+      {/* 点赞和互动 */}
+      <section className="px-4 mb-6">
+        <div className="flex items-center justify-center">
+          <LikeButton 
+            itemType="product" 
+            itemId={product.id}
+            size="lg"
+            showCount={true}
+          />
+        </div>
+      </section>
+
+      {/* 用户评价 */}
+      <section className="px-4 mb-6">
+        <CommentSection 
+          itemType="product" 
+          itemId={product.id}
+          title="用户评价"
+        />
       </section>
 
       {/* Fixed Bottom Actions */}

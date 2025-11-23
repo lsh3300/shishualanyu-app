@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { BackButton } from "@/components/ui/back-button"
 import { ArticleFavoriteButton } from "@/components/ui/article-favorite-button"
+import { LikeButton } from "@/components/ui/like-button"
+import { CommentSection } from "@/components/ui/comment-section"
 import { createServerClient } from "@/lib/supabase/server"
 import { OptimizedImage } from "@/components/ui/optimized-image"
 
@@ -92,13 +94,29 @@ export default async function CultureArticlePage({ params }: CultureArticlePageP
         )}
       </div>
 
-      <div className="mt-10 flex justify-between items-center border-t border-border pt-6">
-        <div>
-          <p className="text-sm text-muted-foreground">喜欢这篇文章？分享给朋友吧。</p>
+      {/* 点赞和互动区域 */}
+      <div className="mt-10 flex items-center justify-between border-t border-border pt-6">
+        <div className="flex items-center gap-4">
+          <LikeButton 
+            itemType="article" 
+            itemId={id}
+            size="md"
+            showCount={true}
+          />
+          <p className="text-sm text-muted-foreground">喜欢这篇文章？点个赞吧</p>
         </div>
         <Button asChild>
           <Link href="/culture">更多文化故事</Link>
         </Button>
+      </div>
+
+      {/* 评论区 */}
+      <div className="mt-12 border-t border-border pt-8">
+        <CommentSection 
+          itemType="article" 
+          itemId={id}
+          title="读者评论"
+        />
       </div>
     </article>
   )

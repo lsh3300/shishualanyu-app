@@ -45,6 +45,11 @@ export interface AddToCartItem {
   size?: string
 }
 
+// 请求去重：防止多个组件同时调用
+let pendingRequest: Promise<any> | null = null
+let lastFetchTime = 0
+const FETCH_COOLDOWN = 1000 // 1秒冷却时间
+
 export function useCart() {
   const [cartData, setCartData] = useState<CartData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -76,11 +81,27 @@ export function useCart() {
     }
   }, [])
 
-  // 获取购物车数据
+  // 获取购物车数据 - 优化：添加去重和冷却
   const fetchCart = useCallback(async () => {
     if (!user) {
       setCartData({ totalItems: 0, totalPrice: 0, items: [] })
       setLoading(false)
+      return
+    }
+
+    // 防抖：如果距离上次请求不到1秒，直接返回
+    const now = Date.now()
+    if (now - lastFetchTime < FETCH_COOLDOWN) {
+      return
+    }
+
+    // 如果有正在进行的请求，直接返回
+    if (pendingRequest) {
+      try {
+        await pendingRequest
+      } catch (error) {
+        // 忽略错误，因为错误已经在原始请求中处理
+      }
       return
     }
 
@@ -94,13 +115,17 @@ export function useCart() {
 
       setLoading(true)
       setError(null)
+      lastFetchTime = now
       
-      const response = await fetch('/api/cart', {
+      // 创建请求promise
+      pendingRequest = fetch('/api/cart', {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        cache: 'no-store',
+        next: { revalidate: 30 }, // 30秒缓存
       })
+      
+      const response = await pendingRequest
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -127,6 +152,7 @@ export function useCart() {
       })
     } finally {
       setLoading(false)
+      pendingRequest = null // 清除pending状态
     }
   }, [user, router, getToken, normalizeCartResponse])
 

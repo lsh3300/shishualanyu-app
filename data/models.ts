@@ -563,3 +563,22 @@ export function getCourseById(id?: string | null) {
 export function getProductById(id: string) {
   return productsData[id as keyof typeof productsData] || null
 }
+
+// 更新课程数据的函数（模拟）
+export async function updateCourse(courseId: string, updatedData: any) {
+  // 在实际应用中，这里应该调用 API 更新数据库
+  // 目前只是模拟，返回更新后的数据
+  const denormalizedId = denormalizeCourseId(courseId)
+  const course = coursesData[denormalizedId as keyof typeof coursesData]
+  
+  if (!course) {
+    throw new Error('课程不存在')
+  }
+  
+  // 模拟异步操作
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ ...course, ...updatedData })
+    }, 500)
+  })
+}

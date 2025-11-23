@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { BottomNav } from "@/components/navigation/bottom-nav"
 import { VideoPlayer } from "@/components/ui/video-player"
+import { LikeButton } from "@/components/ui/like-button"
+import { CommentSection } from "@/components/ui/comment-section"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Heart, Share2 } from "lucide-react"
 import Link from "next/link"
@@ -130,6 +132,27 @@ export function CourseDetailTemplate({ course, courseType = "course" }: CourseDe
 
       {/* Materials Section */}
       <LazyCourseMaterialsSection materials={course.materials} />
+
+      {/* 点赞和互动 */}
+      <section className="px-4 mb-6 mt-6">
+        <div className="flex items-center justify-center">
+          <LikeButton 
+            itemType="course" 
+            itemId={course.id}
+            size="lg"
+            showCount={true}
+          />
+        </div>
+      </section>
+
+      {/* 课程评价 */}
+      <section className="px-4 mb-6">
+        <CommentSection 
+          itemType="course" 
+          itemId={course.id}
+          title="课程评价"
+        />
+      </section>
 
       {/* Fixed Bottom Action */}
       <div className="fixed bottom-16 left-0 right-0 p-4 bg-background border-t border-border">
