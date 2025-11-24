@@ -1,6 +1,6 @@
 'use client'
 
-import { ProductEditPage } from './page'
+import ProductEditPage from '../page'
 
 interface ProductEditDynamicPageProps {
   params: {

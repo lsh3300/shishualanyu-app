@@ -582,3 +582,56 @@ export async function updateCourse(courseId: string, updatedData: any) {
     }, 500)
   })
 }
+
+// 创建课程数据的函数（模拟）
+export async function createCourse(courseData: any) {
+  // 在实际应用中，这里应该调用 API 创建课程
+  // 目前只是模拟，返回新创建的课程数据
+  const newCourse = {
+    id: Date.now().toString(),
+    ...courseData,
+    students: 0,
+    rating: 0,
+  }
+  
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(newCourse)
+    }, 500)
+  })
+}
+
+// 更新产品数据的函数（模拟）
+export async function updateProduct(productId: string, updatedData: any) {
+  // 在实际应用中，这里应该调用 API 更新数据库
+  // 目前只是模拟，返回更新后的数据
+  const product = productsData[productId as keyof typeof productsData]
+  
+  if (!product) {
+    throw new Error('产品不存在')
+  }
+  
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ ...product, ...updatedData })
+    }, 500)
+  })
+}
+
+// 创建产品数据的函数（模拟）
+export async function createProduct(productData: any) {
+  // 在实际应用中，这里应该调用 API 创建产品
+  // 目前只是模拟，返回新创建的产品数据
+  const newProduct = {
+    id: Date.now().toString(),
+    ...productData,
+    sales: 0,
+    rating: 0,
+  }
+  
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(newProduct)
+    }, 500)
+  })
+}

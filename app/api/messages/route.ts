@@ -64,13 +64,23 @@ let messages = [
   },
 ];
 
-// GET 请求处理 - 获取消息列表
+// GET 请求处理 - 获取消息列表或未读消息数量
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const keyword = searchParams.get('keyword');
     const isRead = searchParams.get('isRead');
+    const count = searchParams.get('count') === 'true';
+
+    // 如果请求获取未读消息数量
+    if (count) {
+      const unreadCount = messages.filter(msg => !msg.isRead).length;
+      return NextResponse.json({
+        success: true,
+        data: { unreadCount },
+      });
+    }
 
     let filteredMessages = [...messages];
 
@@ -182,18 +192,5 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// GET_COUNT 请求处理 - 获取未读消息数量
-export async function GET_COUNT() {
-  try {
-    const unreadCount = messages.filter(msg => !msg.isRead).length;
-    return NextResponse.json({
-      success: true,
-      data: { unreadCount },
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: '获取未读消息数量失败' },
-      { status: 500 }
-    );
-  }
-}
+// 修改GET方法，添加获取未读消息数量的功能
+// 在GET请求中添加count=true查询参数来获取未读消息数量
