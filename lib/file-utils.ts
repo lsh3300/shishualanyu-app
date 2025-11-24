@@ -341,6 +341,16 @@ export class FileUtils {
     return this.getFileType(filename) === 'image';
   }
 
+  // 验证图片文件（检查文件类型和MIME类型）
+  static validateImageFile(file: File): boolean {
+    // 检查文件名扩展名
+    const isImageByName = this.isImageFile(file.name);
+    // 检查MIME类型
+    const isImageByMime = file.type.startsWith('image/');
+    
+    return isImageByName && isImageByMime;
+  }
+
   // 检查文件是否为视频
   static isVideoFile(filename: string): boolean {
     return this.getFileType(filename) === 'video';

@@ -8,13 +8,16 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 export function createServerClient() {
-  return createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+  return createSupabaseClient(supabaseUrl!, supabaseServiceKey!, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
     }
   })
 }
+
+// 别名导出，兼容不同的导入方式
+export const createClient = createServerClient
 
 // 默认服务端客户端实例
 export const supabase = createServerClient()
