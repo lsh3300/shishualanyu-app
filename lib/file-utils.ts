@@ -351,6 +351,11 @@ export class FileUtils {
     return isImageByName && isImageByMime;
   }
 
+  // 验证文件（检查文件大小）
+  static validateFile(file: File, maxSizeInBytes: number): boolean {
+    return file.size <= maxSizeInBytes;
+  }
+
   // 检查文件是否为视频
   static isVideoFile(filename: string): boolean {
     return this.getFileType(filename) === 'video';
