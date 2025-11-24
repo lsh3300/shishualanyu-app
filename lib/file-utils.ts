@@ -356,6 +356,16 @@ export class FileUtils {
     return file.size <= maxSizeInBytes;
   }
 
+  // 验证视频文件（检查文件类型和MIME类型）
+  static validateVideoFile(file: File): boolean {
+    // 检查文件名扩展名
+    const isVideoByName = this.isVideoFile(file.name);
+    // 检查MIME类型
+    const isVideoByMime = file.type.startsWith('video/');
+    
+    return isVideoByName && isVideoByMime;
+  }
+
   // 检查文件是否为视频
   static isVideoFile(filename: string): boolean {
     return this.getFileType(filename) === 'video';
