@@ -11,7 +11,7 @@ export async function GET() {
     console.log('Environment variables loaded')
     
     // 直接创建客户端，不使用我们的包装函数
-    const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+    const supabase = createSupabaseClient(supabaseUrl!, supabaseServiceKey!, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
