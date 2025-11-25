@@ -8,6 +8,8 @@ import { Upload, X, FileImage, FileVideo, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface FileUploadProps {
+  onFilesSelected?: (files: File[]) => void;
+  onFilesChange?: (files: File[]) => void;
   onUploadComplete?: (files: UploadedFile[]) => void;
   onUploadError?: (error: Error) => void;
   bucket?: string;
@@ -40,6 +42,8 @@ interface UploadProgress {
 }
 
 export function FileUpload({
+  onFilesSelected,
+  onFilesChange,
   onUploadComplete,
   onUploadError,
   bucket = 'products-images',
@@ -185,13 +189,23 @@ export function FileUpload({
       return;
     }
     
+    // 如果没有有效文件，仅展示错误项
+    if (validFiles.length === 0) {
+      setFiles(prev => [...prev, ...newFiles]);
+      return;
+    }
+
+    // 将通过验证的文件回调给上层
+    onFilesSelected?.(validFiles);
+    onFilesChange?.(validFiles);
+
     setFiles(prev => [...prev, ...newFiles]);
     
     // 上传有效文件
     validFiles.forEach(file => {
       uploadWithProgress(file);
     });
-  }, [files.length, maxFiles, uploadFile]);
+  }, [files.length, maxFiles, uploadFile, onFilesSelected, onFilesChange]);
 
   // 带进度上传
   const uploadWithProgress = async (file: File) => {
