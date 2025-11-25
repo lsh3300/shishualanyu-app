@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Download, Eye, EyeOff, RefreshCw } from 'lucide-react';
 
 interface FileViewerProps {
-  path: string;
+  path?: string;
+  src?: string;
   bucket?: string;
   isLocal?: boolean;
   alt?: string;
   className?: string;
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
   showControls?: boolean;
   lazy?: boolean;
   fallback?: React.ReactNode;
@@ -23,6 +24,7 @@ interface FileViewerProps {
 
 export function FileViewer({
   path,
+  src,
   bucket,
   isLocal = false,
   alt = '',
@@ -35,10 +37,10 @@ export function FileViewer({
   onLoad,
   onError
 }: FileViewerProps) {
-  const [url, setUrl] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [url, setUrl] = useState<string>(src || '');
+  const [isLoading, setIsLoading] = useState(!src);
   const [error, setError] = useState<Error | null>(null);
-  const [isVisible, setIsVisible] = useState(!lazy);
+  const [isVisible, setIsVisible] = useState(!lazy || !!src);
   const [showPreview, setShowPreview] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,6 +49,8 @@ export function FileViewer({
     maxAge: 60 * 60 * 1000, // 1小时
     enableCache: true
   });
+
+  const fileIdentifier = src || path || '';
 
   // 检测文件类型
   const getFileType = (filePath: string): 'image' | 'video' | 'unknown' => {
@@ -86,7 +90,25 @@ export function FileViewer({
 
   // 加载文件URL
   useEffect(() => {
-    if (!isVisible || !path) return;
+    if (!isVisible) return;
+
+    // 如果提供了 src，直接使用
+    if (src) {
+      setUrl(src);
+      setError(null);
+      setIsLoading(false);
+      onLoad?.();
+      return;
+    }
+
+    // 如果没有 path 也没有 src，报错
+    if (!path) {
+      const missingPathError = new Error('缺少文件路径');
+      setError(missingPathError);
+      setIsLoading(false);
+      onError?.(missingPathError);
+      return;
+    }
     
     const loadFile = async () => {
       try {
@@ -105,10 +127,12 @@ export function FileViewer({
     };
     
     loadFile();
-  }, [path, bucket, isLocal, isVisible, getFileUrl, onError]);
+  }, [path, src, bucket, isLocal, isVisible, getFileUrl, onLoad, onError]);
 
   // 预加载文件
   const handlePreload = async () => {
+    if (src || !path) return;
+
     try {
       await preloadFile(path, bucket, isLocal);
     } catch (err) {
@@ -132,17 +156,19 @@ export function FileViewer({
 
   // 下载文件
   const handleDownload = () => {
-    if (!url || !path) return;
+    if (!url) return;
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = path.split('/').pop() || 'download';
+    if (path) {
+      link.download = path.split('/').pop() || 'download';
+    }
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const fileType = getFileType(path);
+  const fileType = getFileType(fileIdentifier);
   const isImage = fileType === 'image';
   const isVideo = fileType === 'video';
 
