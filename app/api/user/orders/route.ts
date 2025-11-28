@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { SUPABASE_URL } from '@/lib/supabase/config';
 
 // 创建Supabase客户端
 const createSupabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
   
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient(SUPABASE_URL, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false

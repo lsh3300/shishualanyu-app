@@ -52,11 +52,11 @@ export function FileSelector({
       }
       
       const data = await response.json();
-      let filteredFiles = data.files || [];
+      let filteredFiles: FileInfo[] = (data.files || []) as FileInfo[];
       
       // 根据accept类型过滤文件
       if (accept !== 'all') {
-        filteredFiles = filteredFiles.filter(file => {
+        filteredFiles = filteredFiles.filter((file: FileInfo) => {
           if (accept === 'image') {
             return file.type.startsWith('image/');
           } else if (accept === 'video') {
@@ -316,11 +316,11 @@ export function MultiFileSelector({
       }
       
       const data = await response.json();
-      let filteredFiles = data.files || [];
+      let filteredFiles: FileInfo[] = (data.files || []) as FileInfo[];
       
       // 根据accept类型过滤文件
       if (accept !== 'all') {
-        filteredFiles = filteredFiles.filter(file => {
+        filteredFiles = filteredFiles.filter((file: FileInfo) => {
           if (accept === 'image') {
             return file.type.startsWith('image/');
           } else if (accept === 'video') {

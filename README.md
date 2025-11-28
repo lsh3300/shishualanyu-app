@@ -465,19 +465,19 @@ AWS_S3_BUCKET=your_s3_bucket_name
 ## 项目文档
 
 ### 技术文档
-- [DATABASE_SETUP.md](./DATABASE_SETUP.md) - 数据库初始化指南
-- [Supabase数据库配置指南.md](./Supabase数据库配置指南.md) - 详细的数据库配置说明
-- [SUPABASE_PRODUCTS_SETUP.md](./SUPABASE_PRODUCTS_SETUP.md) - 产品与媒体数据初始化步骤
-- [FILE_UPLOAD_GUIDE.md](./FILE_UPLOAD_GUIDE.md) - 文件上传功能实现指南
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - 部署指南
-- [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md) - 备份与恢复策略
+- [DATABASE_SETUP.md](./docs/DATABASE_SETUP.md) - 数据库初始化指南
+- [Supabase数据库配置指南.md](./docs/Supabase数据库配置指南.md) - 详细的数据库配置说明
+- [SUPABASE_PRODUCTS_SETUP.md](./docs/SUPABASE_PRODUCTS_SETUP.md) - 产品与媒体数据初始化步骤
+- [FILE_UPLOAD_GUIDE.md](./docs/FILE_UPLOAD_GUIDE.md) - 文件上传功能实现指南
+- [DEPLOYMENT.md](./docs/DEPLOYMENT.md) - 部署指南
+- [BACKUP_RECOVERY.md](./docs/BACKUP_RECOVERY.md) - 备份与恢复策略
 - [docs/BACK_BUTTON_GUIDE.md](./docs/BACK_BUTTON_GUIDE.md) - 统一返回按钮使用指南
 
 ### 经验总结
-- [AI图像生成功能实现总结.md](./AI图像生成功能实现总结.md) - AI功能实现经验
-- [购物车和收藏列表功能修复经验总结.md](./购物车和收藏列表功能修复经验总结.md) - 功能修复经验
-- [文化速读功能实现经验总结.md](./文化速读功能实现经验总结.md) - 文化速读与 Supabase 调试经验
-- [Git版本管理与备份指南.md](./Git版本管理与备份指南.md) - 版本管理指南
+- [AI图像生成功能实现总结.md](./docs/AI图像生成功能实现总结.md) - AI功能实现经验
+- [购物车和收藏列表功能修复经验总结.md](./docs/购物车和收藏列表功能修复经验总结.md) - 功能修复经验
+- [文化速读功能实现经验总结.md](./docs/文化速读功能实现经验总结.md) - 文化速读与 Supabase 调试经验
+- [Git版本管理与备份指南.md](./docs/Git版本管理与备份指南.md) - 版本管理指南
 
 ## 注意事项
 
@@ -569,7 +569,7 @@ AWS_S3_BUCKET=your_s3_bucket_name
 1. 在 Supabase SQL Editor 重新执行相关 schema 文件：
    - `supabase/schemas.sql`（主表结构）
    - `supabase/products-schema.sql`（产品表）
-   - `supabase/fix-favorites-for-courses.sql`（收藏表修复）
+   - `supabase/manual-scripts/favorites/fix-favorites-for-courses.sql`（收藏表修复）
 2. 检查 API 代码中的 `.select()` 字段是否与表结构匹配
 3. 使用 Supabase Table Editor 查看实际表结构
 
@@ -582,7 +582,7 @@ AWS_S3_BUCKET=your_s3_bucket_name
 - 唯一索引配置不正确
 
 **解决方法**：
-1. 执行 `supabase/fix-favorites-for-courses.sql` 修复表结构
+1. 执行 `supabase/manual-scripts/favorites/fix-favorites-for-courses.sql` 修复表结构
 2. 确认 `favorites` 表有以下字段：
    - `product_id` (UUID, nullable)
    - `course_id` (UUID, nullable)

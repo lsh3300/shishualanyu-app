@@ -11,6 +11,18 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { useAuth } from "@/contexts/auth-context"
 
+interface Assignment {
+  id: string
+  title: string
+  courseName: string
+  image: string
+  dueDate: string
+  progress: number
+  completedDate?: string
+  score?: number
+  feedback?: string
+}
+
 export default function AssignmentsPage() {
   const { user } = useAuth()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -23,11 +35,11 @@ export default function AssignmentsPage() {
   }, [])
 
   // 使用空数组作为默认数据，实际数据应从API获取
-  const pendingAssignments = []
-  const completedAssignments = []
+  const pendingAssignments: Assignment[] = []
+  const completedAssignments: Assignment[] = []
 
   // 计算截止日期剩余天数
-  const getDaysRemaining = (dueDate) => {
+  const getDaysRemaining = (dueDate: string): number => {
     const today = new Date()
     const due = new Date(dueDate)
     const diffTime = due.getTime() - today.getTime()
@@ -36,7 +48,7 @@ export default function AssignmentsPage() {
   }
 
   // 获取截止日期状态
-  const getDateStatus = (dueDate) => {
+  const getDateStatus = (dueDate: string): "overdue" | "urgent" | "normal" => {
     const daysRemaining = getDaysRemaining(dueDate)
     if (daysRemaining < 0) return "overdue"
     if (daysRemaining <= 3) return "urgent"
@@ -122,7 +134,7 @@ export default function AssignmentsPage() {
                             )}
                             
                             {dateStatus === "urgent" && (
-                              <Badge variant="warning" className="ml-2 text-xs bg-amber-500">
+                              <Badge variant="destructive" className="ml-2 text-xs bg-amber-500">
                                 <AlertCircle className="h-3 w-3 mr-1" />
                                 还剩 {daysRemaining} 天
                               </Badge>

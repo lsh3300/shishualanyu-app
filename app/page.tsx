@@ -49,71 +49,8 @@ const quickAccessItems = [
   { href: "/store/custom", icon: Wrench, label: "定制工坊", color: "bg-chart-4" },
 ]
 
-const featuredCourses = [
-  {
-    id: "1",
-    title: "传统扎染基础入门",
-    instructor: "李师傅",
-    duration: "2小时30分",
-    students: 1234,
-    thumbnail: "/tie-dye-tutorial-hands-on.jpg",
-    isFree: true,
-  },
-  {
-    id: "2",
-    title: "蜡染工艺深度解析",
-    instructor: "王老师",
-    duration: "3小时15分",
-    students: 856,
-    thumbnail: "/wax-resist-dyeing-technique.jpg",
-    price: 199,
-  },
-  {
-    id: "3",
-    title: "现代蓝染创新技法",
-    instructor: "张艺术家",
-    duration: "4小时",
-    students: 567,
-    thumbnail: "/modern-indigo-dyeing-art.jpg",
-    price: 299,
-  },
-]
-
-const featuredProducts = [
-  {
-    id: "11111111-1111-1111-1111-111111111111",
-    name: "扎染T恤",
-    price: 128,
-    originalPrice: 168,
-    image: "/handmade-tie-dye-silk-scarf.jpg",
-    sales: 234,
-  },
-  {
-    id: "22222222-2222-2222-2222-222222222222",
-    name: "蜡染丝巾",
-    price: 198,
-    originalPrice: 228,
-    image: "/wax-resist-dyeing-technique.jpg",
-    sales: 156,
-  },
-  {
-    id: "44444444-4444-4444-4444-444444444444",
-    name: "蜡染抱枕",
-    price: 68,
-    originalPrice: 98,
-    image: "/traditional-wax-resist-cushion.jpg",
-    sales: 89,
-  },
-  {
-    id: "33333333-3333-3333-3333-333333333333",
-    name: "扎染帆布包",
-    price: 88,
-    originalPrice: 118,
-    image: "/indigo-dyed-canvas-bag.jpg",
-    sales: 345,
-  },
-]
-
+// 课程数据从 Supabase 实时获取（见 HomePage 组件内）
+// 产品数据从 Supabase 实时获取（见 HomePage 组件内）
 // 文章数据从 Supabase 实时获取（见 HomePage 组件内）
 
 export default function HomePage() {
@@ -123,11 +60,103 @@ export default function HomePage() {
   // 添加性能监控
   usePerformanceMonitor("/", 6) // 6个主要组件
   
+  // 从 Supabase 获取课程数据
+  const [featuredCourses, setFeaturedCourses] = useState<any[]>([])
+  const [coursesLoading, setCoursesLoading] = useState(true)
+  
+  // 从 Supabase 获取产品数据
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
+  const [productsLoading, setProductsLoading] = useState(true)
+  
   // 从 Supabase 获取文章数据
   const [cultureArticles, setCultureArticles] = useState<any[]>([])
   const [articlesLoading, setArticlesLoading] = useState(true)
   
   useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const supabase = createClient()
+        const { data: courses, error } = await supabase
+          .from('courses')
+          .select('id, title, instructor, duration, price, image_url')
+          .order('created_at', { ascending: false })
+          .limit(3)
+        
+        if (error) {
+          console.error('获取课程失败:', error)
+        } else {
+          // 转换为组件需要的格式
+          const formattedCourses = (courses || []).map(course => ({
+            id: course.id,
+            title: course.title,
+            instructor: course.instructor,
+            duration: `${course.duration}分钟`,
+            students: Math.floor(Math.random() * 1000) + 100, // 临时使用随机数
+            thumbnail: course.image_url || '/placeholder.svg',
+            isFree: course.price === 0 || course.price === '0',
+            price: course.price > 0 ? course.price : undefined,
+          }))
+          setFeaturedCourses(formattedCourses)
+        }
+      } catch (err) {
+        console.error('获取课程异常:', err)
+      } finally {
+        setCoursesLoading(false)
+      }
+    }
+    
+    async function fetchProducts() {
+      try {
+        const supabase = createClient()
+        // 获取产品和它们的封面图片
+        const { data: products, error: productsError } = await supabase
+          .from('products')
+          .select(`
+            id,
+            name,
+            price,
+            original_price,
+            inventory
+          `)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(4)
+        
+        if (productsError) {
+          console.error('获取产品失败:', productsError)
+          setProductsLoading(false)
+          return
+        }
+        
+        // 获取每个产品的封面图片
+        const productsWithImages = await Promise.all(
+          (products || []).map(async (product) => {
+            const { data: media } = await supabase
+              .from('product_media')
+              .select('url')
+              .eq('product_id', product.id)
+              .eq('cover', true)
+              .single()
+            
+            return {
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              originalPrice: product.original_price,
+              image: media?.url || '/placeholder.svg',
+              sales: product.inventory || 0
+            }
+          })
+        )
+        
+        setFeaturedProducts(productsWithImages)
+      } catch (err) {
+        console.error('获取产品异常:', err)
+      } finally {
+        setProductsLoading(false)
+      }
+    }
+    
     async function fetchArticles() {
       try {
         const supabase = createClient()
@@ -150,6 +179,8 @@ export default function HomePage() {
       }
     }
     
+    fetchCourses()
+    fetchProducts()
     fetchArticles()
   }, [])
   
@@ -217,21 +248,45 @@ export default function HomePage() {
       {/* Teaching Section */}
       <section className="px-4 mb-8">
         <SectionHeader title="教学精选" href="/teaching" />
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
-          {featuredCourses.map((course) => (
-            <LazyCourseCard key={course.id} {...course} showFavorite={true} />
-          ))}
-        </div>
+        {coursesLoading ? (
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="min-w-[280px] h-72 bg-gray-100 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        ) : featuredCourses.length > 0 ? (
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
+            {featuredCourses.map((course: any) => (
+              <LazyCourseCard key={course.id} {...course} showFavorite={true} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            暂无课程
+          </div>
+        )}
       </section>
 
       {/* Products Section */}
       <section className="px-4 mb-8">
         <SectionHeader title="文创臻品" href="/store" />
-        <div className="grid grid-cols-2 gap-4">
-          {featuredProducts.map((product) => (
-            <LazyProductCard key={product.id} {...product} />
-          ))}
-        </div>
+        {productsLoading ? (
+          <div className="grid grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        ) : featuredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4">
+            {featuredProducts.map((product: any) => (
+              <LazyProductCard key={product.id} {...product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            暂无产品
+          </div>
+        )}
       </section>
 
       {/* Culture Section */}

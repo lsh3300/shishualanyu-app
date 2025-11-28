@@ -249,7 +249,7 @@ export function FileUpload({
       
       // 检查是否所有文件都已上传完成
       setFiles(prev => {
-        const updatedFiles = prev.map(f => 
+        const updatedFiles: UploadProgress[] = prev.map((f): UploadProgress => 
           f.file.name === file.name 
             ? { ...f, status: 'success', progress: 100, url: uploadedFile.url }
             : f

@@ -22,6 +22,7 @@ interface CartItem {
     image_url: string
     category: string
     in_stock: boolean
+    images?: string[]
   }
 }
 

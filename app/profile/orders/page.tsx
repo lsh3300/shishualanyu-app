@@ -9,8 +9,25 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { useAuth } from "@/contexts/auth-context"
 
+interface OrderItem {
+  id: string
+  image?: string
+  name: string
+  quantity: number
+  price: number
+}
+
+interface Order {
+  id: string
+  status: string
+  statusText: string
+  items: OrderItem[]
+  date: string
+  total: number
+}
+
 // 使用空数组作为默认数据，实际数据应从API获取
-const orders = []
+const orders: Order[] = []
 
 const getStatusIcon = (status: string) => {
   switch (status) {

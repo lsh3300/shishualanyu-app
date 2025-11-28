@@ -13,6 +13,7 @@ import { ShoppingBag, BookOpen, Heart, FileText, MapPin, MessageCircle, Settings
 import { useGlobalState } from "@/hooks/use-global-state"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
+import { UserAchievements } from "@/components/user/UserAchievements"
 
 export default function ProfilePage() {
   const { user, loading, signOut, getToken } = useAuth()
@@ -197,38 +198,10 @@ export default function ProfilePage() {
         </section>
       )}
 
-      {/* 用户成就 - 只在用户登录时显示 */}
+      {/* 用户成就 - 使用新的UserAchievements组件 */}
       {user && (
         <section className="px-4 mb-6">
-          <Card className="p-5 border-0 bg-gradient-to-br from-primary/5 to-background shadow-sm">
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-              <Trophy className="h-5 w-5 mr-2 text-primary" />
-              最近成就
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-card/80 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                  <Star className="h-4 w-4 text-primary" />
-                </div>
-                <p className="text-sm font-medium text-foreground">完成课程</p>
-                <p className="text-xl font-bold text-primary">{statsLoading ? "..." : userStats.completedCourses}</p>
-              </div>
-              <div className="bg-card/80 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp className="h-4 w-4 text-secondary" />
-                </div>
-                <p className="text-sm font-medium text-foreground">学习天数</p>
-                <p className="text-xl font-bold text-secondary">{statsLoading ? "..." : userStats.learningDays}</p>
-              </div>
-              <div className="bg-card/80 rounded-lg p-3 text-center backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-2">
-                  <Trophy className="h-4 w-4 text-accent" />
-                </div>
-                <p className="text-sm font-medium text-foreground">收藏夹</p>
-                <p className="text-xl font-bold text-accent">{statsLoading ? "..." : userStats.favorites}</p>
-              </div>
-            </div>
-          </Card>
+          <UserAchievements />
         </section>
       )}
 

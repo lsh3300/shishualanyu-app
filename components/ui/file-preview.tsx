@@ -71,8 +71,8 @@ export function FilePreview({
           return;
         }
         
-        // 否则通过API获取URL
-        const url = await getFileUrl(file.path, file.isLocal);
+        // 否则通过API获取URL（bucket 使用默认值）
+        const url = await getFileUrl(file.path, undefined, file.isLocal);
         setFileUrl(url);
       } catch (err) {
         console.error('获取文件URL失败:', err);
@@ -387,8 +387,8 @@ export function FileGallery({
           return;
         }
         
-        // 否则通过API获取URL
-        const url = await getFileUrl(currentFile.path, currentFile.isLocal);
+        // 否则通过API获取URL（bucket 使用默认值）
+        const url = await getFileUrl(currentFile.path, undefined, currentFile.isLocal);
         setFileUrl(url);
       } catch (err) {
         console.error('获取文件URL失败:', err);

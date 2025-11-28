@@ -1,0 +1,511 @@
+{
+  "generatedAt": "2025-11-27T08:18:10.363Z",
+  "course": "2023-2024(1)非遗创意实践 - 课堂实践作品",
+  "summary": {
+    "totalAuthors": 32,
+    "totalCourseWorks": 58,
+    "totalProductImages": 30
+  },
+  "courseWorks": [
+    {
+      "author": "蔡金雕",
+      "workName": "大风车",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202130100825-蔡金雕/202130100825-蔡金雕-大风车（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202130100825-蔡金雕/大风车.png"
+    },
+    {
+      "author": "蔡金雕",
+      "workName": "螺旋纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202130100825-蔡金雕/202130100825-蔡金雕-螺旋纹（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202130100825-蔡金雕/螺旋纹.png"
+    },
+    {
+      "author": "蔡海燕",
+      "workName": "小雪花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600101-蔡海燕/202136600101-蔡海燕-小雪花（有声版）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600101-蔡海燕/小雪花.png"
+    },
+    {
+      "author": "蔡海燕",
+      "workName": "百花齐放",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600101-蔡海燕/202136600101-蔡海燕-百花齐放（有声版）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600101-蔡海燕/百花齐放.png"
+    },
+    {
+      "author": "丁朱睿诗",
+      "workName": "盛开的花朵",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600103-丁朱睿诗/202136600103-丁朱睿诗-扎染视频/202136600103-丁朱睿诗-盛开的花朵（无声）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600103-丁朱睿诗/202136600103-丁朱睿诗-扎染视频/盛开的花朵.png"
+    },
+    {
+      "author": "丁朱睿诗",
+      "workName": "鲸鱼戏水",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600103-丁朱睿诗/202136600103-丁朱睿诗-扎染视频/202136600103-丁朱睿诗-鲸鱼戏水（有声）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600103-丁朱睿诗/202136600103-丁朱睿诗-扎染视频/鲸鱼戏水.png"
+    },
+    {
+      "author": "段光维",
+      "workName": "蔚蓝海滩",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600104-段光维/202136600104-段光维-蔚蓝海滩（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600104-段光维/蔚蓝海滩.png"
+    },
+    {
+      "author": "段光维",
+      "workName": "蜘蛛丝",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600104-段光维/202136600104-段光维-蜘蛛丝（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600104-段光维/蜘蛛丝.png"
+    },
+    {
+      "author": "冯一蕊",
+      "workName": "四花同框",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/202136600105-冯一蕊-四花同框（有声）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/四花同框.png"
+    },
+    {
+      "author": "冯一蕊",
+      "workName": "曼陀罗",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/202136600105-冯一蕊-曼陀罗（有声）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/曼陀罗.png"
+    },
+    {
+      "author": "洪铭铭",
+      "workName": "六芒星扎染教程",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/202136600106+洪铭铭+六芒星扎染教程（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/六芒星扎染.png"
+    },
+    {
+      "author": "洪铭铭",
+      "workName": "海上生花扎染教程",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/202136600106+洪铭铭+海上生花扎染教程（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/海上生花扎染.png"
+    },
+    {
+      "author": "胡月",
+      "workName": "横条纹图案",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600109-胡月/202136600109-胡月-扎染视频/202136600109-胡月-横条纹图案.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600109-胡月/202136600109-胡月-扎染视频/横条纹图案.png"
+    },
+    {
+      "author": "胡月",
+      "workName": "海上生明月篇",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600109-胡月/202136600109-胡月-扎染视频/202136600109-胡月-海上生明月篇.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600109-胡月/202136600109-胡月-扎染视频/海上生明月.png"
+    },
+    {
+      "author": "黄佳烨",
+      "workName": "花朵图案蓝染教程",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600110黄佳烨/花朵图案蓝染教程（有配音版）.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "黄佳烨",
+      "workName": "雪花图案蓝染",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600110黄佳烨/雪花图案蓝染（有配音版）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600110黄佳烨/雪花图案蓝染作品.png"
+    },
+    {
+      "author": "蒋文慧",
+      "workName": "水波荡漾",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600112+蒋文慧/202136600112+蒋文慧+水波荡漾（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600112+蒋文慧/水波荡漾.png"
+    },
+    {
+      "author": "赖菲妍",
+      "workName": "海上烟花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600113+赖菲妍/202136600113+赖菲妍+海上烟花（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600113+赖菲妍/海上烟花.png"
+    },
+    {
+      "author": "雷思娴",
+      "workName": "六曜星",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600114-雷思娴/202136600114 雷思娴 六曜星（有声）.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "雷思娴",
+      "workName": "心花怒放",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600114-雷思娴/202136600114 雷思娴 心花怒放（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600114-雷思娴/心花怒放.png"
+    },
+    {
+      "author": "李佩蓉",
+      "workName": "烟花一角",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600115-李佩蓉/202136600115-李佩蓉-烟花一角（有声）.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "李佩蓉",
+      "workName": "风车花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600115-李佩蓉/202136600115-李佩蓉-风车花（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600115-李佩蓉/风车花.png"
+    },
+    {
+      "author": "路霞",
+      "workName": "放射性小松树",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600117-路霞/202136600117-路霞-放射性小松树（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600117-路霞/放射性小松树.png"
+    },
+    {
+      "author": "路霞",
+      "workName": "闪电夜明珠",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600117-路霞/202136600117-路霞-闪电夜明珠（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600117-路霞/闪电夜明珠.png"
+    },
+    {
+      "author": "马莹莹",
+      "workName": "八星花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600118-马莹莹/202136600118-马莹莹-八星花（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600118-马莹莹/八星花.png"
+    },
+    {
+      "author": "马莹莹",
+      "workName": "百叶窗花纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600118-马莹莹/202136600118-马莹莹-百叶窗花纹（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600118-马莹莹/百叶窗花纹.png"
+    },
+    {
+      "author": "宁星雨",
+      "workName": "《八棱飞雪》教程讲解2.0",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600120-宁星雨/202136600120-宁星雨/《八棱飞雪》教程讲解2.0.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600120-宁星雨/202136600120-宁星雨/八棱飞雪.png"
+    },
+    {
+      "author": "宁星雨",
+      "workName": "《鱼鳞纹》教程讲解2.0",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600120-宁星雨/202136600120-宁星雨/《鱼鳞纹》教程讲解2.0.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600120-宁星雨/202136600120-宁星雨/鱼鳞纹.png"
+    },
+    {
+      "author": "潘郭艳",
+      "workName": "百花缭乱",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600121-潘郭艳/202136600121-潘郭艳-百花缭乱（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600121-潘郭艳/百花缭乱.png"
+    },
+    {
+      "author": "潘郭艳",
+      "workName": "鱼鳞纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600121-潘郭艳/202136600121-潘郭艳-鱼鳞纹（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600121-潘郭艳/鱼鳞纹.png"
+    },
+    {
+      "author": "汤吴晨",
+      "workName": "菱格纹 有声",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600122 汤吴晨/202136600122 汤吴晨 菱格纹 有声.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "汤吴晨",
+      "workName": "雪花纹 有声",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600122 汤吴晨/202136600122 汤吴晨 雪花纹 有声.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "王晨璐",
+      "workName": "圆舞曲",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600124-王晨璐/202136600124-王晨璐-圆舞曲（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600124-王晨璐/圆舞曲.png"
+    },
+    {
+      "author": "王晨璐",
+      "workName": "时光隧道",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600124-王晨璐/202136600124-王晨璐-时光隧道（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600124-王晨璐/时光隧道.png"
+    },
+    {
+      "author": "王昕怡",
+      "workName": "几何图形花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600125-王昕怡/202136600125-王昕怡-几何图形花（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600125-王昕怡/几何图形花.png"
+    },
+    {
+      "author": "王昕怡",
+      "workName": "鱼鳞纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600125-王昕怡/202136600125-王昕怡-鱼鳞纹（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600125-王昕怡/鱼鳞纹.png"
+    },
+    {
+      "author": "姚依然",
+      "workName": "曼陀罗花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600128-姚依然/202136600128-姚依然-曼陀罗花（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600128-姚依然/曼陀罗花.png"
+    },
+    {
+      "author": "姚依然",
+      "workName": "蝴蝶纹样",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600128-姚依然/202136600128-姚依然-蝴蝶纹样（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600128-姚依然/蝴蝶纹样.png"
+    },
+    {
+      "author": "张佳欣",
+      "workName": "八角花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600130-张佳欣/202136600130-张佳欣-八角花（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600130-张佳欣/八角花.png"
+    },
+    {
+      "author": "张佳欣",
+      "workName": "波浪纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600130-张佳欣/202136600130-张佳欣-波浪纹（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600130-张佳欣/波浪纹.png"
+    },
+    {
+      "author": "赵翊帆",
+      "workName": "四朵八瓣花制作教学视频",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600134赵翊帆/202136600134-赵翊帆-四朵八瓣花制作教学视频（有声版）.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "赵翊帆",
+      "workName": "渐变鱼鳞纹制作教学视频",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600134赵翊帆/202136600134-赵翊帆-渐变鱼鳞纹制作教学视频（有声版）.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "郑晨莹",
+      "workName": "八角星",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600135-郑晨莹/202136600135-郑晨莹-八角星（有声-无音乐）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600135-郑晨莹/八角星.png"
+    },
+    {
+      "author": "郑晨莹",
+      "workName": "雪莲花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600135-郑晨莹/202136600135-郑晨莹-雪莲花（有声-无音乐）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600135-郑晨莹/雪莲花.png"
+    },
+    {
+      "author": "郑文鑫",
+      "workName": "四叶草之歌",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600136+郑文鑫/202136600136+郑文鑫+四叶草之歌（有声版）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600136+郑文鑫/四叶草之歌.png"
+    },
+    {
+      "author": "郑文鑫",
+      "workName": "时空穿梭",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600136+郑文鑫/202136600136+郑文鑫+时空穿梭（有声版）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600136+郑文鑫/时空穿梭.png"
+    },
+    {
+      "author": "朱琛琛",
+      "workName": "心星",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600138朱琛琛/202136600138朱琛琛心星（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600138朱琛琛/心星.png"
+    },
+    {
+      "author": "朱琛琛",
+      "workName": "棋盘花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600138朱琛琛/202136600138朱琛琛棋盘花（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600138朱琛琛/棋盘花.png"
+    },
+    {
+      "author": "邹治钦",
+      "workName": "八星花制作视频 有声版",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/20213660043邹治钦/八星花制作视频 有声版.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/20213660043邹治钦/八星花.png"
+    },
+    {
+      "author": "邹治钦",
+      "workName": "八面花制作视频 有声版",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/20213660043邹治钦/八面花制作视频 有声版.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/20213660043邹治钦/八面花.png"
+    },
+    {
+      "author": "陈柯颖",
+      "workName": "十字菱格纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500101陈柯颖/十字菱格纹（配音版）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500101陈柯颖/十字菱格纹.png"
+    },
+    {
+      "author": "陈柯颖",
+      "workName": "棋盘花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500101陈柯颖/棋盘花（配音版）.mp4",
+      "effectImagePath": null
+    },
+    {
+      "author": "邓斯月",
+      "workName": "折叠染",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500103邓斯月/折叠染.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500103邓斯月/折叠染.png"
+    },
+    {
+      "author": "邓斯月",
+      "workName": "曼陀罗染",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500103邓斯月/曼陀罗染.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500103邓斯月/曼陀罗染.png"
+    },
+    {
+      "author": "尹艺晓",
+      "workName": "三角形版万花镜",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500132尹艺晓/202138500132尹艺晓三角形版万花镜（有声）.MP4",
+      "effectImagePath": null
+    },
+    {
+      "author": "尹艺晓",
+      "workName": "十字花",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500132尹艺晓/202138500132尹艺晓十字花（有声）.MP4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500132尹艺晓/十字花.png"
+    },
+    {
+      "author": "庄婷",
+      "workName": "竖瞳纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/202138500135-庄婷-竖瞳纹（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/竖瞳纹.png"
+    },
+    {
+      "author": "庄婷",
+      "workName": "魔幻水晶球纹",
+      "videoPath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/202138500135-庄婷-魔幻水晶球纹（有声）.mp4",
+      "effectImagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/魔幻水晶球纹.png"
+    }
+  ],
+  "productImages": [
+    {
+      "productName": "浙师大文化衫",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600101-蔡海燕/浙师大文化衫.jpg",
+      "relatedAuthor": "蔡海燕"
+    },
+    {
+      "productName": "繁花开来束口袋",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600101-蔡海燕/繁花开来束口袋.jpg",
+      "relatedAuthor": "蔡海燕"
+    },
+    {
+      "productName": "馥郁花香束口袋",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600101-蔡海燕/馥郁花香束口袋.jpg",
+      "relatedAuthor": "蔡海燕"
+    },
+    {
+      "productName": "双面帆布双肩包照片-1",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/双面帆布双肩包照片-1.jpg",
+      "relatedAuthor": "冯一蕊"
+    },
+    {
+      "productName": "双面帆布双肩包照片-2",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/双面帆布双肩包照片-2.jpg",
+      "relatedAuthor": "冯一蕊"
+    },
+    {
+      "productName": "双面扇子照片-1",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/双面扇子照片-1.jpg",
+      "relatedAuthor": "冯一蕊"
+    },
+    {
+      "productName": "双面扇子照片-2",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600105-冯一蕊/双面扇子照片-2.jpg",
+      "relatedAuthor": "冯一蕊"
+    },
+    {
+      "productName": "帆布袋5",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/帆布袋5.jpg",
+      "relatedAuthor": "洪铭铭"
+    },
+    {
+      "productName": "帆布袋6",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/帆布袋6.jpg",
+      "relatedAuthor": "洪铭铭"
+    },
+    {
+      "productName": "方巾3",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/方巾3.jpg",
+      "relatedAuthor": "洪铭铭"
+    },
+    {
+      "productName": "方巾4",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/方巾4.jpg",
+      "relatedAuthor": "洪铭铭"
+    },
+    {
+      "productName": "龙凤呈祥1",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/龙凤呈祥1.jpg",
+      "relatedAuthor": "洪铭铭"
+    },
+    {
+      "productName": "龙凤呈祥2",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600106+洪铭铭/202136600106+洪铭铭+非遗创意实践期末作业/龙凤呈祥2.jpg",
+      "relatedAuthor": "洪铭铭"
+    },
+    {
+      "productName": "花朵图案蓝染教程-封面",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600110黄佳烨/花朵图案蓝染教程-封面.jpg",
+      "relatedAuthor": "黄佳烨"
+    },
+    {
+      "productName": "雪花图案蓝染-封面",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600110黄佳烨/雪花图案蓝染-封面.jpg",
+      "relatedAuthor": "黄佳烨"
+    },
+    {
+      "productName": "《八棱飞雪》教程讲解2.0-封面",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600120-宁星雨/202136600120-宁星雨/《八棱飞雪》教程讲解2.0-封面.jpg",
+      "relatedAuthor": "宁星雨"
+    },
+    {
+      "productName": "《鱼鳞纹》教程讲解2.0-封面",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600120-宁星雨/202136600120-宁星雨/《鱼鳞纹》教程讲解2.0-封面.jpg",
+      "relatedAuthor": "宁星雨"
+    },
+    {
+      "productName": "菱格纹纸巾盒",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600122 汤吴晨/菱格纹纸巾盒.jpg",
+      "relatedAuthor": "汤吴晨"
+    },
+    {
+      "productName": "吉祥如意锦鲤图1",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600128-姚依然/吉祥如意锦鲤图1.jpg",
+      "relatedAuthor": "姚依然"
+    },
+    {
+      "productName": "吉祥如意锦鲤图2",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600128-姚依然/吉祥如意锦鲤图2.jpg",
+      "relatedAuthor": "姚依然"
+    },
+    {
+      "productName": "吉祥如意锦鲤图3",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600128-姚依然/吉祥如意锦鲤图3.jpg",
+      "relatedAuthor": "姚依然"
+    },
+    {
+      "productName": "白色心脏1",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600138朱琛琛/白色心脏1.jpg",
+      "relatedAuthor": "朱琛琛"
+    },
+    {
+      "productName": "白色心脏2",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600138朱琛琛/白色心脏2.jpg",
+      "relatedAuthor": "朱琛琛"
+    },
+    {
+      "productName": "白色心脏3",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202136600138朱琛琛/白色心脏3.jpg",
+      "relatedAuthor": "朱琛琛"
+    },
+    {
+      "productName": "狗狗赏花灯1",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/狗狗赏花灯1.jpg",
+      "relatedAuthor": "庄婷"
+    },
+    {
+      "productName": "狗狗赏花灯2",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/狗狗赏花灯2.jpg",
+      "relatedAuthor": "庄婷"
+    },
+    {
+      "productName": "狗狗赏花灯3",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/狗狗赏花灯3.jpg",
+      "relatedAuthor": "庄婷"
+    },
+    {
+      "productName": "狗狗赏花灯4",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/狗狗赏花灯4.jpg",
+      "relatedAuthor": "庄婷"
+    },
+    {
+      "productName": "狗狗赏花灯5",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/狗狗赏花灯5.jpg",
+      "relatedAuthor": "庄婷"
+    },
+    {
+      "productName": "狗狗赏花灯6",
+      "imagePath": "c:/Users/lsh/Desktop/sslyapp/课程视频及商品素材/2023-2024(1)非遗创意实践/2023-2024(1)课堂实践作品/202138500135-庄婷/狗狗赏花灯6.jpg",
+      "relatedAuthor": "庄婷"
+    }
+  ]
+}

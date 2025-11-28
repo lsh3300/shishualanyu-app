@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { getSupabaseClient } from '@/lib/supabaseClient';
 
 interface FileCacheItem {
   url: string;
@@ -20,6 +20,8 @@ interface UseFileCacheReturn {
   preloadFile: (path: string, bucket?: string, isLocal?: boolean) => Promise<void>;
   clearCache: () => void;
   getCacheSize: () => number;
+  getCacheStats: () => { count: number; size: number };
+  getCachedFile: (path: string, bucket?: string, isLocal?: boolean) => { url: string; blob: Blob; timestamp: number } | null;
   isCached: (path: string, bucket?: string, isLocal?: boolean) => boolean;
   uploadFile: (file: File, bucket?: string, path?: string) => Promise<{ url: string; path: string } | null>;
   deleteFile: (path: string, bucket?: string, isLocal?: boolean) => Promise<boolean>;
@@ -33,8 +35,8 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
   } = options;
 
   const [cache, setCache] = useState<Map<string, FileCacheItem>>(new Map());
-  // 使用共享的supabase客户端实例，避免创建多个实例
-  const supabaseClient = useMemo(() => supabase, []);
+  // 创建 Supabase 客户端实例
+  const supabaseClient = useMemo(() => getSupabaseClient(), []);
 
   // 生成缓存键
   const generateCacheKey = (path: string, bucket?: string, isLocal?: boolean): string => {
@@ -191,6 +193,38 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
     return cache.size;
   };
 
+  // 获取缓存统计信息
+  const getCacheStats = (): { count: number; size: number } => {
+    let totalSize = 0;
+    cache.forEach((item) => {
+      totalSize += item.blob?.size ?? 0;
+    });
+    return {
+      count: cache.size,
+      size: totalSize,
+    };
+  };
+
+  // 获取缓存文件详细信息
+  const getCachedFile = (
+    path: string,
+    bucket?: string,
+    isLocal = false
+  ): { url: string; blob: Blob; timestamp: number } | null => {
+    const cacheKey = generateCacheKey(path, bucket, isLocal);
+    const item = cache.get(cacheKey);
+
+    if (!item) {
+      return null;
+    }
+
+    if (Date.now() - item.timestamp >= maxAge) {
+      return null;
+    }
+
+    return item;
+  };
+
   // 检查是否已缓存
   const isCached = (path: string, bucket?: string, isLocal = false): boolean => {
     const cacheKey = generateCacheKey(path, bucket, isLocal);
@@ -223,7 +257,7 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
       }
       
       // 获取公共URL
-      const { data: urlData } = supabase.storage
+      const { data: urlData } = supabaseClient.storage
         .from(bucket)
         .getPublicUrl(data.path);
       
@@ -281,8 +315,10 @@ export function useFileCache(options: FileCacheOptions = {}): UseFileCacheReturn
     preloadFile,
     clearCache,
     getCacheSize,
+    getCacheStats,
+    getCachedFile,
     isCached,
     uploadFile,
-    deleteFile
+    deleteFile,
   };
 }

@@ -24,11 +24,15 @@ interface ParameterAdjustmentProps {
     styleStrength: number
     detailRetention: number
     colorSaturation: number
+    textureComplexity: number
+    artEffectIntensity: number
   }
   onParametersChange?: (newParameters: {
     styleStrength: number
     detailRetention: number
     colorSaturation: number
+    textureComplexity: number
+    artEffectIntensity: number
   }) => void
   isGenerating?: boolean
 }
@@ -63,7 +67,9 @@ export default function ParameterAdjustment({
       const convertedParams = {
         styleStrength: newParams.intensity,
         detailRetention: newParams.contrast,
-        colorSaturation: newParams.saturation
+        colorSaturation: newParams.saturation,
+        textureComplexity: parameters.textureComplexity,
+        artEffectIntensity: parameters.artEffectIntensity,
       }
       onParametersChange(convertedParams)
     }
@@ -85,7 +91,9 @@ export default function ParameterAdjustment({
       const convertedParams = {
         styleStrength: resetParams.intensity,
         detailRetention: resetParams.contrast,
-        colorSaturation: resetParams.saturation
+        colorSaturation: resetParams.saturation,
+        textureComplexity: parameters.textureComplexity,
+        artEffectIntensity: parameters.artEffectIntensity,
       }
       onParametersChange(convertedParams)
     }
@@ -101,7 +109,9 @@ export default function ParameterAdjustment({
       const convertedParams = {
         styleStrength: newParams.intensity,
         detailRetention: newParams.contrast,
-        colorSaturation: newParams.saturation
+        colorSaturation: newParams.saturation,
+        textureComplexity: parameters.textureComplexity,
+        artEffectIntensity: parameters.artEffectIntensity,
       }
       onParametersChange(convertedParams)
     }

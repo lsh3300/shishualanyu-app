@@ -1,7 +1,7 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
+import { createContext, useContext, useEffect, useState, useMemo } from "react"
+import { getSupabaseClient } from "@/lib/supabaseClient"
 import { User } from "@supabase/supabase-js"
 
 interface AuthContextType {
@@ -19,6 +19,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  
+  // 创建 Supabase 客户端实例
+  const supabase = useMemo(() => getSupabaseClient(), [])
 
   useEffect(() => {
     // 获取初始会话
@@ -39,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [supabase])
 
   const signUp = async (email: string, password: string, metadata?: any) => {
     const { error } = await supabase.auth.signUp({

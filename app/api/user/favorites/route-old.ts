@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabaseClient';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { normalizeCourseId } from '@/lib/course-id';
 
 async function fetchProductsMap(supabase: SupabaseClient, productIds: string[]) {
@@ -594,10 +595,10 @@ export async function POST(request: NextRequest) {
         
         // 如果是字段不存在的问题（42703），说明数据库结构可能还没有更新
         if (error.message?.includes('column') || error.code === '42703') {
-          console.error('字段不存在错误，可能数据库结构未更新:', error.message);
+          console.error('字段不存在错误，可能数据库结构还没有更新:', error.message);
           return NextResponse.json({
             success: false,
-            error: '数据库结构不支持此操作。请确保已执行fix-favorites-for-courses.sql脚本。',
+            error: '数据库结构不支持此操作。请确保已执行 supabase/manual-scripts/favorites/fix-favorites-for-courses.sql 脚本。',
             errorCode: error.code,
             errorType: 'column_not_found',
             errorDetails: error.details,

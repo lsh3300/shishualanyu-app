@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const difficulty = searchParams.get('difficulty')
     const isFree = searchParams.get('is_free')
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const limit = parseInt(searchParams.get('limit') || '100') // 增加默认limit到100
     const offset = parseInt(searchParams.get('offset') || '0')
 
     let query = supabase

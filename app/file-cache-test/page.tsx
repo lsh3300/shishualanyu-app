@@ -13,9 +13,9 @@ import { useFileCache } from '@/hooks/use-file-cache';
 import { FileViewer } from '@/components/ui/file-viewer';
 import { FileUpload } from '@/components/ui/file-upload';
 import { FileManager } from '@/components/ui/file-manager';
-import { FileSelector } from '@/components/ui/file-selector';
+import { FileSelector, MultiFileSelector } from '@/components/ui/file-selector';
 import { FilePreview } from '@/components/ui/file-preview';
-import { FileCacheService } from '@/lib/file-cache';
+import { fileCacheService } from '@/lib/file-cache';
 import { FileUtils } from '@/lib/file-utils';
 
 export default function FileCacheTestPage() {
@@ -162,19 +162,19 @@ export default function FileCacheTestPage() {
     
     try {
       // 测试设置缓存
-      await FileCacheService.set('test-key', { data: 'test-data' }, 60 * 1000);
+      await fileCacheService.setCache('test-key', 'test-data', false);
       addTestResult('成功设置缓存');
       
       // 测试获取缓存
-      const cachedData = await FileCacheService.get('test-key');
+      const cachedData = await fileCacheService.getCache('test-key');
       addTestResult(`获取缓存数据: ${JSON.stringify(cachedData)}`);
       
       // 测试删除缓存
-      await FileCacheService.remove('test-key');
+      fileCacheService.deleteCache('test-key');
       addTestResult('成功删除缓存');
       
       // 测试清理过期缓存
-      await FileCacheService.clearExpired();
+      fileCacheService.cleanExpiredCache();
       addTestResult('成功清理过期缓存');
     } catch (error) {
       addTestResult(`文件缓存服务测试失败: ${error instanceof Error ? error.message : '未知错误'}`);
@@ -274,11 +274,11 @@ export default function FileCacheTestPage() {
               <FileUpload
                 bucket={testBucket}
                 isLocal={testIsLocal}
-                onUploadSuccess={(files) => {
+                onUploadComplete={(files: any[]) => {
                   addTestResult(`成功上传 ${files.length} 个文件`);
                 }}
-                onUploadError={(error) => {
-                  addTestResult(`上传失败: ${error}`);
+                onUploadError={(error: Error) => {
+                  addTestResult(`上传失败: ${error.message}`);
                 }}
               />
             </CardContent>
@@ -296,7 +296,18 @@ export default function FileCacheTestPage() {
                 bucket={testBucket}
                 isLocal={testIsLocal}
                 selectable
-                onSelectionChange={setSelectedFiles}
+                onFileSelect={(file: any) => {
+                  setSelectedFiles((prev) => {
+                    const path = file?.path as string;
+                    if (!path) return prev;
+                    return prev.includes(path)
+                      ? prev.filter((p) => p !== path)
+                      : [...prev, path];
+                  });
+                  if (file?.name) {
+                    addTestResult(`点击文件: ${file.name}`);
+                  }
+                }}
               />
             </CardContent>
           </Card>
@@ -314,20 +325,23 @@ export default function FileCacheTestPage() {
                 <FileSelector
                   bucket={testBucket}
                   isLocal={testIsLocal}
-                  onSelect={(file) => {
-                    addTestResult(`选择文件: ${file.name}`);
+                  onChange={(path: string) => {
+                    if (path) {
+                      addTestResult(`选择文件: ${path}`);
+                    } else {
+                      addTestResult('已清除文件选择');
+                    }
                   }}
                 />
               </div>
               
               <div className="space-y-2">
                 <Label>多文件选择器</Label>
-                <FileSelector
+                <MultiFileSelector
                   bucket={testBucket}
                   isLocal={testIsLocal}
-                  multiple
-                  onSelect={(files) => {
-                    addTestResult(`选择 ${files.length} 个文件`);
+                  onChange={(paths: string[]) => {
+                    addTestResult(`选择 ${paths.length} 个文件`);
                   }}
                 />
               </div>
@@ -379,12 +393,18 @@ export default function FileCacheTestPage() {
             <FilePreview
               file={{
                 name: testFileUrl.split('/').pop() || 'test-file',
+                path: testFileUrl,
+                type:
+                  FileUtils.getFileType(testFileUrl) === 'image'
+                    ? 'image/*'
+                    : FileUtils.getFileType(testFileUrl) === 'video'
+                    ? 'video/*'
+                    : 'application/octet-stream',
                 url: testFileUrl,
-                type: FileUtils.getFileType(testFileUrl),
-                size: 0
+                isLocal: testIsLocal,
               }}
-              bucket={testBucket}
-              isLocal={testIsLocal}
+              open={!!testFileUrl}
+              onClose={() => setTestFileUrl('')}
             />
           )}
         </CardContent>

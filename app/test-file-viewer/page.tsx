@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { FileViewer } from '@/components/ui/file-viewer';
-import { getFileUrl } from '@/lib/supabase-storage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -69,7 +68,6 @@ export default function TestFileViewer() {
                 path={testPath}
                 bucket={bucket}
                 isLocal={isLocal}
-                getFileUrl={getFileUrl}
                 width="100%"
                 height="100%"
                 fallback={<div className="flex items-center justify-center h-full text-gray-500">测试组件</div>}

@@ -109,7 +109,7 @@ export function useNotifications(initialData?: Notification[]): UseNotifications
         // 更新全局状态
         if (wasUnread) {
           markNotificationAsRead(notificationId);
-          setUnreadNotifications(prev => Math.max(0, prev - 1));
+          decrementUnreadNotifications();
         }
         
         return updated;
@@ -118,7 +118,7 @@ export function useNotifications(initialData?: Notification[]): UseNotifications
       setError('标记通知失败');
       console.error('Failed to mark notification as read:', err);
     }
-  }, [markNotificationAsRead, setUnreadNotifications]);
+  }, [markNotificationAsRead, decrementUnreadNotifications]);
 
   // 标记全部通知为已读
   const markAllAsRead = useCallback(async () => {

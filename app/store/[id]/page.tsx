@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Label } from "@/components/ui/label"
 import { ArrowLeft, Edit, Plus, X, Image as ImageIcon, Upload, Star } from "lucide-react"
 import { toast } from "sonner"
 import { FileUpload } from "@/components/ui/file-upload"
-import { FileSelector } from "@/components/ui/file-selector"
+import { FileSelector, MultiFileSelector } from "@/components/ui/file-selector"
 import { useFileCache } from "@/hooks/use-file-cache"
 import { ProductDetailTemplate } from "@/components/templates/product-detail-template"
 
@@ -140,13 +141,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     if (files.length === 0 || !product) return
 
     try {
-      const result = await uploadFile(files[0], {
-        bucket: "products",
-        metadata: {
-          product: product.name || "unknown-product",
-          type: "product-image"
-        }
-      })
+      const result = await uploadFile(files[0], "products")
+
+      if (!result) {
+        toast.error("图片上传失败")
+        return
+      }
       
       const updatedProduct = {
         ...product,
@@ -162,10 +162,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   }
 
   // 处理图片选择
-  const handleImageSelect = async (selectedFiles: any[]) => {
-    if (selectedFiles.length === 0 || !product) return
+  const handleImageSelect = async (paths: string[]) => {
+    if (paths.length === 0 || !product) return
 
-    const newImages = selectedFiles.map(file => file.url)
+    const newImages = paths
     const updatedProduct = {
       ...product,
       images: [...product.images, ...newImages]
@@ -322,17 +322,10 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                     
                     <div className="space-y-2">
                       <Label>或从已上传的图片中选择</Label>
-                      <FileSelector
-                        onFilesSelected={handleImageSelect}
+                      <MultiFileSelector
                         bucket="products"
                         accept="image"
-                        multiple={true}
-                        trigger={
-                          <Button variant="outline" className="w-full">
-                            <ImageIcon className="h-4 w-4 mr-2" />
-                            从文件库选择
-                          </Button>
-                        }
+                        onChange={handleImageSelect}
                       />
                     </div>
                   </div>

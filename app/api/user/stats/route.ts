@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { SUPABASE_URL } from '@/lib/supabase/config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
       
       // 使用token创建Supabase客户端
       supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        SUPABASE_URL,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
           auth: {

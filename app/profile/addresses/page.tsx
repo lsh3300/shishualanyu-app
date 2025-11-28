@@ -260,11 +260,11 @@ function AddressForm({ initialData, onSubmit, onCancel }: AddressFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev: any) => ({ ...prev, [name]: value }))
   }
 
   const handleSwitchChange = (checked: boolean) => {
-    setFormData(prev => ({ ...prev, isDefault: checked }))
+    setFormData((prev: any) => ({ ...prev, isDefault: checked }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {

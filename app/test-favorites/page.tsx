@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
 export default function TestFavorites() {
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [user, setUser] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -30,8 +31,8 @@ export default function TestFavorites() {
         }
         const data = await response.json();
         setFavorites(data.favorites || []);
-      } catch (err) {
-        setError(err.message);
+      } catch (err: any) {
+        setError(err?.message ?? String(err));
       } finally {
         setLoading(false);
       }
@@ -71,8 +72,8 @@ export default function TestFavorites() {
       } catch (err) {
         console.error('重新获取收藏列表失败:', err);
       }
-    } catch (err) {
-      setError(err.message);
+    } catch (err: any) {
+      setError(err?.message ?? String(err));
     }
   };
 

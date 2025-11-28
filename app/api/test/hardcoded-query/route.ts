@@ -58,7 +58,7 @@ export async function GET() {
     // 4. 查看用户记录详情
     if (userData && userData.length > 0) {
       console.log('\nAPI - 用户记录详情:');
-      userData.forEach((record, index) => {
+      userData.forEach((record: any, index: number) => {
         console.log(`记录 ${index + 1}:`, record);
       });
     }
@@ -75,8 +75,8 @@ export async function GET() {
       }
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('API测试查询失败:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error?.message ?? String(error) }, { status: 500 });
   }
 }

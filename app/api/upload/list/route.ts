@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
         
         // 读取目录中的文件
         const files = fs.readdirSync(localDir, { withFileTypes: true })
-          .filter(dirent => dirent.isFile())
-          .map(dirent => {
+          .filter((dirent: any) => dirent.isFile())
+          .map((dirent: any) => {
             const filePath = path.join(localDir, dirent.name);
             const stats = fs.statSync(filePath);
             return {

@@ -36,7 +36,7 @@ interface FileManagerProps {
   className?: string;
 }
 
-interface FileInfo {
+export interface FileInfo {
   name: string;
   path: string;
   size: number;
@@ -133,7 +133,7 @@ export function FileManager({
   // 下载文件
   const downloadFile = async (file: FileInfo) => {
     try {
-      const fileUrl = await getFileUrl(file.path, file.isLocal);
+      const fileUrl = await getFileUrl(file.path, bucket, file.isLocal);
       
       // 创建隐藏的a标签来触发下载
       const link = document.createElement('a');
@@ -230,10 +230,10 @@ export function FileManager({
   useEffect(() => {
     filteredFiles.forEach(file => {
       if (getFileType(file) === 'image') {
-        preloadFile(file.path, file.isLocal);
+        preloadFile(file.path, bucket, file.isLocal);
       }
     });
-  }, [filteredFiles, preloadFile]);
+  }, [filteredFiles, preloadFile, bucket]);
 
   // 渲染文件项
   const renderFileItem = (file: FileInfo) => {
@@ -469,11 +469,30 @@ export function FileManager({
       </Card>
       
       {previewFile && (
-        <FileViewer
-          file={previewFile}
-          open={!!previewFile}
-          onClose={() => setPreviewFile(null)}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] p-4 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <p className="font-medium truncate">{previewFile.name}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPreviewFile(null)}
+              >
+                关闭预览
+              </Button>
+            </div>
+            <div className="flex-1 min-h-[300px]">
+              <FileViewer
+                path={previewFile.path}
+                bucket={bucket}
+                isLocal={previewFile.isLocal}
+                width="100%"
+                height="100%"
+                showControls
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

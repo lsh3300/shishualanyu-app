@@ -75,7 +75,12 @@ export default function LevelPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const currentStageIndex = STAGE_STEPS.indexOf(currentSession?.currentStage || 'prepare')
+  const safeCurrentStage: (typeof STAGE_STEPS)[number] =
+    currentSession?.currentStage && STAGE_STEPS.includes(currentSession.currentStage as (typeof STAGE_STEPS)[number])
+      ? (currentSession.currentStage as (typeof STAGE_STEPS)[number])
+      : 'prepare'
+
+  const currentStageIndex = STAGE_STEPS.indexOf(safeCurrentStage)
   const progressPercent = ((currentStageIndex + 1) / STAGE_STEPS.length) * 100
 
   const handleCompleteStage = () => {

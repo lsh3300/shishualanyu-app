@@ -18,11 +18,32 @@ interface ProductImageGalleryProps {
   productName: string
 }
 
+type ImageMediaItem = {
+  type: 'image'
+  src: string
+  index: number
+}
+
+type VideoMediaItem = {
+  type: 'video'
+  src: string
+  index: number
+  video: {
+    id: string
+    url: string
+    thumbnail: string
+    title: string
+    duration: string
+  }
+}
+
+type MediaItem = ImageMediaItem | VideoMediaItem
+
 export function ProductImageGallery({ images, videos = [], productName }: ProductImageGalleryProps) {
   // 合并图片和视频到一个数组中
-  const mediaItems = [
-    ...images.map((img, index) => ({ type: 'image', src: img, index })),
-    ...videos.map((video, index) => ({ type: 'video', src: video.thumbnail, video, index }))
+  const mediaItems: MediaItem[] = [
+    ...images.map<MediaItem>((img, index) => ({ type: 'image', src: img, index })),
+    ...videos.map<MediaItem>((video, index) => ({ type: 'video', src: video.thumbnail, video, index }))
   ]
   
   const [currentIndex, setCurrentIndex] = useState(0)

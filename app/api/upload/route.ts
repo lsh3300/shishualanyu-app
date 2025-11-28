@@ -4,10 +4,11 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { writeFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { SUPABASE_URL } from '@/lib/supabase/config';
 
 // Supabase客户端
 const supabase = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY!
 );
 

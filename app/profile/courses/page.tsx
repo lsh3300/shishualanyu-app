@@ -1,7 +1,7 @@
 "use client"
 
 import { BottomNav } from "@/components/navigation/bottom-nav"
-import { ArrowLeft, PlayCircle, Clock, BookOpen, Star, CheckCircle } from "lucide-react"
+import { ArrowLeft, Play, Clock, BookOpen, Star, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -10,8 +10,20 @@ import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
 import { useAuth } from "@/contexts/auth-context"
 
+interface Course {
+  id: string
+  title: string
+  thumbnail?: string
+  status?: string
+  instructor?: string
+  completedLessons?: number
+  totalLessons?: number
+  progress: number
+  lastWatched?: string
+}
+
 // 使用空数组作为默认数据，实际数据应从API获取
-const courses = []
+const courses: Course[] = []
 
 export default function CoursesPage() {
   const { user } = useAuth()

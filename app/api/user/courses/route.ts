@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { SUPABASE_URL } from '@/lib/supabase/config';
 
 // 创建Supabase客户端
 const createSupabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
   
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient(SUPABASE_URL, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
@@ -58,7 +58,8 @@ export async function GET() {
     // 计算学习天数 - 从第一个课程注册日期开始计算
     let learningDays = 0;
     if (enrollments && enrollments.length > 0) {
-      const firstEnrollment = enrollments.reduce((earliest, current) => {
+      const enrollmentsAny = enrollments as any[];
+      const firstEnrollment = enrollmentsAny.reduce((earliest, current) => {
         return new Date(current.created_at) < new Date(earliest.created_at) ? current : earliest;
       });
       

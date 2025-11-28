@@ -1,6 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { SUPABASE_URL } from '@/lib/supabase/config';
 
 export async function GET() {
   console.log('测试不同查询方式的API called');
@@ -17,7 +18,7 @@ export async function GET() {
   }
   
   // 2. 使用createClient和服务密钥查询
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
   
   if (!supabaseUrl || !supabaseKey) {

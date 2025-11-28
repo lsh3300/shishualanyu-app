@@ -26,3 +26,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# 课堂实践作品（将部署在Supabase上，无需git备份）
+整理后课堂实践作品/

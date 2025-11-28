@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世说蓝语 - 应用访问中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a5fb4 0%, #3584e4 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.5);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .access-methods {
+            margin-top: 30px;
+        }
+        
+        .method-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .method-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .method-name {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .method-icon {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .method-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+        
+        .method-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            transition: background 0.3s ease;
+        }
+        
+        .method-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .file-list {
+            margin-top: 30px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .file-name {
+            font-weight: bold;
+        }
+        
+        .file-desc {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">世说蓝语</h1>
+            <p class="subtitle">传承蓝染文化的数字平台</p>
+            <div class="status">● 服务器运行中</div>
+        </div>
+        
+        <div class="access-methods">
+            <h2 class="method-title">应用访问方式</h2>
+            <div class="method-grid">
+                <div class="method-card" onclick="window.open('https://shishualanyu-dx63zno4k-lsh3300s-projects.vercel.app', '_blank')">
+                    <div class="method-name">
+                        <span class="method-icon">🌐</span>
+                        直接访问
+                    </div>
+                    <p class="method-desc">在浏览器中直接输入地址访问应用</p>
+                    <a href="https://shishualanyu-dx63zno4k-lsh3300s-projects.vercel.app" target="_blank" class="method-link">打开应用</a>
+                </div>
+                
+                <div class="method-card" onclick="window.open('app_entry.html', '_blank')">
+                    <div class="method-name">
+                        <span class="method-icon">📄</span>
+                        入口页面
+                    </div>
+                    <p class="method-desc">通过美观的入口页面访问应用</p>
+                    <a href="app_entry.html" target="_blank" class="method-link">打开入口</a>
+                </div>
+                
+                <div class="method-card" onclick="window.open('launch_app.html', '_blank')">
+                    <div class="method-name">
+                        <span class="method-icon">🚀</span>
+                        快速启动
+                    </div>
+                    <p class="method-desc">自动跳转到应用的快速启动页面</p>
+                    <a href="launch_app.html" target="_blank" class="method-link">快速启动</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-list">
+            <h2 class="method-title">可用文件</h2>
+            <div class="file-item">
+                <div>
+                    <div class="file-name">一键启动应用.bat</div>
+                    <div class="file-desc">一键启动服务器并打开应用</div>
+                </div>
+            </div>
+            <div class="file-item">
+                <div>
+                    <div class="file-name">start_app.bat</div>
+                    <div class="file-desc">多种方式尝试打开应用</div>
+                </div>
+            </div>
+            <div class="file-item">
+                <div>
+                    <div class="file-name">世说蓝语.url</div>
+                    <div class="file-desc">应用快捷方式</div>
+                </div>
+            </div>
+            <div class="file-item">
+                <div>
+                    <div class="file-name">访问指南.md</div>
+                    <div class="file-desc">详细的访问指南文档</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 世说蓝语 - 传承蓝染文化</p>
+        </div>
+    </div>
+</body>
+</html>

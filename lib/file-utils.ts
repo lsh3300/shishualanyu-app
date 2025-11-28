@@ -123,6 +123,12 @@ export class FileUtils {
     return allowedTypes.includes(fileType);
   }
 
+  // 按文件名验证文件类型（用于仅有路径或文件名的场景）
+  static isValidFileType(filename: string, allowedTypes: string[]): boolean {
+    const fileType = this.getFileType(filename);
+    return allowedTypes.includes(fileType);
+  }
+
   // 验证文件大小
   static validateFileSize(file: File, maxSizeInMB: number): boolean {
     const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
@@ -137,6 +143,11 @@ export class FileUtils {
     const randomString = Math.random().toString(36).substring(2, 8);
     
     return `${nameWithoutExtension}_${timestamp}_${randomString}.${extension}`;
+  }
+
+  // 兼容旧命名：generateUniqueFilename（少一个大写 N）
+  static generateUniqueFilename(originalName: string): string {
+    return this.generateUniqueFileName(originalName);
   }
 
   // 生成文件缩略图（仅适用于图片）
