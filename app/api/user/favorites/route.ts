@@ -100,21 +100,21 @@ export async function GET(request: NextRequest) {
     if (courseIds.length > 0) {
       const { data: courses, error: coursesError } = await supabase
         .from('courses')
-        .select('id, title, description, instructor_name, duration, students, rating, price, is_free, difficulty, category, thumbnail')
+        .select('id, title, description, instructor, instructor_name, duration, students, rating, price, is_free, difficulty, category, image_url')
         .in('id', courseIds)
       
       if (!coursesError && courses) {
         courses.forEach(course => {
           coursesMap[course.id] = {
             ...course,
-            image_url: course.thumbnail || '/placeholder.svg'
+            thumbnail: course.image_url || '/placeholder.svg' // 为兼容性添加 thumbnail 字段
           }
         })
         
         console.log('📚 处理后的课程数据:', Object.values(coursesMap).map(c => ({
           id: c.id,
           title: c.title,
-          thumbnail: c.thumbnail
+          image_url: c.image_url
         })))
       }
     }

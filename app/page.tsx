@@ -12,41 +12,18 @@ import {
 } from "@/components/ui/lazy-load"
 import { usePerformanceMonitor } from "@/components/ui/performance-monitor"
 import { HeaderAuth } from "@/components/auth/header-auth"
-import { Palette, Droplets, Package, Wrench, Mail, User, ChevronRight, Bell } from "lucide-react"
+import { Palette, Droplets, Package, Wrench, Mail, User, ChevronRight, Bell, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useGlobalState } from "@/hooks/use-global-state"
 import { createClient } from "@/lib/supabase/client"
 
-const bannerItems = [
-  {
-    id: "1",
-    title: "传承千年的蓝染工艺",
-    subtitle: "跟随匠人大师，学习传统扎染技艺",
-    image: "/traditional-indigo-dyeing-master-craftsman.jpg",
-    href: "/teaching",
-  },
-  {
-    id: "2",
-    title: "春季新品文创系列",
-    subtitle: "融合现代设计的蓝染艺术品",
-    image: "/modern-indigo-dyed-fashion-products.jpg",
-    href: "/store",
-  },
-  {
-    id: "3",
-    title: "热门课程推荐",
-    subtitle: "零基础入门扎染，轻松上手",
-    image: "/indigo-dyeing-workshop-students-learning.jpg",
-    href: "/teaching/tie-dye",
-  },
-]
-
+// 快捷入口配置（静态）
 const quickAccessItems = [
-  { href: "/teaching/tie-dye", icon: Palette, label: "扎染", color: "bg-primary" },
-  { href: "/teaching/wax-resist", icon: Droplets, label: "蜡染", color: "bg-secondary" },
+  { href: "/teaching", icon: Palette, label: "传统工艺", color: "bg-primary" },
   { href: "/store/materials", icon: Package, label: "材料包", color: "bg-accent" },
   { href: "/store/custom", icon: Wrench, label: "定制工坊", color: "bg-chart-4" },
+  { href: "/store/ai-create", icon: Sparkles, label: "AI创作", color: "bg-secondary" },
 ]
 
 // 课程数据从 Supabase 实时获取（见 HomePage 组件内）
@@ -71,6 +48,10 @@ export default function HomePage() {
   // 从 Supabase 获取文章数据
   const [cultureArticles, setCultureArticles] = useState<any[]>([])
   const [articlesLoading, setArticlesLoading] = useState(true)
+  
+  // 动态生成的轮播图数据
+  const [bannerItems, setBannerItems] = useState<any[]>([])
+  const [bannerLoading, setBannerLoading] = useState(true)
   
   useEffect(() => {
     async function fetchCourses() {
@@ -179,9 +160,93 @@ export default function HomePage() {
       }
     }
     
+    async function generateBannerItems() {
+      try {
+        const supabase = createClient()
+        const items = []
+        
+        // 1. 获取一个热门课程作为第一张轮播图
+        const { data: topCourse } = await supabase
+          .from('courses')
+          .select('id, title, instructor, image_url')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+        
+        if (topCourse) {
+          items.push({
+            id: '1',
+            title: `跟随 ${topCourse.instructor} 老师，学习《${topCourse.title}》`,
+            subtitle: '掌握传统蓝染图案设计技艺',
+            image: topCourse.image_url || '/traditional-indigo-dyeing-master-craftsman.jpg',
+            href: `/teaching/${topCourse.id}`,
+          })
+        }
+        
+        // 2. 获取一篇热门文章作为第二张轮播图
+        const { data: topArticle } = await supabase
+          .from('culture_articles')
+          .select('id, slug, title, cover_image')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+        
+        if (topArticle) {
+          items.push({
+            id: '2',
+            title: '探索蓝染的千年历史',
+            subtitle: topArticle.title,
+            image: topArticle.cover_image || '/silk-road-indigo.jpg',
+            href: `/culture/${topArticle.slug}`,
+          })
+        }
+        
+        // 3. 添加材料包推广作为第三张轮播图
+        items.push({
+          id: '3',
+          title: '优质蓝染材料包',
+          subtitle: '从零开始，体验传统扎染之美',
+          image: '/indigo-dyeing-workshop-students-learning.jpg',
+          href: '/store/materials',
+        })
+        
+        setBannerItems(items)
+      } catch (err) {
+        console.error('生成轮播图异常:', err)
+        // 如果失败，使用默认轮播图
+        setBannerItems([
+          {
+            id: '1',
+            title: '传承千年的蓝染工艺',
+            subtitle: '跟随匠人大师，学习传统扎染技艺',
+            image: '/traditional-indigo-dyeing-master-craftsman.jpg',
+            href: '/teaching',
+          },
+          {
+            id: '2',
+            title: '探索蓝染文化',
+            subtitle: '了解传统工艺背后的文化故事',
+            image: '/silk-road-indigo.jpg',
+            href: '/culture',
+          },
+          {
+            id: '3',
+            title: '优质蓝染材料包',
+            subtitle: '从零开始，体验传统扎染之美',
+            image: '/indigo-dyeing-workshop-students-learning.jpg',
+            href: '/store/materials',
+          },
+        ])
+      } finally {
+        setBannerLoading(false)
+      }
+    }
+    
     fetchCourses()
     fetchProducts()
     fetchArticles()
+    generateBannerItems()
   }, [])
   
   return (
@@ -237,7 +302,11 @@ export default function HomePage() {
 
       {/* Banner Carousel */}
       <section className="px-4 mb-6">
-        <LazyBannerCarousel items={bannerItems} />
+        {bannerLoading ? (
+          <div className="w-full h-48 bg-gray-100 animate-pulse rounded-2xl" />
+        ) : (
+          <LazyBannerCarousel items={bannerItems} />
+        )}
       </section>
 
       {/* Quick Access */}

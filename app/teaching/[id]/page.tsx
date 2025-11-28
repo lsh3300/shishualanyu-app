@@ -411,7 +411,19 @@ export default function CourseDetailPage() {
 
       {/* Video Player */}
       <div className="relative w-full max-w-5xl mx-auto aspect-video bg-black shadow-lg">
-        {course.image_url ? (
+        {course.video_url ? (
+          // 如果有视频URL，显示视频播放器
+          <video
+            className="w-full h-full"
+            controls
+            preload="metadata"
+            poster={course.image_url || undefined}
+          >
+            <source src={course.video_url} type="video/mp4" />
+            您的浏览器不支持视频播放。
+          </video>
+        ) : course.image_url ? (
+          // 如果没有视频但有封面图，显示封面图和播放按钮提示
           <div className="relative w-full h-full">
             <Image
               src={course.image_url}
@@ -424,13 +436,14 @@ export default function CourseDetailPage() {
               <Button 
                 size="lg" 
                 className="rounded-full h-16 w-16 bg-white/90 hover:bg-white text-primary"
-                onClick={() => toast.info('视频播放功能即将上线')}
+                onClick={() => toast.info('视频即将上线')}
               >
                 <Play className="h-8 w-8 fill-current ml-1" />
               </Button>
             </div>
           </div>
         ) : (
+          // 既没有视频也没有封面图，显示占位符
           <div className="absolute inset-0 flex items-center justify-center">
             <Play className="h-16 w-16 text-muted-foreground" />
           </div>

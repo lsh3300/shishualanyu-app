@@ -13,7 +13,8 @@ import { useAuth } from "@/contexts/auth-context"
 interface Course {
   id: string
   title: string
-  thumbnail?: string
+  image_url?: string
+  thumbnail?: string // 保留兼容性
   status?: string
   instructor?: string
   completedLessons?: number
@@ -51,7 +52,7 @@ export default function CoursesPage() {
             <div className="flex gap-4">
               <div className="relative w-24 h-18 flex-shrink-0">
                 <Image
-                  src={course.thumbnail || "/placeholder.svg"}
+                  src={course.image_url || course.thumbnail || "/placeholder.svg"}
                   alt={course.title}
                   fill
                   className="object-cover rounded-lg"

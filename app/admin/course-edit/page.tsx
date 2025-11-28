@@ -115,7 +115,7 @@ export default function CourseEditPage({ params }: CourseEditPageProps) {
             duration: typeof course.duration === 'number' ? course.duration : 0,
             price: course.price || 0,
             originalPrice: course.originalPrice || 0,
-            coverImage: course.thumbnail || course.image_url || '',
+            coverImage: course.image_url || course.thumbnail || '',
             previewVideo: course.previewVideo || '',
             tags: course.tags || [],
             chapters: (course.chapters || []).map((ch: any) => ({

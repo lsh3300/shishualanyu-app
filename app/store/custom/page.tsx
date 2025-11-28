@@ -1,7 +1,8 @@
 'use client'
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { BottomNav } from "@/components/navigation/bottom-nav"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
@@ -10,40 +11,7 @@ import { CustomProcess } from "./custom-process"
 import { CraftsmenTeam } from "./custom-craftsmen"
 import { LazyFeaturedWorks, LazyFAQSection, LazyCTASection, FeaturedWorksSkeleton, FAQSectionSkeleton, CTASectionSkeleton } from "./custom-sections"
 
-const customServices = [
-  {
-    id: "1",
-    title: "私人定制扎染丝巾",
-    price: 368,
-    image: "/handmade-tie-dye-silk-scarf.jpg",
-    description: "根据您的喜好定制独一无二的扎染丝巾，可以指定图案、颜色和尺寸",
-    popular: true,
-  },
-  {
-    id: "2",
-    title: "苗族蜡染家居定制",
-    price: 498,
-    image: "/traditional-wax-resist-cushion.jpg",
-    description: "定制传统苗族蜡染风格的家居饰品，包括抱枕、桌旗、茶席等",
-    popular: true,
-  },
-  {
-    id: "3",
-    title: "企业礼品定制",
-    price: 688,
-    image: "/placeholder.svg",
-    description: "为企业定制专属的扎染或蜡染礼品，可印logo，适合商务馈赠",
-    popular: false,
-  },
-  {
-    id: "4",
-    title: "个性化服饰定制",
-    price: 298,
-    image: "/modern-indigo-dyed-fashion-products.jpg",
-    description: "定制扎染或蜡染风格的T恤、衬衫、连衣裙等服饰",
-    popular: false,
-  },
-]
+// 定制服务会从 Supabase 动态加载
 
 const craftsmen = [
   {
@@ -100,6 +68,60 @@ const customSteps = [
 
 export default function CustomWorkshopPage() {
   const [activeTab, setActiveTab] = useState("services")
+  const [customServices, setCustomServices] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // 从 Supabase 获取定制服务产品
+  useEffect(() => {
+    async function fetchCustomServices() {
+      try {
+        const supabase = createClient()
+        
+        const { data: products, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('category', '定制服务')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+        
+        if (error) {
+          console.error('获取定制服务失败:', error)
+          setCustomServices([])
+          return
+        }
+
+        // 获取每个产品的封面图
+        const servicesWithImages = await Promise.all(
+          (products || []).map(async (product) => {
+            const { data: media } = await supabase
+              .from('product_media')
+              .select('url')
+              .eq('product_id', product.id)
+              .eq('cover', true)
+              .single()
+            
+            return {
+              id: product.id,
+              title: product.name,
+              price: product.price,
+              image: media?.url || '/placeholder.svg',
+              description: product.description || '',
+              popular: product.is_new || false,
+            }
+          })
+        )
+        
+        setCustomServices(servicesWithImages)
+      } catch (err) {
+        console.error('获取定制服务异常:', err)
+        setCustomServices([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCustomServices()
+  }, [])
 
   return (
     <div className="min-h-screen bg-background pb-32">
@@ -159,7 +181,36 @@ export default function CustomWorkshopPage() {
         {activeTab === "services" && (
           <div>
             {/* 服务列表 */}
-            <ServicesList services={customServices} />
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="mt-4 text-muted-foreground">加载定制服务中...</p>
+              </div>
+            ) : customServices.length > 0 ? (
+              <ServicesList services={customServices} />
+            ) : (
+              <div className="text-center py-16">
+                <div className="max-w-md mx-auto">
+                  <div className="mb-4 text-6xl">🎨</div>
+                  <h3 className="text-xl font-semibold mb-2">定制服务即将开放</h3>
+                  <p className="text-muted-foreground mb-6">
+                    我们正在筹备专业的蓝染定制服务，敬请期待！
+                  </p>
+                  <div className="flex gap-3 justify-center">
+                    <Link href="/teaching">
+                      <Button variant="default">
+                        学习课程
+                      </Button>
+                    </Link>
+                    <Link href="/store">
+                      <Button variant="outline">
+                        选购商品
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* 精选作品 */}
             <Suspense fallback={<FeaturedWorksSkeleton />}>

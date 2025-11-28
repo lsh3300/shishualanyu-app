@@ -1,10 +1,11 @@
 'use client'
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BottomNav } from "@/components/navigation/bottom-nav"
 import { SearchBar } from "@/components/ui/search-bar"
 import { FilterBar } from "@/components/ui/filter-bar"
 import { MaterialCard } from "@/components/ui/material-card"
-import { ArrowLeft, ShoppingCart, SearchIcon } from "lucide-react"
+import { ArrowLeft, ShoppingCart, SearchIcon, Loader2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -16,74 +17,82 @@ const filterOptions = [
   { id: "tie-dye", label: "扎染材料" },
   { id: "wax-resist", label: "蜡染材料" },
   { id: "beginner", label: "初学者套装" },
-  { id: "professional", label: "专业工具" },
+  { id: "advanced", label: "进阶工具" },
   { id: "natural", label: "天然染料" },
-]
-
-const materialPackages = [
-  {
-    id: "1",
-    name: "扎染入门材料包",
-    price: 68,
-    image: "/indigo-dyeing-workshop-students-learning.jpg",
-    description: "包含棉布、橡皮筋、靛蓝染料等全套入门材料，适合初学者",
-    category: "tie-dye",
-    level: "beginner",
-  },
-  {
-    id: "2",
-    name: "专业扎染工具套装",
-    price: 128,
-    image: "/placeholder.svg",
-    description: "专业扎染夹具、刷子、手套等工具，提升创作效率",
-    category: "tie-dye",
-    level: "professional",
-  },
-  {
-    id: "3",
-    name: "天然植物染料套装",
-    price: 198,
-    image: "/natural-plant-dyes.jpg",
-    description: "苏木、蓝草、茜草等天然植物染料，环保健康",
-    category: "tie-dye",
-    level: "natural",
-  },
-  {
-    id: "4",
-    name: "蜡染入门材料包",
-    price: 88,
-    image: "/wax-resist-dyeing-technique.jpg",
-    description: "蜂蜡、画笔、染料等蜡染基础材料，入门必备",
-    category: "wax-resist",
-    level: "beginner",
-  },
-  {
-    id: "5",
-    name: "专业蜡染工具套装",
-    price: 158,
-    image: "/placeholder.svg",
-    description: "专业蜡染刀、熔炉、蜡锅等工具，适合进阶学习",
-    category: "wax-resist",
-    level: "professional",
-  },
-  {
-    id: "6",
-    name: "苗族传统蜡染染料",
-    price: 228,
-    image: "/traditional-miao-wax-resist-dye.jpg",
-    description: "源自贵州苗族的传统蜡染配方，色彩鲜艳持久",
-    category: "wax-resist",
-    level: "natural",
-  },
 ]
 
 export default function MaterialsPage() {
   const [selectedFilter, setSelectedFilter] = useState("all")
+  const [materials, setMaterials] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const isMobile = useIsMobile()
 
+  // 从 Supabase 获取材料包产品
+  useEffect(() => {
+    async function fetchMaterials() {
+      try {
+        const supabase = createClient()
+        
+        // 获取所有材料包类别的产品
+        const { data: products, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('category', '材料包')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+        
+        if (error) {
+          console.error('获取材料包失败:', error)
+          setMaterials([])
+          return
+        }
+
+        // 获取每个产品的封面图
+        const materialsWithImages = await Promise.all(
+          (products || []).map(async (product) => {
+            const { data: media } = await supabase
+              .from('product_media')
+              .select('url')
+              .eq('product_id', product.id)
+              .eq('cover', true)
+              .single()
+            
+            return {
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              image: media?.url || '/placeholder.svg',
+              description: product.description || '',
+              category: getTechnique(product.metadata?.technique),
+              level: product.metadata?.level || 'beginner',
+            }
+          })
+        )
+        
+        setMaterials(materialsWithImages)
+      } catch (err) {
+        console.error('获取材料包异常:', err)
+        setMaterials([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchMaterials()
+  }, [])
+
+  // 将技术类型转换为筛选分类
+  const getTechnique = (technique: string) => {
+    if (!technique) return 'other'
+    if (technique.includes('扎染')) return 'tie-dye'
+    if (technique.includes('蜡染')) return 'wax-resist'
+    if (technique.includes('天然')) return 'natural'
+    return 'other'
+  }
+
   const filteredMaterials = selectedFilter === "all" 
-    ? materialPackages 
-    : materialPackages.filter(material => 
+    ? materials 
+    : materials.filter(material => 
         material.category === selectedFilter || material.level === selectedFilter
       )
 
@@ -130,11 +139,40 @@ export default function MaterialsPage() {
         />
 
         {/* Material List */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMaterials.map((material) => (
-            <MaterialCard key={material.id} {...material} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="mt-6 flex flex-col items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">加载材料包中...</p>
+          </div>
+        ) : filteredMaterials.length > 0 ? (
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMaterials.map((material) => (
+              <MaterialCard key={material.id} {...material} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 text-center py-16">
+            <div className="max-w-md mx-auto">
+              <div className="mb-4 text-6xl">📦</div>
+              <h3 className="text-xl font-semibold mb-2">材料包即将上线</h3>
+              <p className="text-muted-foreground mb-6">
+                我们正在精心准备各类扎染、蜡染材料包，敬请期待！
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Link href="/teaching">
+                  <Button variant="default">
+                    浏览课程
+                  </Button>
+                </Link>
+                <Link href="/store">
+                  <Button variant="outline">
+                    查看商品
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tips Section */}
         <div className="mt-10 bg-muted p-6 rounded-xl">

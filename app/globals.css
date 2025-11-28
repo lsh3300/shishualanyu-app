@@ -157,3 +157,139 @@
     @apply bg-card rounded-xl shadow-sm border border-border p-6 transition-all duration-200 hover:shadow-md;
   }
 }
+
+/* ========================================
+   AI创作页面 - 水墨动画效果
+   ======================================== */
+
+@keyframes ink-float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translate(50px, -30px) scale(1.1);
+    opacity: 0.4;
+  }
+  66% {
+    transform: translate(-30px, 40px) scale(0.95);
+    opacity: 0.25;
+  }
+}
+
+@keyframes ink-float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-60px, 50px) scale(1.15) rotate(5deg);
+    opacity: 0.35;
+  }
+}
+
+@keyframes ink-float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  40% {
+    transform: translate(40px, -50px) scale(1.08);
+    opacity: 0.3;
+  }
+  80% {
+    transform: translate(-20px, 30px) scale(0.92);
+    opacity: 0.15;
+  }
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.4;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes dye-vat-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes sink-in {
+  0% {
+    transform: translateY(-100px) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(20px) scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes water-drop {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+/* 应用动画类 */
+.animate-ink-float-1 {
+  animation: ink-float-1 30s ease-in-out infinite;
+}
+
+.animate-ink-float-2 {
+  animation: ink-float-2 25s ease-in-out infinite;
+}
+
+.animate-ink-float-3 {
+  animation: ink-float-3 35s ease-in-out infinite;
+}
+
+.animate-float-particle {
+  animation: float-particle 8s ease-in-out infinite;
+}
+
+.animate-ripple {
+  animation: ripple 1.5s ease-out;
+}
+
+.animate-dye-vat-shimmer {
+  animation: dye-vat-shimmer 3s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+.animate-sink-in {
+  animation: sink-in 1s ease-out forwards;
+}
+
+.animate-water-drop {
+  animation: water-drop 0.8s ease-in forwards;
+}
