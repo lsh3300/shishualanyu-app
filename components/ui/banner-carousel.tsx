@@ -81,7 +81,7 @@ export function BannerCarousel({ items }: BannerCarouselProps) {
   }
 
   return (
-    <div className="relative h-72 md:h-80 rounded-xl overflow-hidden shadow-lg group my-2">
+    <div className="relative w-full aspect-[21/9] sm:aspect-[18/7] rounded-xl overflow-hidden shadow-lg group my-2">
       {/* 背景装饰 */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-background -z-10" />
       

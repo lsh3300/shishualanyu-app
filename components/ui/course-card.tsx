@@ -72,16 +72,16 @@ export function CourseCard({
     }
   }
   return (
-    <div className="relative group">
-      <Card className="cultural-card hover:scale-105 transition-all duration-300 w-64 flex-shrink-0 shadow-md hover:shadow-lg bg-card">
+    <div className="relative group w-full max-w-[280px] mx-auto">
+      <Card className="cultural-card hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg bg-card">
         <Link href={`/teaching/${id}`} prefetch={false} className="block">
-          <div className="relative overflow-hidden rounded-t-xl">
+          <div className="relative overflow-hidden rounded-t-xl aspect-video">
             <OptimizedImage
               src={thumbnail || "/placeholder.svg"}
               alt={title}
               width={256}
               height={144}
-              className="w-full h-36 object-cover transition-transform duration-700 group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               lazy={true}
             />
             <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 backdrop-blur-sm">
@@ -92,15 +92,15 @@ export function CourseCard({
               <Play className="h-6 w-6 text-white fill-white transition-transform duration-300 group-hover:scale-110" />
             </div>
           </div>
-          <div className="p-4">
-            <h3 className="font-semibold text-foreground mb-2 line-clamp-2 transition-colors duration-200 group-hover:text-primary">{title}</h3>
-            <p className="text-sm text-muted-foreground mb-3">{instructor}</p>
+          <div className="p-2.5">
+            <h3 className="text-xs sm:text-sm font-semibold text-foreground mb-1 line-clamp-1 transition-colors duration-200 group-hover:text-primary">{title}</h3>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-1.5">{instructor}</p>
             <div className="flex items-center justify-between">
-              <div className="flex items-center text-xs text-muted-foreground">
-                <Users className="h-3 w-3 mr-1" />
-                {students}人学习
+              <div className="flex items-center text-[10px] sm:text-xs text-muted-foreground">
+                <Users className="h-2.5 w-2.5 mr-0.5" />
+                {students}人
               </div>
-              <div className="text-sm font-semibold text-accent">{isFree ? "免费" : `¥${price}`}</div>
+              <div className="text-xs sm:text-sm font-semibold text-accent">{isFree ? "免费" : `¥${price}`}</div>
             </div>
           </div>
         </Link>

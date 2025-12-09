@@ -1,3 +1,5 @@
+'use client'
+
 import { AuthLayout } from "@/components/auth/auth-layout"
 import { NewPasswordForm } from "@/components/ui/new-password-form"
 import { useRouter } from "next/navigation"

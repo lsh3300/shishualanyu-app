@@ -226,10 +226,10 @@ export default function ImmersiveAICreate() {
       </header>
 
       {/* ===== 主内容区 ===== */}
-      <main className="relative z-10 p-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <main className="relative z-10 px-4 py-6 max-w-7xl mx-auto">
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6">
           {/* 左侧主区域 (2列宽) */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 w-full">
             <AnimatePresence mode="wait">
               {/* 上传步骤 */}
               {currentStep === 'upload' && (
@@ -274,17 +274,18 @@ export default function ImmersiveAICreate() {
                     onParametersChange={handleParametersChange}
                     isGenerating={isGenerating}
                   />
-                  <div className="mt-6 flex justify-between">
+                  <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:justify-between">
                     <Button
                       variant="outline"
                       onClick={() => setCurrentStep('style')}
+                      className="w-full sm:w-auto"
                     >
                       返回选择风格
                     </Button>
                     <Button
                       onClick={handleGeneratePreview}
                       disabled={isGenerating}
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
                     >
                       {isGenerating ? "染制中..." : "开始染制"}
                     </Button>
@@ -305,28 +306,27 @@ export default function ImmersiveAICreate() {
                     originalImage={uploadedImage}
                     generatedImage={generatedImage}
                   />
-                  <div className="mt-6 flex justify-between">
+                  <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:justify-between">
                     <Button
                       variant="outline"
                       onClick={() => setCurrentStep('adjust')}
+                      className="w-full sm:w-auto"
                     >
                       重新调整
                     </Button>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={handleRestart}
-                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                      >
-                        再来一次
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={handleRestart}
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                    >
+                      再来一次
+                    </Button>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* 右侧作品墙 */}
+          {/* 右侧作品墙 - 桌面端显示在右侧，移动端显示在下方 */}
           <div className="lg:col-span-1">
             <WorksGallery works={[]} />
           </div>

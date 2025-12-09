@@ -26,7 +26,7 @@ interface CulturePageProps {
 }
 
 export default async function CulturePage({ searchParams }: CulturePageProps) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const category = searchParams.category || 'all'
 
   // 获取文章数据

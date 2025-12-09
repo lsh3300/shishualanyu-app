@@ -8,6 +8,7 @@ import {
   LazyCourseCard, 
   LazyProductCard, 
   LazyCultureArticleCard,
+  LazyCultureArticleListCard,
   LazyMiniProfilePopover 
 } from "@/components/ui/lazy-load"
 import { usePerformanceMonitor } from "@/components/ui/performance-monitor"
@@ -61,7 +62,7 @@ export default function HomePage() {
           .from('courses')
           .select('id, title, instructor, duration, price, image_url')
           .order('created_at', { ascending: false })
-          .limit(3)
+          .limit(6)
         
         if (error) {
           console.error('获取课程失败:', error)
@@ -101,7 +102,7 @@ export default function HomePage() {
           `)
           .eq('status', 'published')
           .order('created_at', { ascending: false })
-          .limit(4)
+          .limit(8)
         
         if (productsError) {
           console.error('获取产品失败:', productsError)
@@ -146,7 +147,7 @@ export default function HomePage() {
           .select('id, slug, title, excerpt, cover_image, read_time')
           .eq('status', 'published')
           .order('created_at', { ascending: false })
-          .limit(3)
+          .limit(6)
         
         if (error) {
           console.error('获取文章失败:', error)
@@ -253,7 +254,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background pb-20">
       {/* Header Bar with Search and Icons - Now at the top */}
       <section className="sticky top-0 z-50 bg-gradient-to-r from-background via-background/98 to-background/95 backdrop-blur-md py-3 border-b border-border/30 shadow-lg">
-        <div className="container px-4 mx-auto">
+        <div className="max-w-7xl px-4 mx-auto">
           <div className="flex items-center gap-4">
             {/* Left side - Logo and Brand */}
             <Link href="/" className="flex items-center gap-2.5 mr-3 group">
@@ -301,7 +302,7 @@ export default function HomePage() {
       </section>
 
       {/* Banner Carousel */}
-      <section className="px-4 mb-6">
+      <section className="max-w-7xl mx-auto px-4 mb-6">
         {bannerLoading ? (
           <div className="w-full h-48 bg-gray-100 animate-pulse rounded-2xl" />
         ) : (
@@ -310,12 +311,12 @@ export default function HomePage() {
       </section>
 
       {/* Quick Access */}
-      <section className="mb-8">
+      <section className="max-w-7xl mx-auto mb-8">
         <LazyQuickAccess items={quickAccessItems} />
       </section>
 
       {/* Teaching Section */}
-      <section className="px-4 mb-8">
+      <section className="max-w-7xl mx-auto px-4 mb-8">
         <SectionHeader title="教学精选" href="/teaching" />
         {coursesLoading ? (
           <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
@@ -324,7 +325,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : featuredCourses.length > 0 ? (
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
             {featuredCourses.map((course: any) => (
               <LazyCourseCard key={course.id} {...course} showFavorite={true} />
             ))}
@@ -337,7 +338,7 @@ export default function HomePage() {
       </section>
 
       {/* Products Section */}
-      <section className="px-4 mb-8">
+      <section className="max-w-7xl mx-auto px-4 mb-8">
         <SectionHeader title="文创臻品" href="/store" />
         {productsLoading ? (
           <div className="grid grid-cols-2 gap-4">
@@ -346,7 +347,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
             {featuredProducts.map((product: any) => (
               <LazyProductCard key={product.id} {...product} />
             ))}
@@ -358,27 +359,36 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Culture Section */}
-      <section className="px-4 mb-8">
+      {/* Culture Section - B站风格横向列表 */}
+      <section className="max-w-7xl mx-auto px-4 mb-8">
         <SectionHeader title="文化速读" href="/culture" />
         {articlesLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex gap-4 p-4 bg-gray-100 animate-pulse rounded-lg">
+                <div className="w-32 sm:w-40 h-24 bg-gray-200 rounded" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 bg-gray-200 rounded" />
+                  <div className="h-4 w-1/2 bg-gray-200 rounded" />
+                </div>
+              </div>
             ))}
           </div>
         ) : cultureArticles.length > 0 ? (
-          cultureArticles.map((article) => (
-            <LazyCultureArticleCard 
-              key={article.id} 
-              id={article.slug}
-              articleId={article.id}
-              title={article.title}
-              excerpt={article.excerpt}
-              image={article.cover_image}
-              readTime={`${article.read_time}分钟`}
-            />
-          ))
+          <div className="space-y-3">
+            {cultureArticles.map((article) => (
+              <LazyCultureArticleListCard 
+                key={article.id} 
+                id={article.slug}
+                articleId={article.id}
+                title={article.title}
+                excerpt={article.excerpt}
+                image={article.cover_image}
+                readTime={`${article.read_time}分钟`}
+                views={Math.floor(Math.random() * 100000) + 1000}
+              />
+            ))}
+          </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             暂无文章

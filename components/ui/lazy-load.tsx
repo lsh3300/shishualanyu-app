@@ -152,6 +152,19 @@ export const LazyCultureArticleCard = LazyLoad(
   () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
 )
 
+export const LazyCultureArticleListCard = LazyLoad(
+  () => import("@/components/ui/culture-article-list-card").then(module => ({ default: module.CultureArticleListCard })),
+  () => (
+    <div className="flex gap-4 p-4 bg-gray-100 animate-pulse rounded-lg">
+      <div className="w-32 h-24 bg-gray-200 rounded" />
+      <div className="flex-1 space-y-2">
+        <div className="h-4 w-3/4 bg-gray-200 rounded" />
+        <div className="h-4 w-1/2 bg-gray-200 rounded" />
+      </div>
+    </div>
+  )
+)
+
 export const LazyMiniProfilePopover = LazyLoad(
   () => import("@/components/ui/mini-profile-popover").then(module => ({ default: module.MiniProfilePopover })),
   () => <div className="w-64 h-80 bg-gray-100 animate-pulse rounded-lg" />

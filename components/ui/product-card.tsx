@@ -74,18 +74,18 @@ export function ProductCard({
   }
 
   return (
-    <Link href={`/store/${id}`} prefetch={false} className="group">
+    <Link href={`/store/${id}`} prefetch={false} className="group block w-full max-w-[240px] mx-auto">
       <Card className={cn(
-        "cultural-card hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg bg-card relative",
+        "cultural-card hover:scale-[1.02] transition-all duration-300 shadow-md hover:shadow-lg bg-card relative",
         className
       )}>
-        <div className="relative overflow-hidden rounded-t-xl">
+        <div className="relative overflow-hidden rounded-t-xl aspect-square">
           <OptimizedImage
             src={image || "/placeholder.svg"}
             alt={name}
             width={200}
             height={200}
-            className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             lazy={true}
           />
           
@@ -110,30 +110,13 @@ export function ProductCard({
             </Button>
           )}
         </div>
-        <div className="p-4">
-          <h3 className="font-medium text-foreground mb-2 line-clamp-2 transition-colors duration-200 group-hover:text-primary">{name}</h3>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg font-bold text-accent">¥{price}</span>
-            {originalPrice && <span className="text-sm text-muted-foreground line-through">¥{originalPrice}</span>}
+        <div className="p-2">
+          <h3 className="text-xs font-medium text-foreground mb-1 line-clamp-1 transition-colors duration-200 group-hover:text-primary">{name}</h3>
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-sm font-bold text-accent">¥{price}</span>
+            {originalPrice && <span className="text-[10px] text-muted-foreground line-through">¥{originalPrice}</span>}
           </div>
-          <p className="text-xs text-muted-foreground mb-3">已售 {sales}</p>
-          
-          {showAddToCart && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-200"
-              onClick={handleAddToCart}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <ShoppingCart className="h-4 w-4 mr-2" />
-              )}
-              加入购物车
-            </Button>
-          )}
+          <p className="text-[10px] text-muted-foreground">已售 {sales}</p>
         </div>
       </Card>
     </Link>

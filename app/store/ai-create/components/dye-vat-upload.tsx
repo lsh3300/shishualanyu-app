@@ -91,11 +91,12 @@ export default function DyeVatUpload({ onImageUpload, isUploading = false }: Dye
   }, [])
 
   return (
-    <div className="relative flex items-center justify-center min-h-[500px]">
-      {/* 染缸容器 */}
+    <div className="relative flex items-center justify-center py-8 sm:py-12 lg:py-16">
+      {/* 染缸容器 - 响应式大小 */}
       <div
         className={cn(
-          "relative w-[400px] h-[400px] rounded-full transition-all duration-500",
+          "relative w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] md:w-[320px] md:h-[320px] lg:w-[360px] lg:h-[360px]",
+          "rounded-full transition-all duration-500",
           "cursor-pointer group",
           isUploading && "animate-pulse"
         )}
@@ -232,7 +233,7 @@ export default function DyeVatUpload({ onImageUpload, isUploading = false }: Dye
                   }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <Upload className="h-16 w-16 mx-auto mb-4 opacity-90" />
+                  <Upload className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 mx-auto mb-3 sm:mb-4 opacity-90" />
                 </motion.div>
                 
                 <motion.div
@@ -240,27 +241,31 @@ export default function DyeVatUpload({ onImageUpload, isUploading = false }: Dye
                     opacity: dragActive ? 0 : 1,
                   }}
                 >
-                  <p className="text-xl font-medium mb-2">
+                  <p className="text-base sm:text-lg lg:text-xl font-medium mb-1.5 sm:mb-2">
                     {dragActive ? "放入染缸" : "投入蓝染之中"}
                   </p>
-                  <p className="text-sm opacity-80">
+                  <p className="text-xs sm:text-sm opacity-80">
                     点击或拖拽图片到此处
                   </p>
-                  <p className="text-xs opacity-60 mt-2">
+                  <p className="text-[10px] sm:text-xs opacity-60 mt-1.5 sm:mt-2">
                     支持 JPG、PNG 格式 · 最大 5MB
                   </p>
                 </motion.div>
 
-                {/* Sparkles装饰 */}
+                {/* Sparkles装饰 - 响应式位置 */}
                 {!dragActive && (
                   <>
-                    {[...Array(6)].map((_, i) => (
+                    {[...Array(6)].map((_, i) => {
+                      const angle = i * 60
+                      const radius = 'calc(50% - 20px)' // 相对于容器的半径
+                      return (
                       <motion.div
                         key={i}
-                        className="absolute"
+                        className="absolute hidden sm:block"
                         style={{
-                          left: `${30 + Math.cos(i * 60 * Math.PI / 180) * 120}px`,
-                          top: `${200 + Math.sin(i * 60 * Math.PI / 180) * 120}px`,
+                          left: `calc(50% + ${Math.cos(angle * Math.PI / 180)} * ${radius})`,
+                          top: `calc(50% + ${Math.sin(angle * Math.PI / 180)} * ${radius})`,
+                          transform: 'translate(-50%, -50%)',
                         }}
                         animate={{
                           opacity: [0, 1, 0],
@@ -273,9 +278,10 @@ export default function DyeVatUpload({ onImageUpload, isUploading = false }: Dye
                           delay: i * 0.5,
                         }}
                       >
-                        <Sparkles className="h-4 w-4 text-white" />
+                        <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                       </motion.div>
-                    ))}
+                      )
+                    })}
                   </>
                 )}
               </motion.div>
