@@ -7,13 +7,17 @@ import {
   LazyQuickAccess, 
   LazyCourseCard, 
   LazyProductCard, 
-  LazyCultureArticleCard,
   LazyCultureArticleListCard,
-  LazyMiniProfilePopover 
 } from "@/components/ui/lazy-load"
+import { 
+  BannerSkeleton, 
+  CoursesGridSkeleton, 
+  ProductsGridSkeleton, 
+  ArticlesListSkeleton 
+} from "@/components/ui/home-skeleton"
 import { usePerformanceMonitor } from "@/components/ui/performance-monitor"
 import { HeaderAuth } from "@/components/auth/header-auth"
-import { Palette, Droplets, Package, Wrench, Mail, User, ChevronRight, Bell, Sparkles } from "lucide-react"
+import { Palette, Package, Wrench, Mail, Bell, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useGlobalState } from "@/hooks/use-global-state"
@@ -27,155 +31,130 @@ const quickAccessItems = [
   { href: "/store/ai-create", icon: Sparkles, label: "AI创作", color: "bg-secondary" },
 ]
 
-// 课程数据从 Supabase 实时获取（见 HomePage 组件内）
-// 产品数据从 Supabase 实时获取（见 HomePage 组件内）
-// 文章数据从 Supabase 实时获取（见 HomePage 组件内）
+// 默认轮播图数据
+const defaultBannerItems = [
+  {
+    id: '1',
+    title: '传承千年的蓝染工艺',
+    subtitle: '跟随匠人大师，学习传统扎染技艺',
+    image: '/traditional-indigo-dyeing-master-craftsman.jpg',
+    href: '/teaching',
+  },
+  {
+    id: '2',
+    title: '探索蓝染文化',
+    subtitle: '了解传统工艺背后的文化故事',
+    image: '/silk-road-indigo.jpg',
+    href: '/culture',
+  },
+  {
+    id: '3',
+    title: '优质蓝染材料包',
+    subtitle: '从零开始，体验传统扎染之美',
+    image: '/indigo-dyeing-workshop-students-learning.jpg',
+    href: '/store/materials',
+  },
+]
 
 export default function HomePage() {
   // 使用全局状态获取未读消息和通知数量
   const { unreadMessages, unreadNotifications } = useGlobalState();
   
   // 添加性能监控
-  usePerformanceMonitor("/", 6) // 6个主要组件
+  usePerformanceMonitor("/", 6)
   
-  // 从 Supabase 获取课程数据
+  // 状态管理
   const [featuredCourses, setFeaturedCourses] = useState<any[]>([])
   const [coursesLoading, setCoursesLoading] = useState(true)
-  
-  // 从 Supabase 获取产品数据
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
-  
-  // 从 Supabase 获取文章数据
   const [cultureArticles, setCultureArticles] = useState<any[]>([])
   const [articlesLoading, setArticlesLoading] = useState(true)
-  
-  // 动态生成的轮播图数据
   const [bannerItems, setBannerItems] = useState<any[]>([])
   const [bannerLoading, setBannerLoading] = useState(true)
   
+  // 优化：使用 Promise.all 并行请求所有数据
   useEffect(() => {
-    async function fetchCourses() {
+    const supabase = createClient()
+    
+    async function fetchAllData() {
       try {
-        const supabase = createClient()
-        const { data: courses, error } = await supabase
-          .from('courses')
-          .select('id, title, instructor, duration, price, image_url')
-          .order('created_at', { ascending: false })
-          .limit(6)
-        
-        if (error) {
-          console.error('获取课程失败:', error)
-        } else {
-          // 转换为组件需要的格式
-          const formattedCourses = (courses || []).map(course => ({
+        // 并行发起所有数据请求
+        const [coursesResult, productsResult, articlesResult, bannerDataResult] = await Promise.all([
+          // 1. 获取课程
+          supabase
+            .from('courses')
+            .select('id, title, instructor, duration, price, image_url')
+            .order('created_at', { ascending: false })
+            .limit(6),
+          
+          // 2. 获取产品（包含封面图片，使用 JOIN 避免 N+1 查询）
+          supabase
+            .from('products')
+            .select('id, name, price, original_price, inventory, product_media!inner(url)')
+            .eq('status', 'published')
+            .eq('product_media.cover', true)
+            .order('created_at', { ascending: false })
+            .limit(8),
+          
+          // 3. 获取文章
+          supabase
+            .from('culture_articles')
+            .select('id, slug, title, excerpt, cover_image, read_time')
+            .eq('status', 'published')
+            .order('created_at', { ascending: false })
+            .limit(6),
+          
+          // 4. 获取轮播图数据（热门课程和文章）
+          Promise.all([
+            supabase.from('courses').select('id, title, instructor, image_url').order('created_at', { ascending: false }).limit(1).single(),
+            supabase.from('culture_articles').select('id, slug, title, cover_image').eq('status', 'published').order('created_at', { ascending: false }).limit(1).single()
+          ])
+        ])
+
+        // 处理课程数据
+        if (!coursesResult.error && coursesResult.data) {
+          const formattedCourses = coursesResult.data.map(course => ({
             id: course.id,
             title: course.title,
             instructor: course.instructor,
             duration: `${course.duration}分钟`,
-            students: Math.floor(Math.random() * 1000) + 100, // 临时使用随机数
+            students: Math.floor(Math.random() * 1000) + 100,
             thumbnail: course.image_url || '/placeholder.svg',
             isFree: course.price === 0 || course.price === '0',
             price: course.price > 0 ? course.price : undefined,
           }))
           setFeaturedCourses(formattedCourses)
         }
-      } catch (err) {
-        console.error('获取课程异常:', err)
-      } finally {
         setCoursesLoading(false)
-      }
-    }
-    
-    async function fetchProducts() {
-      try {
-        const supabase = createClient()
-        // 获取产品和它们的封面图片
-        const { data: products, error: productsError } = await supabase
-          .from('products')
-          .select(`
-            id,
-            name,
-            price,
-            original_price,
-            inventory
-          `)
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(8)
-        
-        if (productsError) {
-          console.error('获取产品失败:', productsError)
-          setProductsLoading(false)
-          return
+
+        // 处理产品数据（已通过 JOIN 获取图片）
+        if (!productsResult.error && productsResult.data) {
+          const productsWithImages = productsResult.data.map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            originalPrice: product.original_price,
+            image: product.product_media?.[0]?.url || '/placeholder.svg',
+            sales: product.inventory || 0
+          }))
+          setFeaturedProducts(productsWithImages)
         }
-        
-        // 获取每个产品的封面图片
-        const productsWithImages = await Promise.all(
-          (products || []).map(async (product) => {
-            const { data: media } = await supabase
-              .from('product_media')
-              .select('url')
-              .eq('product_id', product.id)
-              .eq('cover', true)
-              .single()
-            
-            return {
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              originalPrice: product.original_price,
-              image: media?.url || '/placeholder.svg',
-              sales: product.inventory || 0
-            }
-          })
-        )
-        
-        setFeaturedProducts(productsWithImages)
-      } catch (err) {
-        console.error('获取产品异常:', err)
-      } finally {
         setProductsLoading(false)
-      }
-    }
-    
-    async function fetchArticles() {
-      try {
-        const supabase = createClient()
-        const { data, error } = await supabase
-          .from('culture_articles')
-          .select('id, slug, title, excerpt, cover_image, read_time')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(6)
-        
-        if (error) {
-          console.error('获取文章失败:', error)
-        } else {
-          setCultureArticles(data || [])
+
+        // 处理文章数据
+        if (!articlesResult.error && articlesResult.data) {
+          setCultureArticles(articlesResult.data)
         }
-      } catch (err) {
-        console.error('获取文章异常:', err)
-      } finally {
         setArticlesLoading(false)
-      }
-    }
-    
-    async function generateBannerItems() {
-      try {
-        const supabase = createClient()
-        const items = []
+
+        // 处理轮播图数据
+        const [topCourseResult, topArticleResult] = bannerDataResult
+        const bannerItemsList: any[] = []
         
-        // 1. 获取一个热门课程作为第一张轮播图
-        const { data: topCourse } = await supabase
-          .from('courses')
-          .select('id, title, instructor, image_url')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
-        
-        if (topCourse) {
-          items.push({
+        if (topCourseResult.data) {
+          const topCourse = topCourseResult.data
+          bannerItemsList.push({
             id: '1',
             title: `跟随 ${topCourse.instructor} 老师，学习《${topCourse.title}》`,
             subtitle: '掌握传统蓝染图案设计技艺',
@@ -184,17 +163,9 @@ export default function HomePage() {
           })
         }
         
-        // 2. 获取一篇热门文章作为第二张轮播图
-        const { data: topArticle } = await supabase
-          .from('culture_articles')
-          .select('id, slug, title, cover_image')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
-        
-        if (topArticle) {
-          items.push({
+        if (topArticleResult.data) {
+          const topArticle = topArticleResult.data
+          bannerItemsList.push({
             id: '2',
             title: '探索蓝染的千年历史',
             subtitle: topArticle.title,
@@ -203,8 +174,7 @@ export default function HomePage() {
           })
         }
         
-        // 3. 添加材料包推广作为第三张轮播图
-        items.push({
+        bannerItemsList.push({
           id: '3',
           title: '优质蓝染材料包',
           subtitle: '从零开始，体验传统扎染之美',
@@ -212,51 +182,28 @@ export default function HomePage() {
           href: '/store/materials',
         })
         
-        setBannerItems(items)
+        setBannerItems(bannerItemsList.length > 0 ? bannerItemsList : defaultBannerItems)
+        setBannerLoading(false)
+
       } catch (err) {
-        console.error('生成轮播图异常:', err)
-        // 如果失败，使用默认轮播图
-        setBannerItems([
-          {
-            id: '1',
-            title: '传承千年的蓝染工艺',
-            subtitle: '跟随匠人大师，学习传统扎染技艺',
-            image: '/traditional-indigo-dyeing-master-craftsman.jpg',
-            href: '/teaching',
-          },
-          {
-            id: '2',
-            title: '探索蓝染文化',
-            subtitle: '了解传统工艺背后的文化故事',
-            image: '/silk-road-indigo.jpg',
-            href: '/culture',
-          },
-          {
-            id: '3',
-            title: '优质蓝染材料包',
-            subtitle: '从零开始，体验传统扎染之美',
-            image: '/indigo-dyeing-workshop-students-learning.jpg',
-            href: '/store/materials',
-          },
-        ])
-      } finally {
+        console.error('获取首页数据异常:', err)
+        setCoursesLoading(false)
+        setProductsLoading(false)
+        setArticlesLoading(false)
+        setBannerItems(defaultBannerItems)
         setBannerLoading(false)
       }
     }
     
-    fetchCourses()
-    fetchProducts()
-    fetchArticles()
-    generateBannerItems()
+    fetchAllData()
   }, [])
   
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header Bar with Search and Icons - Now at the top */}
+      {/* Header Bar */}
       <section className="sticky top-0 z-50 bg-gradient-to-r from-background via-background/98 to-background/95 backdrop-blur-md py-3 border-b border-border/30 shadow-lg">
         <div className="max-w-7xl px-4 mx-auto">
           <div className="flex items-center gap-4">
-            {/* Left side - Logo and Brand */}
             <Link href="/" className="flex items-center gap-2.5 mr-3 group">
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:scale-105">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -272,12 +219,10 @@ export default function HomePage() {
               </div>
             </Link>
             
-            {/* Center - Search Bar */}
             <div className="flex-1 max-w-xl mx-auto">
               <SearchBar />
             </div>
             
-            {/* Right side - Icons */}
             <div className="flex items-center gap-3">
               <HeaderAuth />
               <Link href="/messages" className="p-2.5 rounded-full hover:bg-muted/80 hover:scale-105 transition-all duration-200 group relative">
@@ -303,11 +248,7 @@ export default function HomePage() {
 
       {/* Banner Carousel */}
       <section className="max-w-7xl mx-auto px-4 mb-6">
-        {bannerLoading ? (
-          <div className="w-full h-48 bg-gray-100 animate-pulse rounded-2xl" />
-        ) : (
-          <LazyBannerCarousel items={bannerItems} />
-        )}
+        {bannerLoading ? <BannerSkeleton /> : <LazyBannerCarousel items={bannerItems} />}
       </section>
 
       {/* Quick Access */}
@@ -319,11 +260,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 mb-8">
         <SectionHeader title="教学精选" href="/teaching" />
         {coursesLoading ? (
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="min-w-[280px] h-72 bg-gray-100 animate-pulse rounded-lg" />
-            ))}
-          </div>
+          <CoursesGridSkeleton count={6} />
         ) : featuredCourses.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5">
             {featuredCourses.map((course: any) => (
@@ -331,9 +268,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            暂无课程
-          </div>
+          <div className="text-center py-8 text-muted-foreground">暂无课程</div>
         )}
       </section>
 
@@ -341,11 +276,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 mb-8">
         <SectionHeader title="文创臻品" href="/store" />
         {productsLoading ? (
-          <div className="grid grid-cols-2 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-lg" />
-            ))}
-          </div>
+          <ProductsGridSkeleton count={8} />
         ) : featuredProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-5">
             {featuredProducts.map((product: any) => (
@@ -353,27 +284,15 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            暂无产品
-          </div>
+          <div className="text-center py-8 text-muted-foreground">暂无产品</div>
         )}
       </section>
 
-      {/* Culture Section - B站风格横向列表 */}
+      {/* Culture Section */}
       <section className="max-w-7xl mx-auto px-4 mb-8">
         <SectionHeader title="文化速读" href="/culture" />
         {articlesLoading ? (
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex gap-4 p-4 bg-gray-100 animate-pulse rounded-lg">
-                <div className="w-32 sm:w-40 h-24 bg-gray-200 rounded" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 bg-gray-200 rounded" />
-                  <div className="h-4 w-1/2 bg-gray-200 rounded" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <ArticlesListSkeleton count={6} />
         ) : cultureArticles.length > 0 ? (
           <div className="space-y-3">
             {cultureArticles.map((article) => (
@@ -390,9 +309,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            暂无文章
-          </div>
+          <div className="text-center py-8 text-muted-foreground">暂无文章</div>
         )}
       </section>
 

@@ -7,6 +7,7 @@ import { Suspense } from "react"
 import { AuthLayout } from "@/components/auth/auth-layout"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { PageLoadingBar } from "@/components/ui/page-loading"
 import "./globals.css"
 
 const notoSansSC = Noto_Sans_SC({
@@ -30,6 +31,9 @@ export default function RootLayout({
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={`font-sans ${notoSansSC.variable} ${GeistMono.variable}`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Suspense fallback={null}>
+            <PageLoadingBar />
+          </Suspense>
           <AuthLayout>
             <Suspense fallback={null}>{children}</Suspense>
           </AuthLayout>

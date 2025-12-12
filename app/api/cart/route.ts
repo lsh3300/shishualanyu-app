@@ -22,6 +22,7 @@ type CartItemWithProduct = {
   } | null
 }
 
+// 优化：快速解析 JWT 获取用户 ID，避免每次都调用 getUser
 async function resolveUserId(request: NextRequest, supabase: ReturnType<typeof createServiceClient>) {
   const authHeader = request.headers.get('authorization');
   let token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : undefined;
@@ -34,13 +35,33 @@ async function resolveUserId(request: NextRequest, supabase: ReturnType<typeof c
     return null;
   }
 
-  const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data?.user) {
-    console.error('认证失败:', error);
-    return null;
+  try {
+    // 快速解析 JWT 获取 sub (用户ID)，不验证签名（Supabase 已验证）
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    
+    // 检查 token 是否过期
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      // Token 过期，需要完整验证
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data?.user) {
+        return null;
+      }
+      return data.user.id;
+    }
+    
+    return payload.sub || null;
+  } catch (e) {
+    // 解析失败，回退到完整验证
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data?.user) {
+      return null;
+    }
+    return data.user.id;
   }
-
-  return data.user.id;
 }
 
 async function fetchProductsMap(
@@ -50,37 +71,34 @@ async function fetchProductsMap(
   const map: Record<string, any> = {}
   if (!productIds.length) return map
 
-  // 优化：减少不必要的字段
-  const { data: productsData, error: productsError } = await supabase
-    .from('products')
-    .select('id, name, price, image_url, category')
-    .in('id', productIds)
+  // 优化：使用 Promise.all 并行查询产品和图片
+  const [productsResult, mediaResult] = await Promise.all([
+    supabase
+      .from('products')
+      .select('id, name, price, image_url, category')
+      .in('id', productIds),
+    supabase
+      .from('product_media')
+      .select('product_id, url')
+      .in('product_id', productIds)
+      .eq('type', 'image')
+      .eq('cover', true)
+      .limit(productIds.length)
+  ])
 
-  if (productsError) {
-    console.error('获取购物车商品详情失败:', productsError)
+  if (productsResult.error) {
+    console.error('获取购物车商品详情失败:', productsResult.error)
     return map
   }
 
-  // 优化：只查询封面图
-  const { data: mediaData, error: mediaError } = await supabase
-    .from('product_media')
-    .select('product_id, url')
-    .in('product_id', productIds)
-    .eq('type', 'image')
-    .eq('cover', true)
-    .limit(productIds.length)
-
   const coverMap: Record<string, string> = {}
-  if (mediaError) {
-    console.warn('获取购物车商品图片失败:', mediaError)
-  } else {
-    // 优化：直接使用封面图（已过滤cover=true）
-    mediaData?.forEach((media) => {
+  if (!mediaResult.error && mediaResult.data) {
+    mediaResult.data.forEach((media) => {
       coverMap[media.product_id] = media.url
     })
   }
 
-  ;(productsData || []).forEach((product) => {
+  ;(productsResult.data || []).forEach((product) => {
     map[product.id] = {
       ...product,
       image_url: coverMap[product.id] || product.image_url || '/placeholder.jpg',

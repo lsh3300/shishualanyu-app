@@ -49,7 +49,9 @@ export interface AddToCartItem {
 // 请求去重：防止多个组件同时调用
 let pendingRequest: Promise<any> | null = null
 let lastFetchTime = 0
-const FETCH_COOLDOWN = 1000 // 1秒冷却时间
+let cachedCartData: any = null
+const FETCH_COOLDOWN = 5000 // 5秒冷却时间（增加以减少请求）
+const CACHE_DURATION = 30000 // 30秒缓存有效期
 
 export function useCart() {
   const [cartData, setCartData] = useState<CartData | null>(null)
@@ -82,21 +84,29 @@ export function useCart() {
     }
   }, [])
 
-  // 获取购物车数据 - 优化：添加去重和冷却
-  const fetchCart = useCallback(async () => {
+  // 获取购物车数据 - 优化：添加去重、冷却和缓存
+  const fetchCart = useCallback(async (forceRefresh = false) => {
     if (!user) {
       setCartData({ totalItems: 0, totalPrice: 0, items: [] })
       setLoading(false)
       return
     }
 
-    // 防抖：如果距离上次请求不到1秒，直接返回
     const now = Date.now()
-    if (now - lastFetchTime < FETCH_COOLDOWN) {
+    
+    // 优化：如果有缓存且未过期，直接使用缓存
+    if (!forceRefresh && cachedCartData && now - lastFetchTime < CACHE_DURATION) {
+      setCartData(cachedCartData)
+      setLoading(false)
       return
     }
 
-    // 如果有正在进行的请求，直接返回
+    // 防抖：如果距离上次请求不到冷却时间，直接返回
+    if (!forceRefresh && now - lastFetchTime < FETCH_COOLDOWN) {
+      return
+    }
+
+    // 如果有正在进行的请求，等待它完成
     if (pendingRequest) {
       try {
         await pendingRequest
@@ -142,18 +152,15 @@ export function useCart() {
       if (data) {
         const normalized = normalizeCartResponse(data)
         setCartData(normalized)
+        cachedCartData = normalized // 更新缓存
       }
     } catch (err) {
       console.error('获取购物车数据错误:', err)
       setError(err instanceof Error ? err.message : '获取购物车数据失败')
-      toast({
-        title: "错误",
-        description: err instanceof Error ? err.message : '获取购物车数据失败',
-        variant: "destructive",
-      })
+      // 优化：减少错误提示的频率，避免打扰用户
     } finally {
       setLoading(false)
-      pendingRequest = null // 清除pending状态
+      pendingRequest = null
     }
   }, [user, router, getToken, normalizeCartResponse])
 

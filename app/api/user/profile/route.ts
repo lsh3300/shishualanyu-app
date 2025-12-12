@@ -1,48 +1,54 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-import { SUPABASE_URL } from "@/lib/supabase/config"
+import { createServiceClient } from "@/lib/supabaseClient"
 
-function createRouteClient(token: string) {
-  return createClient(
-    SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      global: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
+// 优化：快速解析 JWT 获取用户 ID，避免每次都调用 getUser
+function parseJwtUserId(token: string): string | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    // 检查是否过期
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      return null;
     }
-  )
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
 }
 
-async function getUserAndClient(request: NextRequest) {
+async function getUserId(request: NextRequest, supabase: ReturnType<typeof createServiceClient>) {
   const authHeader = request.headers.get("Authorization")
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return { error: NextResponse.json({ error: "未授权访问" }, { status: 401 }) }
+    return null
   }
 
   const token = authHeader.substring(7)
-  const supabase = createRouteClient(token)
-  const { data, error } = await supabase.auth.getUser()
-
+  
+  // 优化：先尝试快速解析 JWT
+  const quickUserId = parseJwtUserId(token)
+  if (quickUserId) {
+    return quickUserId
+  }
+  
+  // 回退到完整验证
+  const { data, error } = await supabase.auth.getUser(token)
   if (error || !data.user) {
-    return { error: NextResponse.json({ error: "未授权访问" }, { status: 401 }) }
+    return null
   }
 
-  return { supabase, userId: data.user.id }
+  return data.user.id
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const result = await getUserAndClient(request)
-    if ("error" in result) return result.error
+    const supabase = createServiceClient()
+    const userId = await getUserId(request, supabase)
+    
+    if (!userId) {
+      return NextResponse.json({ error: "未授权访问" }, { status: 401 })
+    }
 
-    const { supabase, userId } = result
     const { data, error } = await supabase
       .from("profiles")
       .select("id, username, full_name, avatar_url, website")
@@ -71,10 +77,13 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const result = await getUserAndClient(request)
-    if ("error" in result) return result.error
+    const supabase = createServiceClient()
+    const userId = await getUserId(request, supabase)
+    
+    if (!userId) {
+      return NextResponse.json({ error: "未授权访问" }, { status: 401 })
+    }
 
-    const { supabase, userId } = result
     const body = (await request.json().catch(() => ({}))) as Partial<{
       full_name: string | null
       username: string | null

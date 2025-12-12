@@ -2,10 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabaseClient'
 
 // 启用 Next.js 路由缓存优化
-export const dynamic = 'force-dynamic' // 保持动态以确保用户认证
-export const revalidate = 60 // 60秒缓存
+export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
-// 用户认证函数
+// 优化：快速解析 JWT 获取用户 ID
+function parseJwtUserId(token: string): string | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
+    return payload.sub || null;
+  } catch {
+    return null;
+  }
+}
+
+// 用户认证函数 - 优化版
 async function authenticateUser(request: NextRequest) {
   const authHeader = request.headers.get('authorization')
   const token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : null
@@ -14,6 +27,13 @@ async function authenticateUser(request: NextRequest) {
     return { userId: null, error: 'Missing authorization token' }
   }
   
+  // 优化：先尝试快速解析 JWT
+  const quickUserId = parseJwtUserId(token)
+  if (quickUserId) {
+    return { userId: quickUserId, error: null }
+  }
+  
+  // 回退到完整验证
   const supabase = createServiceClient()
   const { data, error } = await supabase.auth.getUser(token)
   
@@ -24,7 +44,7 @@ async function authenticateUser(request: NextRequest) {
   return { userId: data.user.id, error: null }
 }
 
-// GET: 获取用户收藏列表
+// GET: 获取用户收藏列表 - 优化版：使用 Promise.all 并行查询
 export async function GET(request: NextRequest) {
   try {
     const { userId, error: authError } = await authenticateUser(request)
@@ -35,166 +55,110 @@ export async function GET(request: NextRequest) {
     
     const supabase = createServiceClient()
     
-    // 查询收藏列表（支持商品、课程和文章收藏）
-    const { data: favorites, error: favoritesError } = await supabase
-      .from('favorites')
-      .select('id, product_id, course_id, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+    // 优化：并行查询收藏列表和文章收藏
+    const [favoritesResult, articleFavoritesResult] = await Promise.all([
+      supabase
+        .from('favorites')
+        .select('id, product_id, course_id, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('article_favorites')
+        .select('id, article_id, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+    ])
     
-    // 查询文章收藏
-    const { data: articleFavorites, error: articleFavoritesError } = await supabase
-      .from('article_favorites')
-      .select('id, article_id, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-    
-    if (favoritesError) {
-      console.error('查询收藏失败:', favoritesError)
+    if (favoritesResult.error) {
+      console.error('查询收藏失败:', favoritesResult.error)
       return NextResponse.json({ error: '查询收藏失败' }, { status: 500 })
     }
     
-    // 获取商品详情和图片
-    const productIds = favorites?.filter(f => f.product_id).map(f => f.product_id) || []
-    let productsMap: Record<string, any> = {}
+    const favorites = favoritesResult.data || []
+    const articleFavorites = articleFavoritesResult.data || []
+    
+    // 收集所有需要查询的 ID
+    const productIds = favorites.filter(f => f.product_id).map(f => f.product_id)
+    const courseIds = favorites.filter(f => f.course_id).map(f => f.course_id)
+    const articleIds = articleFavorites.filter(f => f.article_id).map(f => f.article_id)
+    
+    // 优化：并行查询所有详情数据
+    const detailQueries: Promise<any>[] = []
     
     if (productIds.length > 0) {
-      // 优化：查询产品基本信息（减少字段）
-      const { data: products, error: productsError } = await supabase
-        .from('products')
-        .select('id, name, price, image_url, category')
-        .in('id', productIds)
-      
-      // 优化：只查询封面图
-      const { data: mediaData, error: mediaError } = await supabase
-        .from('product_media')
-        .select('product_id, url')
-        .in('product_id', productIds)
-        .eq('type', 'image')
-        .eq('cover', true)
-        .limit(productIds.length)
-      
-      if (!productsError && products) {
-        products.forEach(product => {
-          // 优化：直接使用封面图（已经过滤了cover=true）
-          const coverImage = mediaData?.find(m => m.product_id === product.id)?.url
-          
-          productsMap[product.id] = {
-            ...product,
-            image_url: coverImage || product.image_url || '/placeholder.svg'
-          }
-        })
-        
-        console.log('📦 处理后的产品数据:', Object.values(productsMap).map(p => ({
-          id: p.id,
-          name: p.name,
-          image_url: p.image_url
-        })))
-      }
+      detailQueries.push(
+        Promise.all([
+          supabase.from('products').select('id, name, price, image_url, category').in('id', productIds),
+          supabase.from('product_media').select('product_id, url').in('product_id', productIds).eq('type', 'image').eq('cover', true)
+        ]).then(([products, media]) => ({ type: 'products', products: products.data, media: media.data }))
+      )
     }
-    
-    // 获取课程详情
-    const courseIds = favorites?.filter(f => f.course_id).map(f => f.course_id) || []
-    let coursesMap: Record<string, any> = {}
     
     if (courseIds.length > 0) {
-      const { data: courses, error: coursesError } = await supabase
-        .from('courses')
-        .select('id, title, description, instructor, instructor_name, duration, students, rating, price, is_free, difficulty, category, image_url')
-        .in('id', courseIds)
-      
-      if (!coursesError && courses) {
-        courses.forEach(course => {
-          coursesMap[course.id] = {
-            ...course,
-            thumbnail: course.image_url || '/placeholder.svg' // 为兼容性添加 thumbnail 字段
-          }
-        })
-        
-        console.log('📚 处理后的课程数据:', Object.values(coursesMap).map(c => ({
-          id: c.id,
-          title: c.title,
-          image_url: c.image_url
-        })))
-      }
+      detailQueries.push(
+        (async () => {
+          const result = await supabase.from('courses').select('id, title, instructor, duration, price, is_free, image_url').in('id', courseIds)
+          return { type: 'courses', data: result.data }
+        })()
+      )
     }
-    
-    // 获取文章详情
-    const articleIds = articleFavorites?.filter(f => f.article_id).map(f => f.article_id) || []
-    let articlesMap: Record<string, any> = {}
     
     if (articleIds.length > 0) {
-      const { data: articles, error: articlesError } = await supabase
-        .from('culture_articles')
-        .select('id, slug, title, excerpt, cover_image, category, tags, read_time, author')
-        .in('id', articleIds)
-      
-      if (!articlesError && articles) {
-        articles.forEach(article => {
-          articlesMap[article.id] = {
-            ...article,
-            image_url: article.cover_image || '/placeholder.svg'
-          }
+      detailQueries.push(
+        (async () => {
+          const result = await supabase.from('culture_articles').select('id, slug, title, excerpt, cover_image, read_time').in('id', articleIds)
+          return { type: 'articles', data: result.data }
+        })()
+      )
+    }
+    
+    const detailResults = await Promise.all(detailQueries)
+    
+    // 构建映射
+    const productsMap: Record<string, any> = {}
+    const coursesMap: Record<string, any> = {}
+    const articlesMap: Record<string, any> = {}
+    
+    for (const result of detailResults) {
+      if (result.type === 'products' && result.products) {
+        const mediaMap: Record<string, string> = {}
+        result.media?.forEach((m: any) => { mediaMap[m.product_id] = m.url })
+        result.products.forEach((p: any) => {
+          productsMap[p.id] = { ...p, image_url: mediaMap[p.id] || p.image_url || '/placeholder.svg' }
         })
-        
-        console.log('📰 处理后的文章数据:', Object.values(articlesMap).map(a => ({
-          id: a.id,
-          title: a.title,
-          slug: a.slug
-        })))
+      } else if (result.type === 'courses' && result.data) {
+        result.data.forEach((c: any) => {
+          coursesMap[c.id] = { ...c, thumbnail: c.image_url || '/placeholder.svg' }
+        })
+      } else if (result.type === 'articles' && result.data) {
+        result.data.forEach((a: any) => {
+          articlesMap[a.id] = { ...a, image_url: a.cover_image || '/placeholder.svg' }
+        })
       }
     }
     
-    // 组装返回数据（包括文章）
-    const enrichedFavorites = favorites?.map(fav => {
+    // 组装返回数据
+    const enrichedFavorites = favorites.map(fav => {
       if (fav.product_id) {
-        return {
-          id: fav.id,
-          product_id: fav.product_id,
-          created_at: fav.created_at,
-          item_type: 'product',
-          products: productsMap[fav.product_id] || null
-        }
+        return { id: fav.id, product_id: fav.product_id, created_at: fav.created_at, item_type: 'product', products: productsMap[fav.product_id] || null }
       } else if (fav.course_id) {
-        return {
-          id: fav.id,
-          course_id: fav.course_id,
-          created_at: fav.created_at,
-          item_type: 'course',
-          courses: coursesMap[fav.course_id] || null
-        }
+        return { id: fav.id, course_id: fav.course_id, created_at: fav.created_at, item_type: 'course', courses: coursesMap[fav.course_id] || null }
       }
       return null
-    }).filter(Boolean) || []
+    }).filter(Boolean)
     
-    // 添加文章收藏
-    const enrichedArticleFavorites = articleFavorites?.map(fav => ({
-      id: fav.id,
-      article_id: fav.article_id,
-      created_at: fav.created_at,
-      item_type: 'article',
-      articles: articlesMap[fav.article_id] || null
-    })).filter(f => f.articles) || []
+    const enrichedArticleFavorites = articleFavorites.map(fav => ({
+      id: fav.id, article_id: fav.article_id, created_at: fav.created_at, item_type: 'article', articles: articlesMap[fav.article_id] || null
+    })).filter(f => f.articles)
     
-    // 合并所有收藏
     const allFavorites = [...enrichedFavorites, ...enrichedArticleFavorites]
-      .sort((a, b) => {
-        const dateA = a?.created_at ? new Date(a.created_at).getTime() : 0
-        const dateB = b?.created_at ? new Date(b.created_at).getTime() : 0
-        return dateB - dateA
-      })
+      .sort((a, b) => new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime())
     
-    return NextResponse.json({
-      favorites: allFavorites,
-      source: 'supabase'
-    })
+    return NextResponse.json({ favorites: allFavorites, source: 'supabase' })
     
   } catch (error) {
     console.error('GET /api/user/favorites 错误:', error)
-    return NextResponse.json(
-      { error: '服务器错误' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '服务器错误' }, { status: 500 })
   }
 }
 

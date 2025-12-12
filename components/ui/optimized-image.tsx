@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, memo } from "react"
 import Image, { ImageProps, StaticImageData } from "next/image"
 import { cn } from "@/lib/utils"
-import { imageConfig, generateSrcSet, generateSizes } from "@/lib/image-config"
+import { imageConfig, generateSizes } from "@/lib/image-config"
 
 interface OptimizedImageProps extends Omit<ImageProps, "onLoad" | "onError"> {
   fallback?: string
@@ -15,7 +15,8 @@ interface OptimizedImageProps extends Omit<ImageProps, "onLoad" | "onError"> {
   placeholder?: "blur" | "empty"
 }
 
-export function OptimizedImage({
+// 使用 memo 优化重渲染
+export const OptimizedImage = memo(function OptimizedImage({
   src,
   alt,
   fallback = "/placeholder.svg",
@@ -45,7 +46,7 @@ export function OptimizedImage({
         }
       },
       {
-        rootMargin: "50px", // 开始提前50px加载图片
+        rootMargin: "200px", // 提前200px加载图片，减少白屏
       }
     )
 
@@ -67,41 +68,23 @@ export function OptimizedImage({
     setHasError(true)
   }
 
-  // 生成优化的图片URL
-  const getOptimizedSrc = (originalSrc: string | StaticImageData | any) => {
-    // 如果是外部URL或StaticImport，直接返回
-    if (typeof originalSrc !== "string" || originalSrc.startsWith("http")) {
-      return originalSrc
-    }
-
-    // 如果是本地图片，添加优化参数
-    const config = imageConfig.sizes[usage]
-    const optimizedWidth = props.width || config.width
-    const optimizedHeight = props.height || config.height
-
-    return `${originalSrc}?w=${optimizedWidth}&h=${optimizedHeight}&format=webp&q=${quality}`
+  // 检查是否是 Supabase 存储的图片
+  const isSupabaseImage = (url: string) => {
+    return typeof url === 'string' && url.includes('supabase.co/storage')
   }
 
-  // 生成模糊占位符
-  const generateBlurDataURL = () => {
-    if (blurDataURL) return blurDataURL
+  // 检查是否是外部图片
+  const isExternalImage = (url: string | StaticImageData) => {
+    if (typeof url !== 'string') return false
+    return url.startsWith('http://') || url.startsWith('https://')
+  }
 
-    // 生成一个简单的SVG占位符
-    const width = props.width || 20
-    const height = props.height || 20
-    const svg = `
-      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#f3f4f6"/>
-        <rect width="100%" height="100%" fill="url(#placeholder)"/>
-        <defs>
-          <pattern id="placeholder" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1" fill="#e5e7eb"/>
-            <circle cx="12" cy="12" r="1" fill="#e5e7eb"/>
-          </pattern>
-        </defs>
-      </svg>
-    `
-    return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
+  // 获取图片源
+  const getImageSrc = (originalSrc: string | StaticImageData) => {
+    if (typeof originalSrc !== 'string') return originalSrc
+    // 对于空字符串或无效URL，返回fallback
+    if (!originalSrc || originalSrc === '') return fallback
+    return originalSrc
   }
 
   // 如果图片不在视口内且需要懒加载，显示占位符
@@ -110,7 +93,7 @@ export function OptimizedImage({
       <div
         ref={imgRef}
         className={cn(
-          "bg-muted animate-pulse rounded-md",
+          "bg-muted/50 rounded-md",
           placeholderClassName,
           className
         )}
@@ -126,41 +109,44 @@ export function OptimizedImage({
         src={fallback}
         alt={alt}
         className={cn("object-cover", className)}
-        onError={() => setHasError(true)}
         unoptimized
         {...props}
       />
     )
   }
 
+  const imageSrc = getImageSrc(src)
+  // 对于 Supabase 图片，使用 unoptimized 避免 Next.js 再次处理
+  // 对于本地图片，启用 Next.js 优化
+  const shouldUnoptimize = isExternalImage(imageSrc)
+
   return (
-    <div className={cn("relative overflow-hidden", props.fill ? "w-full h-full" : undefined, className)}>
+    <div ref={imgRef} className={cn("relative overflow-hidden", props.fill ? "w-full h-full" : undefined)}>
       {isLoading && (
         <div
           className={cn(
-            "absolute inset-0 bg-muted animate-pulse rounded-md z-10",
+            "absolute inset-0 bg-muted/50 rounded-md z-10",
             placeholderClassName
           )}
         />
       )}
       <Image
-        src={getOptimizedSrc(src)}
+        src={imageSrc}
         alt={alt}
         className={cn(
-          "transition-opacity duration-500",
+          "transition-opacity duration-300",
           isLoading ? "opacity-0" : "opacity-100",
           className
         )}
         onLoad={handleLoad}
         onError={handleError}
-        placeholder={placeholder}
-        blurDataURL={placeholder === "blur" ? generateBlurDataURL() : undefined}
         priority={priority}
         quality={quality}
         sizes={generateSizes(usage)}
-        unoptimized
+        unoptimized={shouldUnoptimize}
+        loading={priority ? "eager" : "lazy"}
         {...props}
       />
     </div>
   )
-}
+})
