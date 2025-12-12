@@ -131,8 +131,10 @@ export interface ShopListing {
   // 关联的作品信息
   cloth?: {
     id: string
-    cloth_data: any
-    score_data: ClothScore
+    layers?: any[] // 作品图层数据
+    cloth_data?: any // 兼容旧格式
+    score_data?: ClothScore
+    status?: string
     created_at: string
   }
 }
@@ -319,6 +321,8 @@ export interface RecommendedShopsResponse {
 export interface InventoryCapacity {
   current: number
   max: number
+  recentCount: number
+  maxRecent: number
   expansion_cost?: number // 扩容价格
 }
 

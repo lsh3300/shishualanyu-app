@@ -1,210 +1,91 @@
 /**
- * 上架API
- * POST /api/listings/create
+ * 上架作品API
+ * Create Listing API
  * 
- * 从背包上架作品到商店
+ * POST /api/listings/create - 上架作品到商店
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabaseClient'
+import { createListing, calculatePriceFromScore } from '@/lib/services/shopService'
+import { ValidationError, createErrorResponse } from '@/lib/game/errors'
+import type { ScoreGrade } from '@/types/game.types'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    // 获取当前用户
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
+    // 使用 Authorization header 认证
+    const authHeader = request.headers.get('authorization')
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : null
+    
+    if (!token) {
       return NextResponse.json(
-        { error: '未登录' },
+        { error: '未授权访问', code: 'UNAUTHORIZED' },
         { status: 401 }
       )
     }
+    
+    const supabase = createServiceClient()
+    const { data, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !data?.user) {
+      return NextResponse.json(
+        { error: '认证失败', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      )
+    }
+    
+    const userId = data.user.id
+    console.log('🏪 上架作品，用户ID:', userId)
 
-    // 解析请求body
     const body = await request.json()
-    const { cloth_id, custom_price } = body
+    const { cloth_id, price, is_featured, score_data } = body
 
+    // 参数验证
     if (!cloth_id) {
-      return NextResponse.json(
-        { error: '缺少cloth_id参数' },
-        { status: 400 }
+      throw new ValidationError('缺少 cloth_id 参数', 'cloth_id')
+    }
+
+    // 如果没有提供价格，根据评分计算建议价格
+    let finalPrice = price
+    if (!finalPrice && score_data) {
+      finalPrice = calculatePriceFromScore(
+        score_data.total_score,
+        score_data.grade as ScoreGrade
       )
     }
 
-    // 1. 检查作品是否存在且属于当前用户
-    const { data: cloth, error: clothError } = await supabase
-      .from('cloths')
-      .select('*')
-      .eq('id', cloth_id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (clothError || !cloth) {
-      return NextResponse.json(
-        { error: '作品不存在或无权操作' },
-        { status: 404 }
-      )
+    if (!finalPrice || finalPrice <= 0) {
+      throw new ValidationError('价格必须大于0', 'price')
     }
 
-    // 2. 检查作品是否已上架
-    const { data: existingListing } = await supabase
-      .from('shop_listings')
-      .select('id')
-      .eq('cloth_id', cloth_id)
-      .eq('status', 'active')
-      .single()
+    // 调用服务上架
+    const result = await createListing(
+      userId,
+      cloth_id,
+      finalPrice,
+      is_featured || false
+    )
 
-    if (existingListing) {
-      return NextResponse.json(
-        { error: '该作品已上架' },
-        { status: 400 }
-      )
+    if (!result.success) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: 'LISTING_ERROR',
+          message: result.message,
+          userMessage: result.message
+        }
+      }, { status: 400 })
     }
-
-    // 3. 获取作品评分
-    const { data: score, error: scoreError } = await supabase
-      .from('cloth_scores')
-      .select('*')
-      .eq('cloth_id', cloth_id)
-      .single()
-
-    if (scoreError || !score) {
-      return NextResponse.json(
-        { error: '作品未评分，无法上架' },
-        { status: 400 }
-      )
-    }
-
-    // 4. 获取用户商店
-    const { data: shop, error: shopError } = await supabase
-      .from('user_shops')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
-
-    // 如果商店不存在，创建一个
-    let shopId: string
-    if (shopError || !shop) {
-      const { data: newShop, error: createShopError } = await supabase
-        .from('user_shops')
-        .insert({
-          user_id: user.id,
-          shop_name: `${user.email?.split('@')[0]}的蓝染坊`,
-          description: '欢迎来到我的蓝染工坊！',
-          theme: 'indigo'
-        })
-        .select()
-        .single()
-
-      if (createShopError || !newShop) {
-        return NextResponse.json(
-          { error: '创建商店失败' },
-          { status: 500 }
-        )
-      }
-      shopId = newShop.id
-    } else {
-      shopId = shop.id
-    }
-
-    // 5. 检查商店上架数量限制
-    const { count: listingCount } = await supabase
-      .from('shop_listings')
-      .select('*', { count: 'exact', head: true })
-      .eq('shop_id', shopId)
-      .eq('status', 'active')
-
-    const maxListings = shop?.max_listings || 5
-    if (listingCount && listingCount >= maxListings) {
-      return NextResponse.json(
-        { 
-          error: `已达到上架数量上限（${maxListings}件）`,
-          message: '请下架部分作品或扩充上架位'
-        },
-        { status: 400 }
-      )
-    }
-
-    // 6. 计算价格（基于评分）
-    const calculatedPrice = calculatePrice(score.grade, score.total_score)
-    const finalPrice = custom_price || calculatedPrice
-
-    // 7. 创建上架记录
-    const { data: listing, error: listingError } = await supabase
-      .from('shop_listings')
-      .insert({
-        shop_id: shopId,
-        cloth_id: cloth_id,
-        price: finalPrice,
-        status: 'active'
-      })
-      .select()
-      .single()
-
-    if (listingError || !listing) {
-      return NextResponse.json(
-        { error: '上架失败' },
-        { status: 500 }
-      )
-    }
-
-    // 8. 更新作品状态
-    await supabase
-      .from('cloths')
-      .update({ status: 'listed' })
-      .eq('id', cloth_id)
-
-    // 9. 更新商店统计
-    await supabase.rpc('increment_shop_listing_count', {
-      p_shop_id: shopId
-    })
 
     return NextResponse.json({
       success: true,
-      data: {
-        listing_id: listing.id,
-        cloth_id: cloth_id,
-        price: finalPrice,
-        calculated_price: calculatedPrice,
-        grade: score.grade
-      },
-      message: '上架成功！'
+      data: result.listing,
+      message: result.message
     })
 
-  } catch (error) {
-    console.error('Error creating listing:', error)
-    return NextResponse.json(
-      { error: '上架失败，请稍后重试' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    console.error('上架API错误:', error)
+    const { status, body } = createErrorResponse(error)
+    return NextResponse.json(body, { status })
   }
-}
-
-/**
- * 根据评分计算价格
- */
-function calculatePrice(grade: string, totalScore: number): number {
-  // 基础价格
-  const basePrice = 100
-
-  // 等级系数
-  const gradeMultipliers: Record<string, number> = {
-    'SSS': 3.0,
-    'SS': 2.5,
-    'S': 2.0,
-    'A': 1.5,
-    'B': 1.0,
-    'C': 0.5
-  }
-
-  const multiplier = gradeMultipliers[grade] || 1.0
-
-  // 计算价格
-  const price = Math.round(basePrice * multiplier)
-
-  // 加上分数浮动（每10分+10币）
-  const scoreBonus = Math.floor(totalScore / 10) * 10
-
-  return price + scoreBonus
 }

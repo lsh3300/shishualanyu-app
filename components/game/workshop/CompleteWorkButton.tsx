@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from "sonner"
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScoreResultDialog } from '@/components/game/scoring/ScoreResultDialog'
@@ -41,6 +42,11 @@ export function CompleteWorkButton({
           // 评分API已自动保存到最近创作，无需额外调用
           console.log('✅ 作品评分与保存成功')
           
+          toast.success("作品评分完成，已保存到最近创作", {
+            position: "bottom-right",
+            duration: 3000
+          })
+          
           setScoreResult(data)
           setShowScoreDialog(true)
           // 刷新玩家档案数据
@@ -48,7 +54,10 @@ export function CompleteWorkButton({
         },
         onError: (err) => {
           console.error('评分失败:', err)
-          alert(`评分失败: ${err.message}`)
+          toast.error(`评分失败: ${err.message}`, {
+            position: "bottom-right",
+            duration: 5000
+          })
         }
       })
     } catch (err) {

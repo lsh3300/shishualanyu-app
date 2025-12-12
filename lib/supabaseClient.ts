@@ -1,8 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { SUPABASE_URL } from '@/lib/supabase/config'
 
-// 获取客户端 Supabase 实例
+// 单例模式 - 确保浏览器端只有一个 Supabase 实例
+let browserClient: SupabaseClient | null = null
+
+// 获取客户端 Supabase 实例（单例）
 export function getSupabaseClient() {
+	// 如果已有实例，直接返回
+	if (browserClient) {
+		return browserClient
+	}
+
 	const supabaseUrl = SUPABASE_URL
 	const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
 
@@ -10,7 +18,8 @@ export function getSupabaseClient() {
 		throw new Error('缺少Supabase环境变量。请检查.env.local文件中的NEXT_PUBLIC_SUPABASE_ANON_KEY。')
 	}
 
-	return createClient(supabaseUrl, supabaseAnonKey)
+	browserClient = createClient(supabaseUrl, supabaseAnonKey)
+	return browserClient
 }
 
 // 服务端客户端（仅在API路由中使用）

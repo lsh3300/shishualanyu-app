@@ -2,12 +2,15 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { toast } from "sonner"
+import { Loader2 } from 'lucide-react'
 import type { ScoreDimensions, ScoreGrade } from '@/types/game.types'
 import { 
   getGradeColor, 
   getGradeDescription,
   getGradeRewards 
 } from '@/lib/game/scoring/score-calculator'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 
 interface ScoreResultDialogProps {
   isOpen: boolean
@@ -70,9 +73,23 @@ export function ScoreResultDialog({
 
     setIsSaving(true)
     try {
+      // 获取 access token
+      const supabase = getSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        setSaveMessage('❌ 请先登录')
+        toast.error("请先登录", { position: "bottom-right", duration: 3000 })
+        setIsSaving(false)
+        return
+      }
+      
       const response = await fetch('/api/inventory/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({ cloth_id: clothId })
       })
 
@@ -80,15 +97,27 @@ export function ScoreResultDialog({
       
       if (data.success) {
         setSaveMessage('✅ 已保存到背包')
+        toast.success("作品已保存到背包", {
+          position: "bottom-right",
+          duration: 3000
+        })
         // 2秒后关闭弹窗
         setTimeout(() => {
           onClose()
         }, 2000)
       } else {
         setSaveMessage(`❌ ${data.message || '保存失败'}`)
+        toast.error(`保存失败: ${data.message || 'API调用失败'}`, {
+          position: "bottom-right",
+          duration: 5000
+        })
       }
     } catch (error) {
       setSaveMessage('❌ 保存失败，请稍后重试')
+      toast.error("API调用失败: 网络错误", {
+        position: "bottom-right",
+        duration: 5000
+      })
     } finally {
       setIsSaving(false)
     }
@@ -290,7 +319,14 @@ export function ScoreResultDialog({
                 disabled={isSaving}
                 className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSaving ? '保存中...' : '💾 保存到背包'}
+                {isSaving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    保存中...
+                  </div>
+                ) : (
+                  '💾 保存到背包'
+                )}
               </motion.button>
             )}
 

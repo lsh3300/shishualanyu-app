@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useCallback, useEffect, useMemo, memo } from 'react'
-import { Undo2, Redo2, Trash2, ChevronLeft, ChevronRight, MousePointer2, Plus, Eraser } from 'lucide-react'
+import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react'
+import { Undo2, Redo2, Trash2, ChevronLeft, ChevronRight, MousePointer2, Plus, Eraser, Save, Loader2 } from 'lucide-react'
+import { toast } from "sonner"
 import Link from 'next/link'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 import { IndigoCanvas, type PlacedPattern } from '../canvas/IndigoCanvas'
 import { PatternSelector } from '../canvas/PatternSelector'
 import { CompleteWorkButton } from './CompleteWorkButton'
@@ -29,6 +31,7 @@ export const IndigoWorkshop = memo(function IndigoWorkshop({
   clothId,
   onComplete
 }: IndigoWorkshopProps) {
+  const supabase = useMemo(() => getSupabaseClient(), [])
   const [selectedPatternId, setSelectedPatternId] = useState<string | null>(null)
   const [layers, setLayers] = useState<ClothLayer[]>([])
   const [patterns, setPatterns] = useState<PlacedPattern[]>([])
@@ -36,6 +39,12 @@ export const IndigoWorkshop = memo(function IndigoWorkshop({
   const [showPatternSelector, setShowPatternSelector] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [tool, setTool] = useState<Tool>('select')
+  
+  // 自动保存相关状态
+  const [isSaving, setIsSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   // 历史记录管理
   const history = useHistory<PlacedPattern[]>([])
@@ -49,6 +58,82 @@ export const IndigoWorkshop = memo(function IndigoWorkshop({
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // 自动保存逻辑（仅保存到本地）
+  const autoSaveWork = useCallback(async () => {
+    if (!autoSaveEnabled || patterns.length === 0) return
+
+    try {
+      setIsSaving(true)
+      
+      // 保存到localStorage作为临时备份
+      const saveData = {
+        clothId,
+        patterns,
+        layers,
+        lastSaved: new Date().toISOString()
+      }
+      localStorage.setItem(`workshop-draft-${clothId}`, JSON.stringify(saveData))
+      
+      // 显示保存成功提示
+      setLastSaved(new Date())
+      console.log('✅ 本地自动保存成功:', new Date().toLocaleTimeString())
+      
+      // 注意：不在这里保存到服务器
+      // 服务器保存会在"完成作品"评分时自动进行
+    } catch (error) {
+      console.error('本地保存失败:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [autoSaveEnabled, patterns, layers, clothId])
+
+  // 定时自动保存
+  useEffect(() => {
+    // 当patterns变化时，设置定时器自动保存
+    if (patterns.length > 0) {
+      // 清除之前的定时器
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+      
+      // 设置3秒后自动保存
+      saveTimeoutRef.current = setTimeout(() => {
+        autoSaveWork()
+      }, 3000)
+    }
+    
+    // 组件卸载时清除定时器
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [patterns, autoSaveWork])
+
+  // 页面关闭前保存
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (patterns.length > 0) {
+        // 同步保存到localStorage
+        const saveData = {
+          clothId,
+          patterns,
+          layers,
+          lastSaved: new Date().toISOString()
+        }
+        localStorage.setItem(`workshop-draft-${clothId}`, JSON.stringify(saveData))
+      }
+    }
+    
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [patterns, layers, clothId])
+
+  // 手动保存函数
+  const handleManualSave = () => {
+    autoSaveWork()
+  }
 
   // 同步历史记录的present状态到patterns
   useEffect(() => {
@@ -174,6 +259,33 @@ export const IndigoWorkshop = memo(function IndigoWorkshop({
               <div className="hidden sm:flex items-center text-xs text-gray-600 px-2 py-1 bg-gray-100 rounded-lg">
                 {layerCount} 图层
               </div>
+              
+              {/* 手动保存按钮 */}
+              <button
+                onClick={handleManualSave}
+                disabled={isSaving || layerCount === 0}
+                className="p-1.5 sm:p-2 text-gray-700 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg transition-colors"
+                title="保存"
+              >
+                {isSaving ? (
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                )}
+              </button>
+              
+              {/* 自动保存状态 */}
+              <div className="hidden sm:flex items-center text-xs text-gray-600 px-2 py-1 bg-gray-100 rounded-lg">
+                {isSaving ? (
+                  <span className="flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    保存中...
+                  </span>
+                ) : lastSaved ? (
+                  <span>草稿已保存</span>
+                ) : null}
+              </div>
+              
               <button
                 onClick={handleUndo}
                 disabled={!canUndo}

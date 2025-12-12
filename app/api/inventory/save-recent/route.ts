@@ -6,72 +6,109 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createServiceClient } from '@/lib/supabaseClient'
+
+// 用户认证函数（从 Authorization header 获取）
+async function authenticateUser(request: NextRequest) {
+  const authHeader = request.headers.get('authorization')
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : null
+  
+  if (!token) {
+    return { userId: null, error: 'Missing authorization token' }
+  }
+  
+  const supabase = createServiceClient()
+  const { data, error } = await supabase.auth.getUser(token)
+  
+  if (error || !data?.user) {
+    return { userId: null, error: 'Invalid token' }
+  }
+  
+  return { userId: data.user.id, error: null }
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerComponentClient({ cookies })
+    console.log('📝 收到保存到最近创作请求')
 
-    // 验证用户（支持测试模式）
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // 验证用户
+    const { userId, error: authError } = await authenticateUser(request)
     
-    // 测试模式：如果没有用户，使用固定的测试用户ID（有效UUID格式）
-    const userId = user?.id || '00000000-0000-0000-0000-000000000000'
-    const isTestMode = !user
-    
-    if (isTestMode) {
-      console.log('🧪 测试模式：使用临时用户ID', userId)
+    if (authError || !userId) {
+      console.error('🔐 用户验证失败:', authError)
+      return NextResponse.json(
+        { error: '未授权访问', code: 'UNAUTHORIZED' },
+        { status: 401 }
+      )
     }
-
+    
+    const supabase = createServiceClient()
+    
     // 获取请求体
     const body = await request.json()
-    const { cloth_id } = body
+    const { cloth_id, clothData } = body
+
+    console.log('📋 请求参数:', { cloth_id, hasClothData: !!clothData, userId })
 
     if (!cloth_id) {
+      console.error('❌ 缺少cloth_id参数')
       return NextResponse.json(
-        { error: '缺少cloth_id参数' },
+        { error: '缺少cloth_id参数', code: 'MISSING_PARAMETER' },
         { status: 400 }
       )
     }
 
-    // 测试模式：直接跳过所有者检查
-    if (!isTestMode) {
-      // 检查作品是否属于当前用户
-      const { data: cloth, error: clothError } = await supabase
-        .from('cloths')
-        .select('user_id')
-        .eq('id', cloth_id)
-        .single()
+    // 检查作品是否属于当前用户
+    const { data: cloth, error: clothError } = await supabase
+      .from('cloths')
+      .select('creator_id')
+      .eq('id', cloth_id)
+      .maybeSingle()
 
-      if (clothError || !cloth) {
-        return NextResponse.json(
-          { error: '作品不存在' },
-          { status: 404 }
-        )
-      }
+    if (clothError) {
+      console.error('❌ 获取作品信息错误:', clothError)
+      return NextResponse.json(
+        { error: '获取作品信息失败', code: 'CLOTH_FETCH_ERROR', details: clothError.message },
+        { status: 500 }
+      )
+    }
 
-      if (cloth.user_id !== user.id) {
-        return NextResponse.json(
-          { error: '无权限操作此作品' },
-          { status: 403 }
-        )
-      }
-    } else {
-      console.log('🧪 测试模式：跳过所有者检查')
+    if (!cloth) {
+      console.error('❌ 作品不存在:', cloth_id)
+      return NextResponse.json(
+        { error: '作品不存在', code: 'CLOTH_NOT_FOUND' },
+        { status: 404 }
+      )
+    }
+
+    if (cloth.creator_id !== userId) {
+      console.error('❌ 无权限操作此作品:', { userId, clothCreatorId: cloth.creator_id })
+      return NextResponse.json(
+        { error: '无权限操作此作品', code: 'UNAUTHORIZED' },
+        { status: 403 }
+      )
     }
 
     // 检查是否已存在于背包或最近创作中
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('user_inventory')
       .select('id, slot_type')
       .eq('user_id', userId)
       .eq('cloth_id', cloth_id)
-      .single()
+      .maybeSingle()
+
+    if (existingError) {
+      console.error('❌ 检查作品是否已存在错误:', existingError)
+      return NextResponse.json(
+        { error: '检查作品状态失败', code: 'CHECK_EXISTING_ERROR', details: existingError.message },
+        { status: 500 }
+      )
+    }
 
     if (existing) {
       // 如果已经在背包中，不做任何操作
       if (existing.slot_type === 'inventory') {
+        console.log('✅ 作品已在背包中，无需操作:', cloth_id)
         return NextResponse.json({
           success: true,
           message: '作品已在背包中',
@@ -80,12 +117,21 @@ export async function POST(request: NextRequest) {
       }
       
       // 如果已在最近创作中，更新时间
-      await supabase
+      console.log('🔄 作品已在最近创作中，更新时间:', cloth_id)
+      const { error: updateError } = await supabase
         .from('user_inventory')
         .update({
           added_at: new Date().toISOString()
         })
         .eq('id', existing.id)
+
+      if (updateError) {
+        console.error('❌ 更新最近创作时间错误:', updateError)
+        return NextResponse.json(
+          { error: '更新最近创作失败', code: 'UPDATE_RECENT_ERROR', details: updateError.message },
+          { status: 500 }
+        )
+      }
 
       return NextResponse.json({
         success: true,
@@ -95,6 +141,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 添加到最近创作
+    console.log('➕ 添加到最近创作:', cloth_id)
     const { error: insertError } = await supabase
       .from('user_inventory')
       .insert({
@@ -104,10 +151,14 @@ export async function POST(request: NextRequest) {
         added_at: new Date().toISOString()
       })
 
-    if (insertError) throw insertError
+    if (insertError) {
+      console.error('❌ 添加到最近创作错误:', insertError)
+      throw new Error(`添加到最近创作失败: ${insertError.message}`)
+    }
 
     // 更新作品状态
-    await supabase
+    console.log('🔄 更新作品状态为draft:', cloth_id)
+    const { error: updateStatusError } = await supabase
       .from('cloths')
       .update({
         status: 'draft',
@@ -115,18 +166,31 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', cloth_id)
 
+    if (updateStatusError) {
+      console.error('❌ 更新作品状态错误:', updateStatusError)
+      // 不抛出错误，继续执行，因为这不是核心功能
+    }
+
     // 清理超过5个的旧记录
+    console.log('🧹 清理旧的最近创作记录')
     await cleanupRecentCreations(userId)
 
+    console.log('✅ 保存到最近创作成功:', cloth_id)
     return NextResponse.json({
       success: true,
-      message: '已自动保存到最近创作'
+      message: '已自动保存到最近创作',
+      cloth_id
     })
 
   } catch (error) {
-    console.error('Error saving to recent creations:', error)
+    console.error('💥 保存到最近创作发生未知错误:', error)
+    const errorMessage = error instanceof Error ? error.message : '保存失败'
     return NextResponse.json(
-      { error: '保存失败' },
+      { 
+        error: errorMessage, 
+        code: 'INTERNAL_ERROR',
+        details: error instanceof Error ? error.message : undefined
+      },
       { status: 500 }
     )
   }
@@ -136,7 +200,7 @@ export async function POST(request: NextRequest) {
  * 清理"最近创作"，保留最新5个
  */
 async function cleanupRecentCreations(userId: string): Promise<void> {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = createServiceClient()
 
   try {
     // 获取所有"最近创作"

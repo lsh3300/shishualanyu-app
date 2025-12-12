@@ -2,165 +2,322 @@
  * 背包服务
  * Inventory Service
  * 
- * 管理用户背包和最近创作
+ * 管理用户作品的保存、移动和容量
  */
 
 import { createClient } from '@/lib/supabase/client'
-import type { InventoryItem, SlotType, InventoryCapacity } from '@/types/shop.types'
+import { InventoryConfig } from '@/lib/game/config'
+
+// 模块级别的 supabase 客户端缓存（用于传入的客户端）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _injectedSupabase: any = null
+
+/**
+ * 设置外部注入的 Supabase 客户端
+ * 用于 API Route 中传入已认证的客户端
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function setSupabaseClient(client: any) {
+  _injectedSupabase = client
+}
+
+/**
+ * 获取 Supabase 客户端
+ * 优先使用注入的客户端，否则创建新的（仅客户端）
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getSupabase(): any {
+  // 如果有注入的客户端，优先使用（服务端场景）
+  if (_injectedSupabase) {
+    return _injectedSupabase
+  }
+  
+  // 客户端场景
+  return createClient()
+}
+import { 
+  InventoryFullError, 
+  NotFoundError, 
+  ClothStatusError,
+  GameError 
+} from '@/lib/game/errors'
+import type { InventoryItem, InventoryCapacity, SlotType } from '@/types/shop.types'
 
 // ============================================================================
-// 背包管理
+// 类型定义
+// ============================================================================
+
+export interface SaveToRecentResult {
+  success: boolean
+  item?: InventoryItem
+  message?: string
+}
+
+export interface MoveToInventoryResult {
+  success: boolean
+  item?: InventoryItem
+  message?: string
+}
+
+// ============================================================================
+// 背包服务函数
 // ============================================================================
 
 /**
- * 保存作品到背包
+ * 保存作品到最近创作
  */
-export async function saveToInventory(
+export async function saveToRecent(
   userId: string,
-  clothId: string,
-  slotType: SlotType = 'inventory'
-): Promise<{ success: boolean; message?: string; item?: InventoryItem }> {
-  const supabase = createClient()
+  clothId: string
+): Promise<SaveToRecentResult> {
+  const supabase = getSupabase()
 
-  try {
-    // 1. 检查背包容量
-    if (slotType === 'inventory') {
-      const capacity = await getInventoryCapacity(userId)
-      if (capacity.current >= capacity.max) {
-        return {
-          success: false,
-          message: '背包已满，请扩容或删除一些作品'
-        }
-      }
-    }
+  // 检查是否已存在
+  const { data: existing } = await supabase
+    .from('user_inventory')
+    .select('id, slot_type')
+    .eq('user_id', userId)
+    .eq('cloth_id', clothId)
+    .single()
 
-    // 2. 如果是保存到背包，检查"最近创作"中是否已存在
-    if (slotType === 'inventory') {
-      const { data: existing } = await supabase
+  if (existing) {
+    if (existing.slot_type === 'recent') {
+      // 更新时间
+      await supabase
         .from('user_inventory')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('cloth_id', clothId)
-        .eq('slot_type', 'recent')
-        .single()
+        .update({ added_at: new Date().toISOString() })
+        .eq('id', existing.id)
+      
+      return { success: true, message: '已更新最近创作时间' }
+    } else {
+      return { success: false, message: '作品已在背包中' }
+    }
+  }
 
-      if (existing) {
-        // 从"最近创作"移到"背包"
-        const { error } = await supabase
-          .from('user_inventory')
-          .update({
-            slot_type: 'inventory',
-            added_at: new Date().toISOString()
-          })
-          .eq('id', existing.id)
+  // 检查最近创作数量
+  const { count } = await supabase
+    .from('user_inventory')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('slot_type', 'recent')
 
-        if (error) throw error
+  // 如果超过限制，删除最旧的
+  if (count && count >= InventoryConfig.maxRecentCreations) {
+    const { data: oldest } = await supabase
+      .from('user_inventory')
+      .select('id, cloth_id')
+      .eq('user_id', userId)
+      .eq('slot_type', 'recent')
+      .order('added_at', { ascending: true })
+      .limit(1)
+      .single()
 
-        // 更新作品状态
-        await updateClothStatus(clothId, 'in_inventory')
+    if (oldest) {
+      await supabase
+        .from('user_inventory')
+        .delete()
+        .eq('id', oldest.id)
 
-        return {
-          success: true,
-          message: '已从最近创作移至背包'
-        }
-      }
+      await supabase
+        .from('cloths')
+        .update({ is_recent: false })
+        .eq('id', oldest.cloth_id)
+    }
+  }
+
+  // 添加新记录
+  const { data: newItem, error } = await supabase
+    .from('user_inventory')
+    .insert({
+      user_id: userId,
+      cloth_id: clothId,
+      slot_type: 'recent',
+      added_at: new Date().toISOString()
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('保存到最近创作失败:', error)
+    throw new GameError('保存失败', 'SAVE_ERROR', 500)
+  }
+
+  // 更新作品状态
+  await supabase
+    .from('cloths')
+    .update({ 
+      status: 'draft',
+      is_recent: true 
+    })
+    .eq('id', clothId)
+
+  return { success: true, item: newItem }
+}
+
+/**
+ * 移动作品到背包
+ */
+export async function moveToInventory(
+  userId: string,
+  clothId: string
+): Promise<MoveToInventoryResult> {
+  const supabase = getSupabase()
+
+  // 获取背包容量
+  const capacity = await getInventoryCapacity(userId)
+  
+  // 检查容量
+  if (capacity.current >= capacity.max) {
+    throw new InventoryFullError(capacity.current, capacity.max)
+  }
+
+  // 检查作品是否存在于最近创作
+  const { data: existing } = await supabase
+    .from('user_inventory')
+    .select('id, slot_type')
+    .eq('user_id', userId)
+    .eq('cloth_id', clothId)
+    .single()
+
+  if (existing) {
+    if (existing.slot_type === 'inventory') {
+      return { success: false, message: '作品已在背包中' }
     }
 
-    // 3. 添加到背包
-    const { data: item, error } = await supabase
+    // 从最近创作移动到背包
+    const { data: updated, error } = await supabase
       .from('user_inventory')
-      .insert({
-        user_id: userId,
-        cloth_id: clothId,
-        slot_type: slotType,
+      .update({ 
+        slot_type: 'inventory',
         added_at: new Date().toISOString()
       })
+      .eq('id', existing.id)
       .select()
       .single()
 
-    if (error) throw error
-
-    // 4. 更新作品状态
-    await updateClothStatus(clothId, slotType === 'inventory' ? 'in_inventory' : 'draft')
-
-    // 5. 如果是"最近创作"，清理超过5个的旧记录
-    if (slotType === 'recent') {
-      await cleanupRecentCreations(userId)
+    if (error) {
+      throw new GameError('移动失败', 'MOVE_ERROR', 500)
     }
 
-    return {
-      success: true,
-      message: slotType === 'inventory' ? '已保存到背包' : '已添加到最近创作',
-      item
-    }
-  } catch (error) {
-    console.error('Error saving to inventory:', error)
-    return {
-      success: false,
-      message: '保存失败'
-    }
+    // 更新作品状态
+    await supabase
+      .from('cloths')
+      .update({ 
+        status: 'in_inventory',
+        is_recent: false 
+      })
+      .eq('id', clothId)
+
+    return { success: true, item: updated }
+  }
+
+  // 作品不在任何位置，直接添加到背包
+  const { data: newItem, error } = await supabase
+    .from('user_inventory')
+    .insert({
+      user_id: userId,
+      cloth_id: clothId,
+      slot_type: 'inventory',
+      added_at: new Date().toISOString()
+    })
+    .select()
+    .single()
+
+  if (error) {
+    throw new GameError('保存到背包失败', 'SAVE_ERROR', 500)
+  }
+
+  // 更新作品状态
+  await supabase
+    .from('cloths')
+    .update({ 
+      status: 'in_inventory',
+      is_recent: false 
+    })
+    .eq('id', clothId)
+
+  return { success: true, item: newItem }
+}
+
+/**
+ * 获取背包容量信息（优化版：并行查询）
+ */
+export async function getInventoryCapacity(userId: string): Promise<InventoryCapacity> {
+  const supabase = getSupabase()
+
+  // 并行获取所有数据
+  const [shopResult, inventoryCountResult, recentCountResult] = await Promise.all([
+    supabase
+      .from('user_shops')
+      .select('max_inventory_size')
+      .eq('user_id', userId)
+      .maybeSingle(),
+    supabase
+      .from('user_inventory')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('slot_type', 'inventory'),
+    supabase
+      .from('user_inventory')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('slot_type', 'recent')
+  ])
+
+  const maxInventory = shopResult.data?.max_inventory_size || InventoryConfig.defaultMaxInventory
+
+  return {
+    current: inventoryCountResult.count || 0,
+    max: maxInventory,
+    recentCount: recentCountResult.count || 0,
+    maxRecent: InventoryConfig.maxRecentCreations
   }
 }
 
 /**
- * 获取背包内容
+ * 获取用户背包列表
  */
-export async function getInventory(
+export async function getInventoryItems(
   userId: string,
   slotType?: SlotType
 ): Promise<InventoryItem[]> {
-  const supabase = createClient()
+  const supabase = getSupabase()
 
-  try {
-    let query = supabase
-      .from('user_inventory')
-      .select(`
-        *,
-        cloth:cloths (
-          id,
-          user_id,
-          cloth_data,
+  let query = supabase
+    .from('user_inventory')
+    .select(`
+      *,
+      cloth:cloths(
+        id,
+        layers,
+        status,
+        created_at,
+        cloth_scores(
+          total_score,
+          grade,
+          color_score,
+          pattern_score,
+          creativity_score,
+          technique_score,
           created_at
         )
-      `)
-      .eq('user_id', userId)
-      .order('added_at', { ascending: false })
+      )
+    `)
+    .eq('user_id', userId)
+    .order('added_at', { ascending: false })
 
-    if (slotType) {
-      query = query.eq('slot_type', slotType)
-    }
-
-    const { data, error } = await query
-
-    if (error) throw error
-
-    // 加载评分信息
-    const itemsWithScores = await Promise.all(
-      (data || []).map(async (item) => {
-        if (item.cloth) {
-          const { data: score } = await supabase
-            .from('cloth_scores')
-            .select('*')
-            .eq('cloth_id', item.cloth.id)
-            .single()
-
-          return {
-            ...item,
-            cloth: {
-              ...item.cloth,
-              score_data: score
-            }
-          }
-        }
-        return item
-      })
-    )
-
-    return itemsWithScores
-  } catch (error) {
-    console.error('Error getting inventory:', error)
-    return []
+  if (slotType) {
+    query = query.eq('slot_type', slotType)
   }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('获取背包列表失败:', error)
+    throw new GameError('获取背包失败', 'QUERY_ERROR', 500)
+  }
+
+  return data || []
 }
 
 /**
@@ -169,208 +326,86 @@ export async function getInventory(
 export async function removeFromInventory(
   userId: string,
   clothId: string
-): Promise<{ success: boolean; message?: string }> {
-  const supabase = createClient()
+): Promise<boolean> {
+  const supabase = getSupabase()
 
-  try {
-    // 1. 检查作品是否已上架
-    const { data: listing } = await supabase
-      .from('shop_listings')
-      .select('id')
-      .eq('cloth_id', clothId)
-      .eq('status', 'listed')
-      .single()
+  const { error } = await supabase
+    .from('user_inventory')
+    .delete()
+    .eq('user_id', userId)
+    .eq('cloth_id', clothId)
 
-    if (listing) {
-      return {
-        success: false,
-        message: '作品已上架，请先下架'
-      }
-    }
-
-    // 2. 从背包删除
-    const { error } = await supabase
-      .from('user_inventory')
-      .delete()
-      .eq('user_id', userId)
-      .eq('cloth_id', clothId)
-
-    if (error) throw error
-
-    // 3. 删除作品（可选，或者只是标记为删除）
-    await supabase
-      .from('cloths')
-      .delete()
-      .eq('id', clothId)
-      .eq('user_id', userId)
-
-    return {
-      success: true,
-      message: '已删除'
-    }
-  } catch (error) {
-    console.error('Error removing from inventory:', error)
-    return {
-      success: false,
-      message: '删除失败'
-    }
+  if (error) {
+    console.error('删除背包项失败:', error)
+    throw new GameError('删除失败', 'DELETE_ERROR', 500)
   }
-}
 
-/**
- * 获取背包容量信息
- */
-export async function getInventoryCapacity(userId: string): Promise<InventoryCapacity> {
-  const supabase = createClient()
+  // 更新作品状态
+  await supabase
+    .from('cloths')
+    .update({ 
+      status: 'draft',
+      is_recent: false 
+    })
+    .eq('id', clothId)
 
-  try {
-    // 获取商店信息（包含最大容量）
-    const { data: shop } = await supabase
-      .from('user_shops')
-      .select('max_inventory_size')
-      .eq('user_id', userId)
-      .single()
-
-    // 获取当前数量
-    const { count } = await supabase
-      .from('user_inventory')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('slot_type', 'inventory')
-
-    const max = shop?.max_inventory_size || 20
-    const current = count || 0
-
-    // 计算扩容价格（每次+10个，价格递增）
-    const expansions = Math.floor((max - 20) / 10)
-    const expansion_cost = (expansions + 1) * 200 // 200, 400, 600...
-
-    return {
-      current,
-      max,
-      expansion_cost
-    }
-  } catch (error) {
-    console.error('Error getting inventory capacity:', error)
-    return {
-      current: 0,
-      max: 20,
-      expansion_cost: 200
-    }
-  }
+  return true
 }
 
 /**
  * 扩容背包
  */
-export async function expandInventory(
-  userId: string
-): Promise<{ success: boolean; message?: string; new_max?: number }> {
-  const supabase = createClient()
+export async function expandInventory(userId: string): Promise<{
+  success: boolean
+  newMax: number
+  cost: number
+}> {
+  const supabase = getSupabase()
 
-  try {
-    // 1. 获取当前容量和价格
-    const capacity = await getInventoryCapacity(userId)
+  // 获取当前容量和用户货币
+  const { data: shop } = await supabase
+    .from('user_shops')
+    .select('max_inventory_size')
+    .eq('user_id', userId)
+    .single()
 
-    if (!capacity.expansion_cost) {
-      return {
-        success: false,
-        message: '已达到最大容量'
-      }
-    }
+  const { data: profile } = await supabase
+    .from('player_profile')
+    .select('currency')
+    .eq('user_id', userId)
+    .single()
 
-    // 2. 检查金币是否足够
-    const { data: profile } = await supabase
-      .from('player_profile')
-      .select('currency')
-      .eq('user_id', userId)
-      .single()
+  const currentMax = shop?.max_inventory_size || InventoryConfig.defaultMaxInventory
+  const currentCurrency = profile?.currency || 0
+  const cost = InventoryConfig.expansionCost
 
-    if (!profile || profile.currency < capacity.expansion_cost) {
-      return {
-        success: false,
-        message: `金币不足，需要${capacity.expansion_cost}币`
-      }
-    }
-
-    // 3. 扣除金币
-    const { error: deductError } = await supabase
-      .from('player_profile')
-      .update({
-        currency: profile.currency - capacity.expansion_cost
-      })
-      .eq('user_id', userId)
-
-    if (deductError) throw deductError
-
-    // 4. 增加容量
-    const new_max = capacity.max + 10
-    const { error: updateError } = await supabase
-      .from('user_shops')
-      .update({
-        max_inventory_size: new_max
-      })
-      .eq('user_id', userId)
-
-    if (updateError) throw updateError
-
-    return {
-      success: true,
-      message: `背包扩容成功！现在可存放${new_max}件作品`,
-      new_max
-    }
-  } catch (error) {
-    console.error('Error expanding inventory:', error)
-    return {
-      success: false,
-      message: '扩容失败'
-    }
+  // 检查货币是否足够
+  if (currentCurrency < cost) {
+    throw new GameError(
+      '货币不足',
+      'INSUFFICIENT_CURRENCY',
+      400,
+      `扩容需要 ${cost} 蓝草币，当前只有 ${currentCurrency}`
+    )
   }
-}
 
-// ============================================================================
-// 辅助函数
-// ============================================================================
+  const newMax = currentMax + InventoryConfig.expansionSlots
 
-/**
- * 更新作品状态
- */
-async function updateClothStatus(clothId: string, status: string): Promise<void> {
-  const supabase = createClient()
-
+  // 更新背包容量
   await supabase
-    .from('cloths')
-    .update({
-      status,
-      saved_at: status === 'in_inventory' ? new Date().toISOString() : null
-    })
-    .eq('id', clothId)
-}
+    .from('user_shops')
+    .update({ max_inventory_size: newMax })
+    .eq('user_id', userId)
 
-/**
- * 清理"最近创作"，保留最新5个
- */
-async function cleanupRecentCreations(userId: string): Promise<void> {
-  const supabase = createClient()
+  // 扣除货币
+  await supabase
+    .from('player_profile')
+    .update({ currency: currentCurrency - cost })
+    .eq('user_id', userId)
 
-  try {
-    // 获取所有"最近创作"
-    const { data: recent } = await supabase
-      .from('user_inventory')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('slot_type', 'recent')
-      .order('added_at', { ascending: false })
-
-    if (recent && recent.length > 5) {
-      // 删除超过5个的旧记录
-      const toDelete = recent.slice(5).map(item => item.id)
-      await supabase
-        .from('user_inventory')
-        .delete()
-        .in('id', toDelete)
-    }
-  } catch (error) {
-    console.error('Error cleaning up recent creations:', error)
+  return {
+    success: true,
+    newMax,
+    cost
   }
 }

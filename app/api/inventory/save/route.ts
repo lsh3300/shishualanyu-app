@@ -6,23 +6,39 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createServiceClient } from '@/lib/supabaseClient'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerComponentClient({ cookies })
-
-    // 验证用户（支持测试模式）
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // 使用 Authorization header 认证
+    const authHeader = request.headers.get('authorization')
+    console.log('📦 保存到背包 - Authorization header:', authHeader ? '存在' : '不存在')
     
-    // 测试模式：如果没有用户，使用固定的测试用户ID（有效UUID格式）
-    const userId = user?.id || '00000000-0000-0000-0000-000000000000'
-    const isTestMode = !user
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.replace('Bearer ', '').trim() : null
     
-    if (isTestMode) {
-      console.log('🧪 测试模式：使用临时用户ID', userId)
+    if (!token) {
+      console.log('❌ 保存到背包 - token为空')
+      return NextResponse.json(
+        { error: '未授权访问', code: 'UNAUTHORIZED', message: '缺少认证token' },
+        { status: 401 }
+      )
     }
+    
+    console.log('📦 保存到背包 - token长度:', token.length)
+    
+    const supabase = createServiceClient()
+    const { data, error: authError } = await supabase.auth.getUser(token)
+    
+    if (authError || !data?.user) {
+      console.log('❌ 保存到背包 - 认证失败:', authError?.message)
+      return NextResponse.json(
+        { error: '认证失败', code: 'UNAUTHORIZED', message: authError?.message || '无效token' },
+        { status: 401 }
+      )
+    }
+    
+    const userId = data.user.id
+    console.log('✅ 保存到背包，用户ID:', userId)
 
     // 获取请求体
     const body = await request.json()
@@ -35,33 +51,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 测试模式：直接跳过所有者检查
-    if (!isTestMode) {
-      // 检查作品是否属于当前用户
-      const { data: cloth, error: clothError } = await supabase
-        .from('cloths')
-        .select('creator_id')
-        .eq('id', cloth_id)
-        .maybeSingle()
+    // 检查作品是否属于当前用户
+    const { data: cloth, error: clothError } = await supabase
+      .from('cloths')
+      .select('creator_id')
+      .eq('id', cloth_id)
+      .maybeSingle()
 
-      if (clothError || !cloth) {
-        return NextResponse.json(
-          { error: '作品不存在' },
-          { status: 404 }
-        )
-      }
-
-      if (cloth.creator_id !== user.id) {
-        return NextResponse.json(
-          { error: '无权限操作此作品' },
-          { status: 403 }
-        )
-      }
-    } else {
-      console.log('🧪 测试模式：跳过所有者检查')
+    if (clothError || !cloth) {
+      console.error('作品不存在:', cloth_id)
+      return NextResponse.json(
+        { error: '作品不存在' },
+        { status: 404 }
+      )
     }
 
-    // 直接保存到背包（简化版，适合测试模式）
+    if (cloth.creator_id !== userId) {
+      console.error('无权限操作此作品:', { userId, creatorId: cloth.creator_id })
+      return NextResponse.json(
+        { error: '无权限操作此作品' },
+        { status: 403 }
+      )
+    }
+
+    // 优化版：使用 upsert 减少查询次数
     try {
       // 检查是否已在背包或最近创作中
       const { data: existing } = await supabase
@@ -71,51 +84,49 @@ export async function POST(request: NextRequest) {
         .eq('cloth_id', cloth_id)
         .maybeSingle()
 
+      const now = new Date().toISOString()
+
       if (existing) {
         if (existing.slot_type === 'inventory') {
-          // 已在背包中
           return NextResponse.json({
             success: true,
             message: '作品已在背包中'
           })
-        } else {
-          // 从最近创作移到背包
-          await supabase
-            .from('user_inventory')
-            .update({
-              slot_type: 'inventory',
-              added_at: new Date().toISOString()
-            })
-            .eq('id', existing.id)
-
-          // 更新作品状态为completed
-          await supabase
-            .from('cloths')
-            .update({ status: 'completed' })
-            .eq('id', cloth_id)
-
-          return NextResponse.json({
-            success: true,
-            message: '已从最近创作移至背包'
-          })
         }
+        
+        // 从最近创作移到背包（并行更新）
+        await Promise.all([
+          supabase
+            .from('user_inventory')
+            .update({ slot_type: 'inventory', added_at: now })
+            .eq('id', existing.id),
+          supabase
+            .from('cloths')
+            .update({ status: 'in_inventory', is_recent: false })
+            .eq('id', cloth_id)
+        ])
+
+        return NextResponse.json({
+          success: true,
+          message: '已从最近创作移至背包'
+        })
       }
 
-      // 添加到背包
-      await supabase
-        .from('user_inventory')
-        .insert({
-          user_id: userId,
-          cloth_id: cloth_id,
-          slot_type: 'inventory',
-          added_at: new Date().toISOString()
-        })
-
-      // 更新作品状态为completed
-      await supabase
-        .from('cloths')
-        .update({ status: 'completed' })
-        .eq('id', cloth_id)
+      // 添加到背包（并行操作）
+      await Promise.all([
+        supabase
+          .from('user_inventory')
+          .insert({
+            user_id: userId,
+            cloth_id: cloth_id,
+            slot_type: 'inventory',
+            added_at: now
+          }),
+        supabase
+          .from('cloths')
+          .update({ status: 'in_inventory', is_recent: false })
+          .eq('id', cloth_id)
+      ])
 
       return NextResponse.json({
         success: true,

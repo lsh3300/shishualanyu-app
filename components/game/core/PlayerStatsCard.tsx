@@ -1,31 +1,55 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { RefreshCw, AlertCircle } from 'lucide-react'
 import { usePlayerProfile } from '@/hooks/game/use-player-profile'
+import { Button } from '@/components/ui/button'
 
 /**
  * 玩家统计卡片
  * 显示等级、经验、货币等核心信息
+ * 
+ * 优化版本：添加加载状态、错误状态和刷新功能
  */
 export function PlayerStatsCard() {
-  const { profile, levelInfo, loading, error } = usePlayerProfile()
+  const { profile, levelInfo, loading, error, initialized, refresh } = usePlayerProfile()
 
-  if (loading) {
+  // 加载状态
+  if (loading && !initialized) {
     return (
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-gray-200 rounded w-32"></div>
           <div className="h-4 bg-gray-200 rounded w-24"></div>
           <div className="h-2 bg-gray-200 rounded"></div>
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="h-16 bg-gray-200 rounded"></div>
+            <div className="h-16 bg-gray-200 rounded"></div>
+            <div className="h-16 bg-gray-200 rounded"></div>
+          </div>
         </div>
       </div>
     )
   }
 
+  // 错误状态
   if (error || !profile || !levelInfo) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
-        <p className="text-red-600 text-sm">加载档案失败: {error}</p>
+        <div className="flex items-center gap-2 mb-3">
+          <AlertCircle className="w-5 h-5 text-red-500" />
+          <p className="text-red-600 font-medium">加载档案失败</p>
+        </div>
+        <p className="text-red-500 text-sm mb-4">{error || '未知错误'}</p>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={refresh}
+          className="gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          重试
+        </Button>
       </div>
     )
   }

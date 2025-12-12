@@ -792,14 +792,7 @@ function useFavoritesData(): UseFavoritesReturn {
 
       const imageUrl = product.image_url || product.coverImage || (product.images && product.images[0]) || '/placeholder.svg'
       
-      console.log('🖼️ 处理收藏产品图片:', {
-        product_id: product.id,
-        product_name: product.name,
-        raw_image_url: product.image_url,
-        raw_coverImage: product.coverImage,
-        raw_images: product.images,
-        final_imageUrl: imageUrl
-      })
+
       
       return {
         id: product.id,

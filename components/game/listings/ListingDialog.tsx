@@ -85,29 +85,47 @@ export function ListingDialog({
 
       if (isNaN(price) || price < 10) {
         setError('价格必须大于等于10币')
+        setLoading(false)
         return
       }
 
       if (price > 9999) {
         setError('价格不能超过9999币')
+        setLoading(false)
+        return
+      }
+
+      // 获取 access token
+      const { getSupabaseClient } = await import('@/lib/supabaseClient')
+      const supabase = getSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        setError('请先登录')
+        setLoading(false)
         return
       }
 
       const response = await fetch('/api/listings/create', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
           cloth_id: cloth.id,
-          custom_price: customPrice ? price : null
+          price: price,
+          score_data: cloth.score_data
         })
       })
 
       const result = await response.json()
+      console.log('📦 上架API响应:', result)
 
-      if (!response.ok) {
-        setError(result.error || result.message || '上架失败')
+      if (!response.ok || !result.success) {
+        const errorMsg = result.error?.userMessage || result.error?.message || result.error || result.message || '上架失败'
+        console.error('❌ 上架失败:', errorMsg)
+        setError(errorMsg)
         return
       }
 
@@ -115,6 +133,7 @@ export function ListingDialog({
       onSuccess?.()
       onOpenChange(false)
     } catch (err) {
+      console.error('上架失败:', err)
       setError('上架失败，请稍后重试')
     } finally {
       setLoading(false)
@@ -139,7 +158,7 @@ export function ListingDialog({
           <div className="flex justify-center">
             <div className="w-48 h-48 rounded-xl overflow-hidden shadow-lg border-4 border-amber-900">
               <ClothPreview
-                layers={cloth.cloth_data.layers || []}
+                layers={cloth.cloth_data?.layers || []}
                 showFrame={false}
               />
             </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState, memo } from 'react'
 import type { ClothLayer } from '@/types/game.types'
 import { getPatternById } from '../patterns/PatternLibrary'
 
@@ -12,119 +12,169 @@ interface ClothPreviewProps {
   showFrame?: boolean
 }
 
+// 原始画布大小（创作工坊使用的尺寸）
+const ORIGINAL_CANVAS_SIZE = 500
+
 /**
- * 作品预览组件 - 只读版本
- * 用于在背包、商店、详情页等地方展示作品
- * 
- * 特点：
- * - 纯展示，无交互
- * - 高性能（使用Canvas一次性渲染）
- * - 支持缓存
- * - 响应式大小
+ * 作品预览组件 - SVG版本（优化版）
+ * 使用 memo 减少不必要的重渲染
+ * 使用与创作工坊相同的 SVG 组件渲染，保持视觉一致性
  */
-export function ClothPreview({
+export const ClothPreview = memo(function ClothPreview({
   layers,
-  width = 300,
-  height = 300,
   className = '',
   showFrame = false
 }: ClothPreviewProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState(300)
+  const [isVisible, setIsVisible] = useState(false)
 
+  // 使用 IntersectionObserver 实现懒加载
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    // 设置canvas实际分辨率（2x for retina）
-    const dpr = window.devicePixelRatio || 1
-    canvas.width = width * dpr
-    canvas.height = height * dpr
-    ctx.scale(dpr, dpr)
-
-    // 清空画布
-    ctx.clearRect(0, 0, width, height)
-
-    // 绘制布料底色（米白色）
-    ctx.fillStyle = '#F5F1E8'
-    ctx.fillRect(0, 0, width, height)
-
-    // 添加布料纹理感
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.02)'
-    for (let i = 0; i < width; i += 2) {
-      for (let j = 0; j < height; j += 2) {
-        if (Math.random() > 0.5) {
-          ctx.fillRect(i, j, 1, 1)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
         }
+      },
+      { rootMargin: '100px' }
+    )
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
+  // 监听容器大小变化
+  useEffect(() => {
+    if (!isVisible) return
+
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        setContainerSize(Math.min(rect.width, rect.height))
       }
     }
 
-    // 渲染每个图层
-    layers.forEach((layer) => {
-      const patternDef = getPatternById(layer.textureId)
-      if (!patternDef) return
-
-      const {
-        x: xPercent,
-        y: yPercent,
-        scale,
-        opacity,
-        rotation = 0
-      } = layer.params
-
-      // 转换百分比坐标到像素坐标
-      const x = (xPercent / 100) * width
-      const y = (yPercent / 100) * height
-
-      // 计算图案大小（基础80px * scale）
-      const patternSize = 80 * scale
-
-      // 根据染色深度计算靛蓝色
-      const indigoColor = getIndigoColor(layer.dyeDepth)
-
-      // 保存当前状态
-      ctx.save()
-
-      // 移动到图案中心
-      ctx.translate(x, y)
-      
-      // 旋转
-      if (rotation) {
-        ctx.rotate((rotation * Math.PI) / 180)
-      }
-
-      // 设置透明度
-      ctx.globalAlpha = opacity
-
-      // 绘制图案（简化版）
-      drawPattern(ctx, patternDef.id, patternSize, indigoColor)
-
-      // 恢复状态
-      ctx.restore()
-    })
-
-    // 如果需要，绘制边框
-    if (showFrame) {
-      ctx.strokeStyle = '#8B6F47'
-      ctx.lineWidth = 8
-      ctx.strokeRect(4, 4, width - 8, height - 8)
+    updateSize()
+    const resizeObserver = new ResizeObserver(updateSize)
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
     }
-  }, [layers, width, height, showFrame])
+    return () => resizeObserver.disconnect()
+  }, [isVisible])
+
+  // 计算整体缩放比例
+  const overallScale = containerSize / ORIGINAL_CANVAS_SIZE
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className={className}
+    <div 
+      ref={containerRef}
+      className={`relative overflow-hidden ${className}`}
       style={{
         width: '100%',
         height: '100%',
-        imageRendering: 'high-quality'
+        aspectRatio: '1 / 1',
+        backgroundColor: '#F5F1E8',
+        borderRadius: showFrame ? '8px' : '0',
+        border: showFrame ? '4px solid #8B6F47' : 'none'
       }}
-    />
+    >
+      {/* 布料纹理背景 */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `
+            repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 1px,
+              rgba(0,0,0,0.015) 1px,
+              rgba(0,0,0,0.015) 2px
+            ),
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 1px,
+              rgba(0,0,0,0.012) 1px,
+              rgba(0,0,0,0.012) 2px
+            )
+          `
+        }}
+      />
+
+      {/* 内容容器 - 使用 transform 整体缩放（懒加载） */}
+      {isVisible && (
+        <div
+          className="absolute"
+          style={{
+            width: ORIGINAL_CANVAS_SIZE,
+            height: ORIGINAL_CANVAS_SIZE,
+            transformOrigin: 'top left',
+            transform: `scale(${overallScale})`,
+          }}
+        >
+          {/* 渲染每个图层 - 使用原始坐标和缩放 */}
+          {layers.map((layer, index) => (
+            <PatternLayer 
+              key={index} 
+              layer={layer}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+})
+
+/**
+ * 单个图案图层
+ * 使用与创作工坊完全相同的渲染方式
+ */
+function PatternLayer({ 
+  layer
+}: { 
+  layer: ClothLayer
+}) {
+  const patternDef = getPatternById(layer.textureId)
+  if (!patternDef) return null
+
+  const {
+    x: xPercent,
+    y: yPercent,
+    scale: layerScale,
+    opacity,
+    rotation = 0
+  } = layer.params
+
+  // 根据染色深度计算靛蓝色
+  const color = getIndigoColor(layer.dyeDepth)
+
+  // 获取 SVG 组件
+  const PatternComponent = patternDef.component
+
+  // 直接使用图层的 scale，与创作工坊一致
+  // 不需要额外计算，因为整个容器已经按比例缩放了
+  return (
+    <div
+      className="absolute pointer-events-none"
+      style={{
+        left: `${xPercent}%`,
+        top: `${yPercent}%`,
+        transform: 'translate(-50%, -50%)',
+        mixBlendMode: 'multiply',
+      }}
+    >
+      <PatternComponent 
+        color={color}
+        opacity={opacity}
+        scale={layerScale}
+        rotation={rotation}
+      />
+    </div>
   )
 }
 
@@ -142,196 +192,4 @@ function getIndigoColor(depth: number): string {
   ]
   const index = Math.min(Math.floor(depth * 5), 4)
   return colors[index]
-}
-
-/**
- * 绘制图案（简化版）
- */
-function drawPattern(
-  ctx: CanvasRenderingContext2D,
-  patternId: string,
-  size: number,
-  color: string
-) {
-  const halfSize = size / 2
-
-  ctx.fillStyle = color
-  ctx.strokeStyle = color
-  ctx.lineWidth = 2
-
-  // 根据不同图案ID绘制不同形状
-  switch (patternId) {
-    case 'circle':
-      // 圆形
-      ctx.beginPath()
-      ctx.arc(0, 0, halfSize * 0.8, 0, Math.PI * 2)
-      ctx.fill()
-      break
-
-    case 'square':
-      // 方形
-      ctx.fillRect(-halfSize * 0.8, -halfSize * 0.8, size * 0.8, size * 0.8)
-      break
-
-    case 'triangle':
-      // 三角形
-      ctx.beginPath()
-      ctx.moveTo(0, -halfSize * 0.8)
-      ctx.lineTo(halfSize * 0.8, halfSize * 0.8)
-      ctx.lineTo(-halfSize * 0.8, halfSize * 0.8)
-      ctx.closePath()
-      ctx.fill()
-      break
-
-    case 'star':
-      // 星形
-      drawStar(ctx, 0, 0, 5, halfSize * 0.8, halfSize * 0.4)
-      ctx.fill()
-      break
-
-    case 'hexagon':
-      // 六边形
-      drawPolygon(ctx, 0, 0, 6, halfSize * 0.8)
-      ctx.fill()
-      break
-
-    case 'flower':
-      // 花朵（多个圆形组成）
-      const petalCount = 6
-      const petalRadius = halfSize * 0.4
-      for (let i = 0; i < petalCount; i++) {
-        const angle = (i / petalCount) * Math.PI * 2
-        const px = Math.cos(angle) * halfSize * 0.5
-        const py = Math.sin(angle) * halfSize * 0.5
-        ctx.beginPath()
-        ctx.arc(px, py, petalRadius, 0, Math.PI * 2)
-        ctx.fill()
-      }
-      // 中心圆
-      ctx.beginPath()
-      ctx.arc(0, 0, halfSize * 0.3, 0, Math.PI * 2)
-      ctx.fill()
-      break
-
-    case 'wave':
-      // 波浪线
-      ctx.beginPath()
-      ctx.moveTo(-halfSize, 0)
-      for (let x = -halfSize; x <= halfSize; x += 10) {
-        const y = Math.sin((x / halfSize) * Math.PI * 2) * (halfSize * 0.3)
-        ctx.lineTo(x, y)
-      }
-      ctx.stroke()
-      break
-
-    case 'dots':
-      // 点状图案
-      const dotRadius = halfSize * 0.15
-      const dotPositions = [
-        [0, 0],
-        [-halfSize * 0.5, -halfSize * 0.5],
-        [halfSize * 0.5, -halfSize * 0.5],
-        [-halfSize * 0.5, halfSize * 0.5],
-        [halfSize * 0.5, halfSize * 0.5]
-      ]
-      dotPositions.forEach(([x, y]) => {
-        ctx.beginPath()
-        ctx.arc(x, y, dotRadius, 0, Math.PI * 2)
-        ctx.fill()
-      })
-      break
-
-    case 'cross':
-      // 十字
-      ctx.lineWidth = halfSize * 0.3
-      ctx.beginPath()
-      ctx.moveTo(0, -halfSize * 0.8)
-      ctx.lineTo(0, halfSize * 0.8)
-      ctx.moveTo(-halfSize * 0.8, 0)
-      ctx.lineTo(halfSize * 0.8, 0)
-      ctx.stroke()
-      break
-
-    case 'spiral':
-      // 螺旋
-      ctx.beginPath()
-      let angle = 0
-      const maxRadius = halfSize * 0.8
-      ctx.moveTo(0, 0)
-      for (let r = 0; r <= maxRadius; r += 2) {
-        angle += 0.3
-        const x = Math.cos(angle) * r
-        const y = Math.sin(angle) * r
-        ctx.lineTo(x, y)
-      }
-      ctx.stroke()
-      break
-
-    default:
-      // 默认圆形
-      ctx.beginPath()
-      ctx.arc(0, 0, halfSize * 0.8, 0, Math.PI * 2)
-      ctx.fill()
-  }
-}
-
-/**
- * 绘制星形
- */
-function drawStar(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  spikes: number,
-  outerRadius: number,
-  innerRadius: number
-) {
-  let rot = (Math.PI / 2) * 3
-  let x = cx
-  let y = cy
-  const step = Math.PI / spikes
-
-  ctx.beginPath()
-  ctx.moveTo(cx, cy - outerRadius)
-
-  for (let i = 0; i < spikes; i++) {
-    x = cx + Math.cos(rot) * outerRadius
-    y = cy + Math.sin(rot) * outerRadius
-    ctx.lineTo(x, y)
-    rot += step
-
-    x = cx + Math.cos(rot) * innerRadius
-    y = cy + Math.sin(rot) * innerRadius
-    ctx.lineTo(x, y)
-    rot += step
-  }
-
-  ctx.lineTo(cx, cy - outerRadius)
-  ctx.closePath()
-}
-
-/**
- * 绘制多边形
- */
-function drawPolygon(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  sides: number,
-  radius: number
-) {
-  const angle = (Math.PI * 2) / sides
-  ctx.beginPath()
-
-  for (let i = 0; i < sides; i++) {
-    const x = cx + radius * Math.cos(angle * i - Math.PI / 2)
-    const y = cy + radius * Math.sin(angle * i - Math.PI / 2)
-    if (i === 0) {
-      ctx.moveTo(x, y)
-    } else {
-      ctx.lineTo(x, y)
-    }
-  }
-
-  ctx.closePath()
 }

@@ -128,23 +128,25 @@ export default function GameHubPage() {
             </Link>
           </motion.div>
 
-          {/* 材料库 */}
+          {/* 蓝染市场 */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="group bg-gradient-to-br from-purple-50/90 to-pink-100/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-200 opacity-60 cursor-not-allowed">
-              <div className="text-6xl mb-4 text-center">
-                🪣
+            <Link href="/game/market">
+              <div className="group bg-gradient-to-br from-purple-50/90 to-pink-100/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-purple-200 hover:shadow-xl transition-all cursor-pointer">
+                <div className="text-6xl mb-4 text-center group-hover:scale-110 transition-transform">
+                  🛒
+                </div>
+                <h3 className="text-2xl font-bold text-center text-gray-800 mb-2">
+                  蓝染市场
+                </h3>
+                <p className="text-center text-gray-600 text-sm">
+                  购买其他染匠的作品
+                </p>
               </div>
-              <h3 className="text-2xl font-bold text-center text-gray-800 mb-2">
-                材料库
-              </h3>
-              <p className="text-center text-gray-600 text-sm">
-                即将开放...
-              </p>
-            </div>
+            </Link>
           </motion.div>
 
           {/* 任务板 */}

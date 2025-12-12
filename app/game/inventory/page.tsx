@@ -2,19 +2,24 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Package, Sparkles, Trash2, ShoppingBag } from 'lucide-react'
+import { toast } from "sonner"
+import { ArrowLeft, Package, Sparkles, Trash2, ShoppingBag, Eye, AlertCircle, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ClothCard } from '@/components/game/inventory/ClothCard'
 import { ListingDialog } from '@/components/game/listings/ListingDialog'
+import { ClothDetailDialog } from '@/components/game/inventory/ClothDetailDialog'
+import { ExpansionDialog } from '@/components/game/inventory/ExpansionDialog'
 import { usePlayerProfile } from '@/hooks/game/use-player-profile'
+import { getSupabaseClient } from '@/lib/supabaseClient'
+import { InventoryConfig } from '@/lib/game/config'
 
 /**
  * 背包页面
  * 展示最近创作和背包作品
  */
 export default function InventoryPage() {
-  const { profile } = usePlayerProfile()
+  const { profile, refresh: refreshProfile } = usePlayerProfile()
   const [recentItems, setRecentItems] = useState<any[]>([])
   const [inventoryItems, setInventoryItems] = useState<any[]>([])
   const [capacity, setCapacity] = useState({ current: 0, max: 20 })
@@ -23,6 +28,16 @@ export default function InventoryPage() {
   // 上架相关状态
   const [listingDialogOpen, setListingDialogOpen] = useState(false)
   const [selectedCloth, setSelectedCloth] = useState<any | null>(null)
+  
+  // 查看详情相关状态
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false)
+  const [detailCloth, setDetailCloth] = useState<any | null>(null)
+  const [detailSlotType, setDetailSlotType] = useState<'recent' | 'inventory'>('recent')
+
+  // 扩容相关状态
+  const [expansionDialogOpen, setExpansionDialogOpen] = useState(false)
+
+  const [error, setError] = useState<string | null>(null)
 
   // 加载背包数据
   useEffect(() => {
@@ -31,40 +46,96 @@ export default function InventoryPage() {
 
   const fetchInventory = async () => {
     try {
-      const response = await fetch('/api/inventory')
+      setError(null)
+      
+      // 获取 access token（使用单例客户端）
+      const supabase = getSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        setError('未登录')
+        setLoading(false)
+        return
+      }
+      
+      const response = await fetch('/api/inventory', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
       const result = await response.json()
       
       if (result.success) {
         setRecentItems(result.data.recent || [])
         setInventoryItems(result.data.inventory || [])
-        setCapacity(result.data.capacity)
+        setCapacity(result.data.capacity || { current: 0, max: 20, recentCount: 0, maxRecent: 5 })
+      } else {
+        setError(result.error?.userMessage || '加载背包失败')
       }
     } catch (error) {
       console.error('Failed to fetch inventory:', error)
+      setError('网络错误，请检查网络连接')
     } finally {
       setLoading(false)
     }
   }
 
-  // 保存到背包
+  // 保存到背包（乐观更新）
   const handleSaveToInventory = async (clothId: string) => {
+    // 乐观更新：先在 UI 上移动
+    const itemToMove = recentItems.find(item => item.cloth_id === clothId)
+    if (itemToMove) {
+      setRecentItems(prev => prev.filter(item => item.cloth_id !== clothId))
+      setInventoryItems(prev => [...prev, { ...itemToMove, slot_type: 'inventory' }])
+      setCapacity(prev => ({ ...prev, current: prev.current + 1 }))
+    }
+
     try {
+      const supabase = getSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // 回滚乐观更新
+        if (itemToMove) {
+          setRecentItems(prev => [...prev, itemToMove])
+          setInventoryItems(prev => prev.filter(item => item.cloth_id !== clothId))
+          setCapacity(prev => ({ ...prev, current: prev.current - 1 }))
+        }
+        toast.error("请先登录", { position: "bottom-right", duration: 3000 })
+        return
+      }
+      
       const response = await fetch('/api/inventory/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({ cloth_id: clothId })
       })
 
       const result = await response.json()
       
       if (result.success) {
-        // 刷新数据
-        fetchInventory()
+        toast.success("作品已保存到背包", { position: "bottom-right", duration: 3000 })
       } else {
-        alert(result.message || '保存失败')
+        // 回滚乐观更新
+        if (itemToMove) {
+          setRecentItems(prev => [...prev, itemToMove])
+          setInventoryItems(prev => prev.filter(item => item.cloth_id !== clothId))
+          setCapacity(prev => ({ ...prev, current: prev.current - 1 }))
+        }
+        toast.error(`保存失败: ${result.message || result.error || 'API调用失败'}`, { position: "bottom-right", duration: 5000 })
       }
     } catch (error) {
-      alert('保存失败，请稍后重试')
+      // 回滚乐观更新
+      if (itemToMove) {
+        setRecentItems(prev => [...prev, itemToMove])
+        setInventoryItems(prev => prev.filter(item => item.cloth_id !== clothId))
+        setCapacity(prev => ({ ...prev, current: prev.current - 1 }))
+      }
+      console.error('保存到背包失败:', error)
+      toast.error("保存失败: 网络错误", { position: "bottom-right", duration: 5000 })
     }
   }
 
@@ -78,8 +149,125 @@ export default function InventoryPage() {
   const handleListingSuccess = () => {
     // 刷新数据
     fetchInventory()
-    // 可以显示成功提示
-    alert('上架成功！')
+    // 显示成功提示
+    toast.success("作品上架成功", {
+      position: "bottom-right",
+      duration: 3000
+    })
+  }
+
+  // 查看作品详情
+  const handleViewCloth = (item: any, slotType: 'recent' | 'inventory') => {
+    setDetailCloth(item.cloth)
+    setDetailSlotType(slotType)
+    setDetailDialogOpen(true)
+  }
+
+  // 从详情对话框保存到背包
+  const handleSaveFromDetail = () => {
+    if (detailCloth) {
+      handleSaveToInventory(detailCloth.id)
+    }
+  }
+
+  // 从详情对话框打开上架
+  const handleListFromDetail = () => {
+    if (detailCloth) {
+      setSelectedCloth(detailCloth)
+      setDetailDialogOpen(false)
+      setListingDialogOpen(true)
+    }
+  }
+
+  // 背包扩容
+  const handleExpandInventory = async () => {
+    try {
+      const supabase = getSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        toast.error("请先登录")
+        return
+      }
+
+      const response = await fetch('/api/inventory/expand', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        toast.success(result.message)
+        // 更新容量
+        setCapacity(prev => ({
+          ...prev,
+          max: result.data.newMax
+        }))
+        // 刷新用户信息
+        refreshProfile()
+      } else {
+        toast.error(result.error?.userMessage || '扩容失败')
+      }
+    } catch (err) {
+      console.error('扩容失败:', err)
+      toast.error("扩容失败: 网络错误")
+    }
+  }
+
+  // 删除作品（乐观更新）
+  const handleDeleteCloth = async (clothId: string) => {
+    // 乐观更新：先从 UI 移除
+    const itemToDelete = inventoryItems.find(item => item.cloth_id === clothId)
+    if (itemToDelete) {
+      setInventoryItems(prev => prev.filter(item => item.cloth_id !== clothId))
+      setCapacity(prev => ({ ...prev, current: prev.current - 1 }))
+    }
+
+    try {
+      const supabase = getSupabaseClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        // 回滚
+        if (itemToDelete) {
+          setInventoryItems(prev => [...prev, itemToDelete])
+          setCapacity(prev => ({ ...prev, current: prev.current + 1 }))
+        }
+        toast.error("请先登录")
+        return
+      }
+      
+      const response = await fetch(`/api/inventory?cloth_id=${clothId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        toast.success("作品已删除")
+      } else {
+        // 回滚
+        if (itemToDelete) {
+          setInventoryItems(prev => [...prev, itemToDelete])
+          setCapacity(prev => ({ ...prev, current: prev.current + 1 }))
+        }
+        toast.error(`删除失败: ${result.message || '未知错误'}`)
+      }
+    } catch (err) {
+      // 回滚
+      if (itemToDelete) {
+        setInventoryItems(prev => [...prev, itemToDelete])
+        setCapacity(prev => ({ ...prev, current: prev.current + 1 }))
+      }
+      console.error('删除失败:', err)
+      toast.error("删除失败: 网络错误")
+    }
   }
 
   return (
@@ -159,6 +347,7 @@ export default function InventoryPage() {
                   cloth={item.cloth}
                   showActions
                   onSave={() => handleSaveToInventory(item.cloth_id)}
+                  onView={() => handleViewCloth(item, 'recent')}
                   badgeText="最近"
                   badgeColor="bg-yellow-500"
                 />
@@ -171,6 +360,11 @@ export default function InventoryPage() {
               <p className="text-sm text-gray-500 mt-1">
                 去创作工坊染制你的第一件作品吧！
               </p>
+              <Link href="/game/workshop">
+                <Button className="mt-4" variant="default">
+                  去创作
+                </Button>
+              </Link>
             </div>
           )}
         </motion.section>
@@ -190,11 +384,15 @@ export default function InventoryPage() {
               <span className="text-sm text-gray-600">
                 {capacity.current}/{capacity.max}
               </span>
-              {capacity.current >= capacity.max && (
-                <Button size="sm" variant="outline" className="text-xs">
-                  扩容
-                </Button>
-              )}
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="text-xs gap-1"
+                onClick={() => setExpansionDialogOpen(true)}
+              >
+                <Plus className="w-3 h-3" />
+                扩容
+              </Button>
             </div>
           </div>
 
@@ -211,7 +409,14 @@ export default function InventoryPage() {
                   key={item.id}
                   cloth={item.cloth}
                   showActions
+                  onView={() => handleViewCloth(item, 'inventory')}
                   actionButtons={[
+                    {
+                      icon: <Eye className="w-4 h-4" />,
+                      label: '查看',
+                      variant: 'outline',
+                      onClick: () => handleViewCloth(item, 'inventory')
+                    },
                     {
                       icon: <ShoppingBag className="w-4 h-4" />,
                       label: '上架',
@@ -222,7 +427,7 @@ export default function InventoryPage() {
                       icon: <Trash2 className="w-4 h-4" />,
                       label: '删除',
                       variant: 'destructive',
-                      onClick: () => console.log('删除', item.cloth_id)
+                      onClick: () => handleDeleteCloth(item.cloth_id)
                     }
                   ]}
                 />
@@ -240,6 +445,31 @@ export default function InventoryPage() {
         </motion.section>
       </main>
 
+      {/* 错误提示 */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg z-50"
+        >
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-800">加载失败</p>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setError(null)}
+              className="ml-auto -mt-1 -mr-2"
+            >
+              ✕
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
       {/* 上架对话框 */}
       {selectedCloth && (
         <ListingDialog
@@ -249,6 +479,29 @@ export default function InventoryPage() {
           onSuccess={handleListingSuccess}
         />
       )}
+
+      {/* 作品详情对话框 */}
+      <ClothDetailDialog
+        open={detailDialogOpen}
+        onOpenChange={setDetailDialogOpen}
+        cloth={detailCloth}
+        slotType={detailSlotType}
+        onSave={handleSaveFromDetail}
+        onList={handleListFromDetail}
+      />
+
+      {/* 背包扩容对话框 */}
+      <ExpansionDialog
+        open={expansionDialogOpen}
+        onOpenChange={setExpansionDialogOpen}
+        type="inventory"
+        currentCapacity={capacity.current}
+        maxCapacity={capacity.max}
+        expansionCost={InventoryConfig.expansionCost}
+        expansionAmount={InventoryConfig.expansionSlots}
+        userCurrency={profile?.currency || 0}
+        onConfirm={handleExpandInventory}
+      />
     </div>
   )
 }

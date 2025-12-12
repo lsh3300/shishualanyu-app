@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Save, Eye } from 'lucide-react'
 import { ClothPreview } from '@/components/game/preview/ClothPreview'
@@ -39,10 +39,11 @@ interface ClothCardProps {
 }
 
 /**
- * 作品卡片组件
- * 展示作品缩略图、评分、操作按钮
+ * 作品卡片组件（优化版）
+ * 使用 memo 减少不必要的重渲染
+ * 移除 framer-motion 动画提升性能
  */
-export function ClothCard({
+export const ClothCard = memo(function ClothCard({
   cloth,
   showActions = false,
   onSave,
@@ -64,28 +65,28 @@ export function ClothCard({
   const score = cloth.score_data?.total_score || 0
 
   return (
-    <motion.div
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      whileHover={{ scale: 1.05 }}
-      className="group relative bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden border-2 border-gray-200 hover:border-blue-300"
+    <div
+      className="group relative bg-white rounded-xl shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-200 overflow-hidden border-2 border-gray-200 hover:border-blue-300"
     >
       {/* 作品预览 - 真实渲染 */}
       <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
-        <ClothPreview
-          layers={cloth.cloth_data.layers || []}
-          className="w-full h-full"
-        />
+        {/* Canvas 预览层 - z-0 */}
+        <div className="absolute inset-0 z-0">
+          <ClothPreview
+            layers={cloth.cloth_data?.layers || []}
+            className="w-full h-full"
+          />
+        </div>
         
-        {/* 图层信息提示 */}
-        {cloth.cloth_data.layers && cloth.cloth_data.layers.length > 0 && (
-          <div className="absolute bottom-2 left-2 right-2 text-[10px] text-gray-600 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-center shadow-sm">
+        {/* 图层信息提示 - z-10 */}
+        {cloth.cloth_data?.layers && cloth.cloth_data.layers.length > 0 && (
+          <div className="absolute bottom-2 left-2 right-2 z-10 text-[10px] text-gray-600 bg-white/90 backdrop-blur-sm rounded px-2 py-1 text-center shadow-sm">
             {cloth.cloth_data.layers.length} 个图层
           </div>
         )}
 
-        {/* 悬停遮罩 */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+        {/* 悬停遮罩和按钮 - z-20 */}
+        <div className="absolute inset-0 z-20 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
           <Button
             variant="ghost"
             size="sm"
@@ -97,18 +98,18 @@ export function ClothCard({
           </Button>
         </div>
 
-        {/* 评分徽章 */}
+        {/* 评分徽章 - z-10 */}
         {cloth.score_data && (
-          <div className="absolute top-2 left-2">
+          <div className="absolute top-2 left-2 z-10">
             <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${gradeColors[grade]} text-white text-xs font-bold shadow-lg`}>
               {grade} · {score}分
             </div>
           </div>
         )}
 
-        {/* 自定义徽章 */}
+        {/* 自定义徽章 - z-10 */}
         {badgeText && (
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2 z-10">
             <div className={`px-2 py-1 rounded-full ${badgeColor || 'bg-blue-500'} text-white text-xs font-medium shadow-lg`}>
               {badgeText}
             </div>
@@ -118,7 +119,11 @@ export function ClothCard({
 
       {/* 操作按钮区域 */}
       {showActions && (
-        <div className="p-2 bg-gray-50 border-t border-gray-200">
+        <div className="p-2 bg-gray-50 border-t border-gray-200 relative z-40">
+          {/* 创作时间 - 显示在按钮区域上方 */}
+          <div className="text-[10px] text-gray-400 text-center mb-1">
+            {new Date(cloth.created_at).toLocaleDateString()}
+          </div>
           {actionButtons && actionButtons.length > 0 ? (
             <div className="flex gap-1">
               {actionButtons.map((btn, index) => (
@@ -147,11 +152,6 @@ export function ClothCard({
           ) : null}
         </div>
       )}
-
-      {/* 创作时间 */}
-      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
-        {new Date(cloth.created_at).toLocaleDateString()}
-      </div>
-    </motion.div>
+    </div>
   )
-}
+})

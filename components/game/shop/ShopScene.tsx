@@ -3,14 +3,31 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import Image from 'next/image'
-import { Sparkles, ShoppingBag } from 'lucide-react'
+import { Sparkles, ShoppingBag, DollarSign } from 'lucide-react'
+import { ShopListing } from '@/types/shop.types'
+import { ClothPreview } from '@/components/game/preview/ClothPreview'
 
 /**
  * 商店场景组件
  * 参考设计优化：背景占据更大空间，更沉浸的体验
  */
-export function ShopScene() {
+interface ShopSceneProps {
+  listings?: ShopListing[]
+}
+
+export function ShopScene({ listings = [] }: ShopSceneProps) {
   const [selectedFrame, setSelectedFrame] = useState<number | null>(null)
+  
+  // 调试日志
+  console.log('🏪 ShopScene listings:', listings)
+  if (listings.length > 0) {
+    console.log('🖼️ 第一个listing:', listings[0])
+    console.log('🎨 cloth数据:', listings[0]?.cloth)
+    console.log('🎨 layers数据:', listings[0]?.cloth?.layers)
+    console.log('🎨 layers类型:', typeof listings[0]?.cloth?.layers)
+    console.log('🎨 layers是数组?:', Array.isArray(listings[0]?.cloth?.layers))
+    console.log('🎨 layers长度:', listings[0]?.cloth?.layers?.length)
+  }
 
   return (
     <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -74,6 +91,7 @@ export function ShopScene() {
             isSelected={selectedFrame === 1}
             onClick={() => setSelectedFrame(1)}
             delay={0.4}
+            listing={listings[0]}
           />
 
           {/* 画框2 */}
@@ -82,6 +100,7 @@ export function ShopScene() {
             isSelected={selectedFrame === 2}
             onClick={() => setSelectedFrame(2)}
             delay={0.5}
+            listing={listings[1]}
           />
 
           {/* 画框3 */}
@@ -90,6 +109,7 @@ export function ShopScene() {
             isSelected={selectedFrame === 3}
             onClick={() => setSelectedFrame(3)}
             delay={0.6}
+            listing={listings[2]}
           />
         </div>
 
@@ -125,9 +145,18 @@ interface FramePlaceholderProps {
   isSelected: boolean
   onClick: () => void
   delay: number
+  listing?: ShopListing
 }
 
-function FramePlaceholder({ index, isSelected, onClick, delay }: FramePlaceholderProps) {
+function FramePlaceholder({ index, isSelected, onClick, delay, listing }: FramePlaceholderProps) {
+  // 调试日志
+  const hasListing = !!listing
+  const hasCloth = !!listing?.cloth
+  const layers = listing?.cloth?.layers
+  const hasLayers = Array.isArray(layers) && layers.length > 0
+  
+  console.log(`🖼️ 画框${index}:`, { hasListing, hasCloth, hasLayers, layersCount: layers?.length })
+  
   return (
     <motion.div
       initial={{ y: -80, opacity: 0, rotate: -5 }}
@@ -136,14 +165,14 @@ function FramePlaceholder({ index, isSelected, onClick, delay }: FramePlaceholde
       onClick={onClick}
       className={`
         relative cursor-pointer transition-all duration-300
-        w-[20%] max-w-[180px] aspect-square
+        w-[20%] max-w-[180px] flex flex-col items-center
         ${isSelected ? 'scale-110 z-30' : 'hover:scale-105 z-10'}
       `}
     >
-      {/* 画框外框 - 响应式边框粗细 */}
+      {/* 画框 - 正方形 */}
       <div 
         className={`
-          absolute inset-0 rounded-lg border-[6px] md:border-[10px] bg-white shadow-2xl
+          relative w-full aspect-square rounded-lg border-[6px] md:border-[10px] bg-white shadow-2xl
           transition-all duration-300
           ${isSelected 
             ? 'border-yellow-400 shadow-yellow-400/60 shadow-2xl' 
@@ -151,30 +180,82 @@ function FramePlaceholder({ index, isSelected, onClick, delay }: FramePlaceholde
           }
         `}
       >
-        {/* 内部占位内容 */}
-        <div className="absolute inset-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded flex flex-col items-center justify-center gap-1 md:gap-3 border-2 border-gray-200">
-          <motion.div
-            animate={{ 
-              scale: isSelected ? [1, 1.2, 1] : 1 
-            }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl md:text-5xl"
-          >
-            🖼️
-          </motion.div>
-          <div className="text-xs md:text-sm font-bold text-gray-700">
-            画框 {index}
-          </div>
-          <div className="text-[10px] md:text-xs text-gray-500 text-center px-2">
-            {isSelected ? '已选中' : '暂无作品'}
-          </div>
+        {/* 内部内容 - 作品填满整个画框 */}
+        <div className="absolute inset-1 rounded overflow-hidden">
+          {hasListing && hasCloth && hasLayers ? (
+            // 有作品且有图层数据 - 作品填满整个画框
+            <ClothPreview
+              layers={layers}
+              width={200}
+              height={200}
+            />
+          ) : hasListing ? (
+            // 有上架但没有图层数据
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
+              <div className="text-2xl md:text-4xl">🎨</div>
+              <div className="text-[8px] text-red-400 mt-1">
+                (图层缺失)
+              </div>
+            </div>
+          ) : (
+            // 无作品
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">
+              <motion.div
+                animate={{ 
+                  scale: isSelected ? [1, 1.2, 1] : 1 
+                }}
+                transition={{ duration: 0.5 }}
+                className="text-2xl md:text-4xl"
+              >
+                🖼️
+              </motion.div>
+              <div className="text-[10px] md:text-xs text-gray-500 mt-1">
+                {isSelected ? '已选中' : '空'}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* 木纹纹理效果（模拟） */}
-        <div className="absolute inset-0 rounded-lg opacity-20 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(139,69,19,0.1)_2px,rgba(139,69,19,0.1)_4px)]" />
+        {/* 木纹纹理效果 */}
+        <div className="absolute inset-0 rounded-lg opacity-20 bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,rgba(139,69,19,0.1)_2px,rgba(139,69,19,0.1)_4px)] pointer-events-none" />
       </div>
 
-      {/* 选中时的光效 - 更强烈 */}
+      {/* 画框下方的信息卡片 - 所有画框都显示 */}
+      <motion.div
+        initial={{ opacity: 0, y: -5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: delay + 0.2 }}
+        className="mt-2 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-lg border border-gray-200 flex items-center justify-center gap-2 min-w-[80px]"
+      >
+        {hasListing ? (
+          <>
+            {/* 等级徽章 */}
+            <div className={`
+              px-2 py-0.5 rounded text-xs font-bold text-white
+              ${listing.cloth?.score_data?.grade === 'SSS' ? 'bg-gradient-to-r from-purple-500 to-pink-500' :
+                listing.cloth?.score_data?.grade === 'SS' ? 'bg-gradient-to-r from-blue-500 to-indigo-500' :
+                listing.cloth?.score_data?.grade === 'S' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
+                listing.cloth?.score_data?.grade === 'A' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
+                listing.cloth?.score_data?.grade === 'B' ? 'bg-gray-500' :
+                'bg-gray-400'}
+            `}>
+              {listing.cloth?.score_data?.grade || 'C'}
+            </div>
+            {/* 价格 */}
+            <div className="text-xs md:text-sm text-green-600 font-bold flex items-center">
+              <DollarSign className="w-3 h-3" />
+              {listing.price}
+            </div>
+          </>
+        ) : (
+          // 空画框显示"点击上架"
+          <div className="text-[10px] md:text-xs text-gray-400 font-medium">
+            点击上架
+          </div>
+        )}
+      </motion.div>
+
+      {/* 选中时的光效 */}
       {isSelected && (
         <>
           <motion.div
@@ -187,11 +268,7 @@ function FramePlaceholder({ index, isSelected, onClick, delay }: FramePlaceholde
               scale: [1, 1.1, 1],
               opacity: [0.5, 0.8, 0.5]
             }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="absolute -inset-4 bg-yellow-400/30 rounded-xl blur-xl -z-10"
           />
         </>
@@ -201,7 +278,7 @@ function FramePlaceholder({ index, isSelected, onClick, delay }: FramePlaceholde
       {!isSelected && (
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
           <div className="bg-black/90 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap font-medium shadow-lg">
-            点击选择
+            {listing ? '查看详情' : '点击选择'}
           </div>
         </div>
       )}
