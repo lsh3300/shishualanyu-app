@@ -1,0 +1,3749 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* 自托管字体配置 - 避免外网依赖 */
+@font-face {
+  font-family: 'Source Han Sans CN';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: local('PingFang SC'), local('Hiragino Sans GB'), local('Microsoft YaHei'), local('Source Han Sans CN');
+}
+
+@font-face {
+  font-family: 'Source Han Serif CN';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: local('Noto Serif SC'), local('Source Han Serif CN'), local('SimSun');
+}
+
+@font-face {
+  font-family: 'Ma Shan Zheng';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Ma Shan Zheng'), local('STKaiti'), local('KaiTi');
+}
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* ========================================
+     世说蓝语 - 蓝染文化色彩系统
+     ======================================== */
+  
+  /* 蓝染色谱 - 从深靛蓝到浅天蓝 */
+  --indigo-900: oklch(0.20 0.08 245);  /* 深靛蓝 - 染缸底色 */
+  --indigo-800: oklch(0.25 0.09 245);  /* 靛蓝 */
+  --indigo-700: oklch(0.32 0.10 245);  /* 中靛蓝 */
+  --indigo-600: oklch(0.40 0.11 245);  /* 标准靛蓝 */
+  --indigo-500: oklch(0.48 0.12 240);  /* 蓝染标准色 */
+  --indigo-400: oklch(0.58 0.11 235);  /* 浅靛蓝 */
+  --indigo-300: oklch(0.68 0.09 230);  /* 天蓝 */
+  --indigo-200: oklch(0.80 0.06 225);  /* 淡蓝 */
+  --indigo-100: oklch(0.92 0.03 220);  /* 极淡蓝 */
+  --indigo-50:  oklch(0.97 0.015 220); /* 蓝白 */
+  
+  /* 米白/原木色 - 背景和纸张质感 */
+  --cream-50:  oklch(0.99 0.005 80);   /* 纯米白 */
+  --cream-100: oklch(0.97 0.01 75);    /* 浅米色 */
+  --cream-200: oklch(0.94 0.015 70);   /* 米色 */
+  
+  /* 金色 - 匠心品质强调 */
+  --gold-600: oklch(0.60 0.16 75);     /* 深金 */
+  --gold-500: oklch(0.70 0.15 70);     /* 标准金 */
+  --gold-400: oklch(0.78 0.12 65);     /* 浅金 */
+  
+  /* 主题变量 */
+  --background: var(--indigo-50);
+  --foreground: var(--indigo-900);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--indigo-900);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--indigo-900);
+  --primary: var(--indigo-700);
+  --primary-foreground: oklch(0.98 0.005 240);
+  --secondary: var(--indigo-400);
+  --secondary-foreground: oklch(0.98 0.005 240);
+  --muted: var(--indigo-50);
+  --muted-foreground: var(--indigo-500);
+  --accent: var(--gold-500);
+  --accent-foreground: var(--indigo-900);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0.005 240);
+  --border: var(--indigo-100);
+  --input: var(--indigo-50);
+  --ring: var(--indigo-400);
+  --chart-1: var(--indigo-700);
+  --chart-2: var(--indigo-400);
+  --chart-3: var(--gold-500);
+  --chart-4: oklch(0.55 0.15 145);
+  --chart-5: oklch(0.50 0.12 280);
+  --radius: 0.75rem;
+  --sidebar: var(--indigo-50);
+  --sidebar-foreground: var(--indigo-900);
+  --sidebar-primary: var(--indigo-700);
+  --sidebar-primary-foreground: oklch(0.98 0.005 240);
+  --sidebar-accent: var(--indigo-50);
+  --sidebar-accent-foreground: var(--indigo-900);
+  --sidebar-border: var(--indigo-100);
+  --sidebar-ring: var(--indigo-400);
+}
+
+.dark {
+  /* ========================================
+     世说蓝语 - 暗色主题
+     深靛蓝基调，舒适护眼
+     ======================================== */
+  
+  --background: oklch(0.14 0.025 245); /* 深靛蓝背景 */
+  --foreground: oklch(0.88 0.015 230); /* 柔和浅蓝文字 */
+  
+  --card: oklch(0.18 0.03 245); /* 卡片背景 */
+  --card-foreground: oklch(0.88 0.015 230);
+  
+  --popover: oklch(0.20 0.03 245);
+  --popover-foreground: oklch(0.88 0.015 230);
+  
+  --primary: oklch(0.65 0.10 230); /* 天蓝主色 */
+  --primary-foreground: oklch(0.14 0.025 245);
+  
+  --secondary: oklch(0.30 0.04 245);
+  --secondary-foreground: oklch(0.88 0.015 230);
+  
+  --muted: oklch(0.22 0.03 245);
+  --muted-foreground: oklch(0.65 0.04 230);
+  
+  --accent: oklch(0.75 0.12 60); /* 暖金色强调 */
+  --accent-foreground: oklch(0.14 0.025 245);
+  
+  --destructive: oklch(0.55 0.18 25);
+  --destructive-foreground: oklch(0.98 0.005 240);
+  
+  --border: oklch(0.28 0.035 245);
+  --input: oklch(0.22 0.03 245);
+  --ring: oklch(0.65 0.10 230);
+  
+  --chart-1: oklch(0.65 0.10 230);
+  --chart-2: oklch(0.75 0.12 60);
+  --chart-3: oklch(0.60 0.12 170);
+  --chart-4: oklch(0.65 0.10 280);
+  --chart-5: oklch(0.70 0.10 120);
+  
+  --sidebar: oklch(0.14 0.025 245);
+  --sidebar-foreground: oklch(0.88 0.015 230);
+  --sidebar-primary: oklch(0.65 0.10 230);
+  --sidebar-primary-foreground: oklch(0.14 0.025 245);
+  --sidebar-accent: oklch(0.22 0.03 245);
+  --sidebar-accent-foreground: oklch(0.88 0.015 230);
+  --sidebar-border: oklch(0.28 0.035 245);
+  --sidebar-ring: oklch(0.65 0.10 230);
+}
+
+.indigo-gradient {
+  /* ========================================
+     世说蓝语 - 渐变蓝韵主题
+     深度沉浸式蓝染美学体验
+     ======================================== */
+  
+  /* 核心渐变背景 - 更深邃的蓝染色调 */
+  --gradient-primary: linear-gradient(135deg, 
+    oklch(0.08 0.08 250) 0%,    /* 深靛蓝 */
+    oklch(0.12 0.06 245) 20%,   /* 靛蓝 */
+    oklch(0.16 0.05 240) 40%,   /* 中蓝 */
+    oklch(0.14 0.06 248) 60%,   /* 深蓝 */
+    oklch(0.10 0.07 252) 80%,   /* 墨蓝 */
+    oklch(0.09 0.08 250) 100%   /* 深靛蓝 */
+  );
+  
+  /* 次级渐变 - 用于卡片和组件 */
+  --gradient-secondary: linear-gradient(225deg,
+    oklch(0.18 0.08 235) 0%,    /* 浅靛蓝 */
+    oklch(0.22 0.06 240) 30%,   /* 天蓝 */
+    oklch(0.25 0.05 245) 60%,   /* 浅蓝 */
+    oklch(0.20 0.07 238) 100%   /* 中靛蓝 */
+  );
+  
+  /* 强调渐变 - 金色系 */
+  --gradient-accent: linear-gradient(45deg,
+    oklch(0.78 0.18 65) 0%,     /* 亮金 */
+    oklch(0.72 0.15 70) 50%,    /* 标准金 */
+    oklch(0.75 0.16 62) 100%    /* 暖金 */
+  );
+  
+  /* 极光渐变 - 用于特殊效果 */
+  --gradient-aurora: radial-gradient(ellipse at center,
+    oklch(0.25 0.12 230) 0%,    /* 青蓝 */
+    oklch(0.18 0.08 240) 30%,   /* 靛蓝 */
+    oklch(0.12 0.06 250) 60%,   /* 深蓝 */
+    oklch(0.08 0.08 260) 100%   /* 墨蓝 */
+  );
+  
+  /* 基础色彩系统 */
+  --background: var(--gradient-primary);
+  --foreground: oklch(0.92 0.015 220);  /* 月光白 */
+  
+  /* 卡片系统 - 多层次毛玻璃 */
+  --card: rgba(255, 255, 255, 0.12);
+  --card-foreground: oklch(0.92 0.015 220);
+  
+  --popover: rgba(10, 16, 35, 0.92);
+  --popover-foreground: oklch(0.92 0.015 220);
+  
+  /* 主色调 - 蓝染水墨 */
+  --primary: oklch(0.72 0.10 225);      /* 蓝染水墨 */
+  --primary-foreground: oklch(0.08 0.08 250);
+  
+  /* 次要色彩 */
+  --secondary: rgba(255, 255, 255, 0.20);
+  --secondary-foreground: oklch(0.92 0.015 220);
+  
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: oklch(0.75 0.05 220);
+  
+  /* 强调色 - 传统金色 */
+  --accent: oklch(0.78 0.18 65);        /* 传统金 */
+  --accent-foreground: oklch(0.08 0.08 250);
+  
+  --destructive: oklch(0.62 0.25 25);   /* 朱红 */
+  --destructive-foreground: oklch(0.98 0.005 240);
+  
+  /* 边框和输入 */
+  --border: rgba(255, 255, 255, 0.20);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: oklch(0.72 0.10 225);
+  
+  /* 图表色彩 - 蓝染色谱 */
+  --chart-1: oklch(0.72 0.10 225);     /* 青花蓝 */
+  --chart-2: oklch(0.78 0.18 65);      /* 传统金 */
+  --chart-3: oklch(0.65 0.12 180);     /* 翠绿 */
+  --chart-4: oklch(0.68 0.10 280);     /* 紫蓝 */
+  --chart-5: oklch(0.70 0.08 120);     /* 青绿 */
+  
+  /* 侧边栏 */
+  --sidebar: var(--gradient-secondary);
+  --sidebar-foreground: oklch(0.92 0.015 220);
+  --sidebar-primary: oklch(0.72 0.10 225);
+  --sidebar-primary-foreground: oklch(0.08 0.08 250);
+  --sidebar-accent: rgba(255, 255, 255, 0.15);
+  --sidebar-accent-foreground: oklch(0.92 0.015 220);
+  --sidebar-border: rgba(255, 255, 255, 0.20);
+  --sidebar-ring: oklch(0.72 0.10 225);
+}
+
+.porcelain-blue {
+  /* ========================================
+     世说蓝语 - 蓝染水墨主题
+     更蓝更浓 · 水墨洗染（静态、清爽、与渐变蓝韵区分）
+     ======================================== */
+
+  --background: oklch(0.975 0.02 235);
+  --foreground: oklch(0.22 0.07 248);
+
+  --card: rgba(255, 255, 255, 0.82);
+  --card-foreground: oklch(0.24 0.06 245);
+
+  --popover: rgba(255, 255, 255, 0.92);
+  --popover-foreground: oklch(0.22 0.06 245);
+
+  --primary: oklch(0.42 0.16 248);
+  --primary-foreground: oklch(0.99 0.005 230);
+
+  --secondary: oklch(0.94 0.02 230);
+  --secondary-foreground: oklch(0.24 0.06 245);
+
+  --muted: oklch(0.96 0.015 230);
+  --muted-foreground: oklch(0.46 0.08 248);
+
+  --accent: oklch(0.74 0.12 70); /* 更柔的金色点睛 */
+  --accent-foreground: oklch(0.22 0.06 245);
+
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0.005 240);
+
+  --border: oklch(0.90 0.03 230);
+  --input: oklch(0.95 0.02 230);
+  --ring: oklch(0.52 0.14 248);
+
+  --chart-1: oklch(0.46 0.12 245);
+  --chart-2: oklch(0.74 0.12 70);
+  --chart-3: oklch(0.62 0.10 210);
+  --chart-4: oklch(0.55 0.08 260);
+  --chart-5: oklch(0.58 0.08 190);
+
+  --sidebar: oklch(0.98 0.01 230);
+  --sidebar-foreground: oklch(0.26 0.06 245);
+  --sidebar-primary: oklch(0.46 0.12 245);
+  --sidebar-primary-foreground: oklch(0.99 0.005 230);
+  --sidebar-accent: oklch(0.96 0.015 230);
+  --sidebar-accent-foreground: oklch(0.24 0.06 245);
+  --sidebar-border: oklch(0.90 0.03 230);
+  --sidebar-ring: oklch(0.56 0.10 245);
+}
+
+@theme inline {
+  --font-sans: 'Source Han Sans CN', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-serif: 'Source Han Serif CN', 'Noto Serif SC', 'SimSun', serif;
+  --font-display: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', cursive;
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* ========================================
+     世说蓝语 - 自定义样式类
+     ======================================== */
+
+  /* 排版样式 */
+  .heading-primary {
+    @apply text-2xl font-bold text-primary leading-tight;
+  }
+
+  .heading-secondary {
+    @apply text-xl font-semibold text-foreground leading-relaxed;
+  }
+
+  .body-text {
+    @apply text-base text-muted-foreground leading-relaxed;
+  }
+
+  .ui-section-title {
+    @apply text-base font-bold text-indigo-900;
+  }
+
+  .ui-section-kicker {
+    @apply text-[11px] text-indigo-500 tracking-widest uppercase font-medium;
+  }
+
+  .ui-section-action {
+    @apply text-xs text-muted-foreground flex items-center hover:text-primary transition-colors;
+  }
+
+  .ui-card-elevated {
+    @apply bg-white rounded-3xl border border-indigo-100/70;
+    box-shadow: 0 8px 28px -10px rgba(15, 23, 42, 0.18);
+  }
+
+  .ui-card-title {
+    @apply font-bold text-indigo-900 text-[13px] leading-snug;
+  }
+
+  .ui-card-desc {
+    @apply text-[11px] text-indigo-400 leading-relaxed;
+  }
+
+  .ui-card-soft {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(247, 251, 255, 0.90) 100%);
+    border: 1px solid rgba(214, 228, 246, 0.92);
+    box-shadow:
+      0 10px 24px rgba(49, 81, 128, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .ui-card-glass {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(245, 249, 255, 0.42) 100%);
+    border: 1px solid rgba(222, 234, 248, 0.9);
+    box-shadow:
+      0 12px 28px rgba(58, 92, 145, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.68);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .ui-card-soft-strong {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(246, 250, 255, 0.96) 100%);
+    border: 1px solid rgba(214, 228, 246, 0.94);
+    box-shadow:
+      0 12px 26px rgba(49, 81, 128, 0.10),
+      inset 0 1px 0 rgba(255, 255, 255, 0.68);
+  }
+
+  .ui-card-kicker {
+    @apply text-[10px] font-medium tracking-wide text-indigo-500;
+  }
+
+  .ui-card-micro {
+    @apply text-[10px] leading-none text-indigo-400;
+  }
+
+  /* 文化卡片 - 带蓝染质感 */
+  .cultural-card {
+    @apply bg-card rounded-2xl border border-border/50 p-6;
+    @apply shadow-sm shadow-primary/5;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-0.5;
+    background-image: linear-gradient(135deg, transparent 0%, oklch(0.48 0.12 240 / 0.02) 100%);
+  }
+
+  /* 蓝染渐变背景 */
+  .bg-indigo-gradient,
+  .indigo-gradient {
+    background: linear-gradient(135deg, var(--indigo-700) 0%, var(--indigo-600) 50%, var(--indigo-500) 100%);
+  }
+
+  .bg-indigo-gradient-soft {
+    background: linear-gradient(135deg, var(--indigo-100) 0%, var(--indigo-50) 100%);
+  }
+
+  /* 金色强调渐变 */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-600) 100%);
+  }
+
+  /* 蓝染纹理背景 */
+  .bg-indigo-texture {
+    background-color: var(--background);
+    background-image: 
+      radial-gradient(circle at 20% 80%, oklch(0.48 0.12 240 / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, oklch(0.68 0.09 230 / 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, oklch(0.58 0.11 235 / 0.02) 0%, transparent 30%);
+  }
+
+  /* 蓝染分割线 */
+  .divider-indigo {
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--indigo-200) 20%,
+      var(--indigo-400) 50%,
+      var(--indigo-200) 80%,
+      transparent 100%
+    );
+  }
+
+  /* 蓝染按钮样式 */
+  .btn-indigo {
+    @apply px-6 py-3 rounded-xl font-medium text-white;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:-translate-y-0.5 active:translate-y-0;
+    background: linear-gradient(135deg, var(--indigo-600) 0%, var(--indigo-700) 100%);
+    box-shadow: 
+      0 4px 14px oklch(0.40 0.11 245 / 0.25),
+      inset 0 1px 0 oklch(1 0 0 / 0.1);
+  }
+
+  .btn-indigo:hover {
+    background: linear-gradient(135deg, var(--indigo-500) 0%, var(--indigo-600) 100%);
+    box-shadow: 
+      0 6px 20px oklch(0.40 0.11 245 / 0.35),
+      inset 0 1px 0 oklch(1 0 0 / 0.15);
+  }
+
+  /* 金色强调按钮 */
+  .btn-gold {
+    @apply px-6 py-3 rounded-xl font-medium;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:-translate-y-0.5 active:translate-y-0;
+    background: linear-gradient(135deg, var(--gold-400) 0%, var(--gold-500) 100%);
+    color: var(--indigo-900);
+    box-shadow: 
+      0 4px 14px oklch(0.70 0.15 70 / 0.3),
+      inset 0 1px 0 oklch(1 0 0 / 0.2);
+  }
+
+  .btn-gold:hover {
+    background: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-600) 100%);
+    box-shadow: 
+      0 6px 20px oklch(0.70 0.15 70 / 0.4),
+      inset 0 1px 0 oklch(1 0 0 / 0.25);
+  }
+
+  /* 蓝染输入框 */
+  .input-indigo {
+    @apply w-full px-4 py-3 rounded-xl;
+    @apply bg-indigo-50 border border-indigo-100;
+    @apply text-foreground placeholder:text-muted-foreground;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20;
+  }
+
+  /* 价格标签 */
+  .price-tag {
+    @apply inline-flex items-center px-2 py-1 rounded-lg;
+    @apply text-sm font-bold;
+    background: linear-gradient(135deg, var(--gold-400) 0%, var(--gold-500) 100%);
+    color: var(--indigo-900);
+  }
+
+  /* 分类标签 */
+  .category-tag {
+    @apply inline-flex items-center px-3 py-1 rounded-full;
+    @apply text-xs font-medium;
+    @apply bg-indigo-100 text-indigo-700;
+    @apply transition-colors duration-200;
+    @apply hover:bg-indigo-200;
+  }
+
+  /* 安全区域 */
+  .h-safe-area-inset-bottom {
+    height: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* ========================================
+   AI创作页面 - 水墨动画效果
+   ======================================== */
+
+@keyframes ink-float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translate(50px, -30px) scale(1.1);
+    opacity: 0.4;
+  }
+  66% {
+    transform: translate(-30px, 40px) scale(0.95);
+    opacity: 0.25;
+  }
+}
+
+@keyframes ink-float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-60px, 50px) scale(1.15) rotate(5deg);
+    opacity: 0.35;
+  }
+}
+
+@keyframes ink-float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  40% {
+    transform: translate(40px, -50px) scale(1.08);
+    opacity: 0.3;
+  }
+  80% {
+    transform: translate(-20px, 30px) scale(0.92);
+    opacity: 0.15;
+  }
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.4;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes dye-vat-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes sink-in {
+  0% {
+    transform: translateY(-100px) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(20px) scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes water-drop {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+}
+
+/* 应用动画类 */
+.animate-ink-float-1 {
+  animation: ink-float-1 30s ease-in-out infinite;
+}
+
+.animate-ink-float-2 {
+  animation: ink-float-2 25s ease-in-out infinite;
+}
+
+.animate-ink-float-3 {
+  animation: ink-float-3 35s ease-in-out infinite;
+}
+
+.animate-float-particle {
+  animation: float-particle 8s ease-in-out infinite;
+}
+
+.animate-ripple {
+  animation: ripple 1.5s ease-out;
+}
+
+.animate-dye-vat-shimmer {
+  animation: dye-vat-shimmer 3s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+.animate-sink-in {
+  animation: sink-in 1s ease-out forwards;
+}
+
+.animate-water-drop {
+  animation: water-drop 0.8s ease-in forwards;
+}
+
+
+/* ========================================
+   首页栏目重设计 - 新增样式
+   ======================================== */
+
+/* 蓝染水墨扩散动画 */
+@keyframes ink-spread {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.ink-spread-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.ink-spread-hover::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(30, 58, 95, 0.15) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.6s ease-out, opacity 0.3s ease-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ink-spread-hover:hover::before {
+  transform: translate(-50%, -50%) scale(2);
+  opacity: 1;
+}
+
+/* 丝带折扣标签 */
+.ribbon-discount {
+  position: absolute;
+  top: 12px;
+  left: -8px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 4px 12px 4px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 4px) 50%, 100% 100%, 8px 100%, 0 50%);
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.ribbon-discount::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid #991b1b;
+  border-top: 4px solid #991b1b;
+}
+
+/* 水滴形状标签 */
+.droplet-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1e3a5f 0%, #4a90a4 100%);
+  color: white;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.3);
+}
+
+/* 金色渐变价格 */
+.price-gold-gradient {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* 栏目背景色调 */
+.section-teaching {
+  background: linear-gradient(180deg, 
+    rgba(30, 58, 95, 0.04) 0%, 
+    rgba(30, 58, 95, 0.01) 50%,
+    transparent 100%);
+  position: relative;
+}
+
+.section-teaching::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(30, 58, 95, 0.1), transparent);
+}
+
+.section-product {
+  background: linear-gradient(180deg, 
+    rgba(217, 119, 6, 0.03) 0%, 
+    rgba(217, 119, 6, 0.01) 50%,
+    transparent 100%);
+  position: relative;
+}
+
+.section-product::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217, 119, 6, 0.15), transparent);
+}
+
+.section-culture {
+  background: linear-gradient(180deg, 
+    rgba(74, 144, 164, 0.04) 0%, 
+    rgba(74, 144, 164, 0.01) 50%,
+    transparent 100%);
+  position: relative;
+}
+
+.section-culture::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(74, 144, 164, 0.15), transparent);
+}
+
+/* 匠人标识 */
+.craftsman-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.1), rgba(74, 144, 164, 0.1));
+  border: 1px solid rgba(30, 58, 95, 0.2);
+  border-radius: 9999px;
+  font-size: 10px;
+  color: #1e3a5f;
+  font-weight: 500;
+}
+
+/* 分类标签颜色 */
+.category-history {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: white;
+}
+
+.category-technique {
+  background: linear-gradient(135deg, #1e3a5f, #2d5a7f);
+  color: white;
+}
+
+.category-people {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+}
+
+.category-story {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+}
+
+.category-news {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: white;
+}
+
+/* 横向滚动容器 */
+.scroll-container {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0.5rem 0;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-item {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* 隐藏滚动条 */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 快捷购买按钮动画 */
+.quick-add-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s ease-out;
+}
+
+.group:hover .quick-add-btn {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 文章摘要展开动画 */
+.excerpt-expand {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+  opacity: 0;
+}
+
+.group:hover .excerpt-expand {
+  max-height: 100px;
+  opacity: 1;
+}
+
+/* 波纹分隔线动画 */
+@keyframes wave-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.divider-wave {
+  height: 24px;
+  background: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M0 10 Q25 0, 50 10 T100 10' fill='none' stroke='%234a90a4' stroke-width='1' opacity='0.3'/%3E%3C/svg%3E") repeat-x;
+  background-size: 100px 20px;
+  animation: wave-flow 8s linear infinite;
+}
+
+/* 扎染圆点分隔 */
+.divider-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.divider-dots::before,
+.divider-dots::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(74, 144, 164, 0.2), transparent);
+}
+
+/* 图案分隔 */
+.divider-pattern {
+  height: 32px;
+  background: 
+    radial-gradient(circle at 10% 50%, rgba(30, 58, 95, 0.08) 0%, transparent 20%),
+    radial-gradient(circle at 30% 50%, rgba(74, 144, 164, 0.06) 0%, transparent 15%),
+    radial-gradient(circle at 50% 50%, rgba(135, 206, 235, 0.08) 0%, transparent 20%),
+    radial-gradient(circle at 70% 50%, rgba(74, 144, 164, 0.06) 0%, transparent 15%),
+    radial-gradient(circle at 90% 50%, rgba(30, 58, 95, 0.08) 0%, transparent 20%);
+}
+
+
+/* ========================================
+   手机模拟器框架样式
+   ======================================== */
+
+/* 手机框内的固定定位元素需要相对于框架定位 */
+.mobile-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 让页面内容可以使用 min-h-full */
+.mobile-frame > * {
+  min-height: 100%;
+}
+
+.mobile-frame .sticky {
+  position: sticky;
+}
+
+/* 确保手机框内滚动正常 */
+.mobile-frame::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+/* 手机框内任意嵌套滚动容器也隐藏滚动条（避免不同页面出现不一致的滚动条） */
+.mobile-frame *::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.mobile-frame::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.mobile-frame *::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.mobile-frame::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.mobile-frame *::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.mobile-frame::-webkit-scrollbar-thumb:hover {
+  background: transparent !important;
+}
+
+/* 隐藏滚动条（不影响滚动），避免滚动条出现在手机模拟屏幕内部 */
+.mobile-frame {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+.mobile-frame * {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+/* 手机模拟器模式下：锁定页面滚动，避免浏览器滚动条覆盖到手机外壳内部 */
+html.simulator-lock-scroll,
+html.simulator-lock-scroll body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ========================================
+   沉浸式首页设计 - Glassmorphism 效果
+   ======================================== */
+
+/* 玻璃态效果基础类 */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.glassmorphism-strong {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(25px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.glassmorphism-subtle {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(15px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 3D 卡片悬停效果 */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.card-3d:hover {
+  transform: rotateX(5deg) rotateY(-5deg) translateZ(20px);
+}
+
+.card-3d::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.card-3d:hover::before {
+  opacity: 1;
+}
+
+/* 视差滚动效果 */
+.parallax-slow {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.parallax-medium {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.parallax-fast {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 动态渐变背景 */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.gradient-animated {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease-in-out infinite;
+}
+
+/* 浮动动画 */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes float-medium {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes float-strong {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float-gentle {
+  animation: float-gentle 6s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
+}
+
+.animate-float-strong {
+  animation: float-strong 3s ease-in-out infinite;
+}
+
+/* 光效扫过动画 */
+@keyframes light-sweep {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.light-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.light-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  transition: transform 0.8s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.light-sweep:hover::after {
+  animation: light-sweep 0.8s ease-out;
+}
+
+/* 六边形形状 */
+.hexagon {
+  clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+}
+
+.hexagon-soft {
+  clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%);
+}
+
+/* 脉冲光环效果 */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  position: relative;
+}
+
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(79, 70, 229, 0.6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+/* 磨砂玻璃输入框 */
+.input-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.input-glass::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.input-glass:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+}
+
+/* 流体形状 */
+.blob-shape {
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  transition: border-radius 0.5s ease-in-out;
+}
+
+.blob-shape:hover {
+  border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+}
+
+/* 深度阴影 */
+.shadow-depth-1 {
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.shadow-depth-2 {
+  box-shadow: 
+    0 3px 6px rgba(0, 0, 0, 0.16),
+    0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.shadow-depth-3 {
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.19),
+    0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+.shadow-depth-4 {
+  box-shadow: 
+    0 14px 28px rgba(0, 0, 0, 0.25),
+    0 10px 10px rgba(0, 0, 0, 0.22);
+}
+
+.shadow-depth-5 {
+  box-shadow: 
+    0 19px 38px rgba(0, 0, 0, 0.30),
+    0 15px 12px rgba(0, 0, 0, 0.22);
+}
+
+/* 彩色玻璃效果 */
+.glass-indigo {
+  background: linear-gradient(135deg, 
+    rgba(79, 70, 229, 0.1) 0%, 
+    rgba(124, 58, 237, 0.05) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+.glass-amber {
+  background: linear-gradient(135deg, 
+    rgba(245, 158, 11, 0.1) 0%, 
+    rgba(217, 119, 6, 0.05) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.glass-emerald {
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.1) 0%, 
+    rgba(13, 148, 136, 0.05) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* 响应式玻璃效果 */
+@media (max-width: 768px) {
+  .glassmorphism,
+  .glassmorphism-strong,
+  .glassmorphism-subtle {
+    backdrop-filter: blur(15px) saturate(150%);
+  }
+}
+
+/* 性能优化 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ========================================
+   用户菜单弹窗动画
+   ======================================== */
+
+@keyframes slide-up {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
+/* 下拉弹窗动画 */
+@keyframes dropdown {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.2s ease-out forwards;
+  transform-origin: top right;
+}
+
+/* 淡入上移动画 - 用于课程页面等 */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* 玻璃面板效果 */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+/* ========================================
+   搜索页面瀑布流样式
+   ======================================== */
+
+/* 瀑布流卡片入场动画 */
+@keyframes waterfall-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.waterfall-item {
+  animation: waterfall-in 0.4s ease-out forwards;
+}
+
+.waterfall-item:nth-child(1) { animation-delay: 0ms; }
+.waterfall-item:nth-child(2) { animation-delay: 50ms; }
+.waterfall-item:nth-child(3) { animation-delay: 100ms; }
+.waterfall-item:nth-child(4) { animation-delay: 150ms; }
+.waterfall-item:nth-child(5) { animation-delay: 200ms; }
+.waterfall-item:nth-child(6) { animation-delay: 250ms; }
+
+/* 搜索框聚焦效果 */
+.search-input-focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* 热门标签悬停效果 */
+.hot-tag-hover {
+  transition: all 0.2s ease;
+}
+
+.hot-tag-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 瀑布流卡片悬停效果 */
+.waterfall-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.waterfall-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+}
+
+/* 搜索结果图片加载占位 */
+.search-image-placeholder {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 无滚动条样式 */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========================================
+   游戏页面全屏沉浸式样式
+   ======================================== */
+
+/* 游戏场景渐变遮罩 */
+.game-scene-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.4) 0%,
+    transparent 30%,
+    transparent 70%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+/* 悬浮UI淡入动画 */
+@keyframes float-ui-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.float-ui-enter {
+  animation: float-ui-in 0.3s ease-out forwards;
+}
+
+/* 游戏按钮发光效果 */
+.game-btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.game-btn-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 70%
+  );
+  transform: rotate(45deg) translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.game-btn-glow:hover::before {
+  transform: rotate(45deg) translateX(100%);
+}
+
+/* 画框悬停光效 */
+.frame-hover-glow {
+  transition: all 0.3s ease;
+}
+
+.frame-hover-glow:hover {
+  box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+}
+
+/* 金币闪烁动画 */
+@keyframes coin-shine {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
+}
+
+.coin-shine {
+  animation: coin-shine 2s ease-in-out infinite;
+}
+
+/* 底部工具栏毛玻璃效果 */
+.game-toolbar-glass {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* 统计数字跳动动画 */
+@keyframes stat-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.stat-bounce {
+  animation: stat-bounce 0.3s ease-out;
+}
+/* ========================================
+   渐变蓝韵主题 - 特殊样式和动画
+   ======================================== */
+
+/* 渐变背景动画 */
+@keyframes indigo-gradient-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 25%;
+  }
+  50% {
+    background-position: 50% 100%;
+  }
+  75% {
+    background-position: 25% 0%;
+  }
+}
+
+@keyframes indigo-gradient-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+/* 渐变蓝韵主题专用类 */
+.indigo-gradient {
+  /* 动态背景 */
+  background: var(--gradient-primary);
+  background-size: 400% 400%;
+  animation: indigo-gradient-flow 20s ease-in-out infinite;
+}
+
+.indigo-gradient .enhanced-glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.indigo-gradient .ui-card-elevated {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* 渐变按钮效果 */
+.indigo-gradient .btn-indigo {
+  background: linear-gradient(135deg, 
+    oklch(0.68 0.08 225) 0%, 
+    oklch(0.60 0.10 230) 50%,
+    oklch(0.65 0.09 220) 100%
+  );
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.indigo-gradient .btn-indigo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.indigo-gradient .btn-indigo:hover::before {
+  left: 100%;
+}
+
+.indigo-gradient .btn-gold {
+  background: var(--gradient-accent);
+  color: oklch(0.12 0.04 245);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* 输入框毛玻璃效果 */
+.indigo-gradient .input-indigo {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: oklch(0.90 0.02 225);
+}
+
+.indigo-gradient .input-indigo::placeholder {
+  color: oklch(0.70 0.04 225);
+}
+
+.indigo-gradient .input-indigo:focus {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: oklch(0.68 0.08 225);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+/* 特殊装饰效果 */
+.indigo-gradient .decorative-pattern {
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.06) 0%, transparent 30%);
+}
+
+/* 蓝染水波纹效果 */
+@keyframes indigo-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.indigo-gradient .indigo-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.indigo-gradient .indigo-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: indigo-ripple 1s ease-out;
+  pointer-events: none;
+}
+
+/* 渐变文字效果 */
+.indigo-gradient .gradient-text {
+  background: linear-gradient(135deg, 
+    oklch(0.90 0.02 225) 0%,
+    oklch(0.75 0.15 60) 50%,
+    oklch(0.85 0.03 220) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 浮动粒子效果 */
+@keyframes indigo-particle-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotate(90deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-10px) translateX(-15px) rotate(180deg);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translateY(-30px) translateX(5px) rotate(270deg);
+    opacity: 0.5;
+  }
+}
+
+.indigo-gradient .floating-particles::before,
+.indigo-gradient .floating-particles::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: indigo-particle-float 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.indigo-gradient .floating-particles::before {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.indigo-gradient .floating-particles::after {
+  top: 60%;
+  right: 15%;
+  animation-delay: 7s;
+}
+
+/* 卡片悬停增强效果 */
+.indigo-gradient .card-3d:hover {
+  transform: rotateX(2deg) rotateY(-2deg) translateZ(10px);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* 导航栏毛玻璃增强 */
+.indigo-gradient .glass-panel {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 底部导航增强 */
+.indigo-gradient .game-toolbar-glass {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .indigo-gradient {
+    background-size: 300% 300%;
+    animation-duration: 15s;
+  }
+  
+  .indigo-gradient .enhanced-glass,
+  .indigo-gradient .ui-card-elevated {
+    backdrop-filter: blur(15px) saturate(150%);
+    -webkit-backdrop-filter: blur(15px) saturate(150%);
+  }
+}
+
+/* 减弱动画效果（用户偏好） */
+@media (prefers-reduced-motion: reduce) {
+  .indigo-gradient {
+    animation: none;
+    background: linear-gradient(135deg, 
+      oklch(0.11 0.045 248) 0%, 
+      oklch(0.13 0.04 245) 100%
+    );
+  }
+  
+  .indigo-gradient .floating-particles::before,
+  .indigo-gradient .floating-particles::after {
+    animation: none;
+    opacity: 0.2;
+  }
+}
+
+/* 纸质纹理效果 */
+.paper-texture {
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(139, 69, 19, 0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* 古典边框装饰 */
+.classical-border {
+  border-image: linear-gradient(45deg, #d97706, #f59e0b, #fbbf24, #f59e0b, #d97706) 1;
+  border-width: 2px;
+  border-style: solid;
+}
+
+/* 毛玻璃效果增强 */
+.enhanced-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 金属质感按钮 */
+.metallic-button {
+  background: linear-gradient(145deg, #fbbf24, #d97706);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid #b45309;
+}
+
+.metallic-button:hover {
+  background: linear-gradient(145deg, #f59e0b, #b45309);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 古典卷轴效果 */
+.scroll-effect {
+  background: linear-gradient(to bottom, 
+    #fef3c7 0%,
+    #fde68a 10%,
+    #fbbf24 90%,
+    #f59e0b 100%
+  );
+  box-shadow: 
+    inset 0 0 20px rgba(139, 69, 19, 0.1),
+    0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 动态光效 */
+@keyframes golden-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.golden-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(251, 191, 36, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: golden-shimmer 3s ease-in-out infinite;
+}
+
+/* ========================================
+   游戏商店交互增强动画
+   ======================================== */
+
+/* 金币飞入动画 */
+@keyframes coin-fly-in {
+  0% {
+    transform: translateY(-20px) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.coin-fly-in {
+  animation: coin-fly-in 0.6s ease-out;
+}
+
+/* 统计数字跳动增强 */
+@keyframes stat-number-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  75% {
+    transform: scale(1.15);
+  }
+}
+
+.stat-number-bounce {
+  animation: stat-number-bounce 0.5s ease-out;
+}
+
+/* 快捷菜单按钮光效扫过 */
+@keyframes menu-button-shine {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.menu-button-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-button-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: menu-button-shine 0.8s ease-out;
+}
+
+/* 画框选中脉冲效果 */
+@keyframes frame-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(251, 191, 36, 0);
+  }
+}
+
+.frame-pulse {
+  animation: frame-pulse 1.5s ease-in-out infinite;
+}
+
+/* 访客数字滚动效果 */
+@keyframes number-roll {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.number-roll {
+  animation: number-roll 0.4s ease-out;
+}
+
+/* 收入增长庆祝动画 */
+@keyframes earnings-celebrate {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1) rotate(2deg);
+  }
+  50% {
+    transform: scale(1.05) rotate(-1deg);
+  }
+  75% {
+    transform: scale(1.08) rotate(1deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.earnings-celebrate {
+  animation: earnings-celebrate 0.8s ease-out;
+}
+
+/* 快捷菜单背景模糊增强 */
+.quick-menu-backdrop {
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+}
+
+/* 统计卡片悬停效果 */
+.stat-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card-hover:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 商品预览卡片入场动画 */
+@keyframes preview-card-enter {
+  0% {
+    transform: translateY(-10px) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.preview-card-enter {
+  animation: preview-card-enter 0.3s ease-out;
+}
+
+/* 操作按钮涟漪效果 */
+@keyframes button-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.button-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.button-ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  animation: button-ripple 0.6s ease-out;
+}
+
+.button-ripple:active::before {
+  width: 100px;
+  height: 100px;
+}
+
+/* ========================================
+   渐变蓝韵主题增强效果
+   ======================================== */
+
+/* 渐变蓝韵主题下的特殊样式 */
+.indigo-gradient .glassmorphism {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40),
+    0 0 0 1px rgba(79, 70, 229, 0.10);
+}
+
+.indigo-gradient .glassmorphism-strong {
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(40px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  box-shadow: 
+    0 16px 50px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.50),
+    0 0 0 1px rgba(79, 70, 229, 0.15);
+}
+
+.indigo-gradient .glassmorphism-subtle {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    0 0 0 1px rgba(79, 70, 229, 0.08);
+}
+
+/* 渐变蓝韵主题下的页面背景 */
+.indigo-gradient body {
+  background: var(--gradient-primary);
+  background-size: 400% 400%;
+  animation: gradient-flow 25s ease-in-out infinite;
+  position: relative;
+}
+
+/* 添加动态极光效果 */
+.indigo-gradient body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-aurora);
+  opacity: 0.3;
+  animation: aurora-flow 40s linear infinite;
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* 添加动态粒子效果 */
+.indigo-gradient body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 50px 50px, 80px 80px, 120px 120px;
+  animation: particles-float 60s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 渐变蓝韵主题下的状态栏样式 */
+.indigo-gradient .mobile-status-bar {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+body.welcome-immersive-active .mobile-status-bar {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 80;
+}
+
+/* 渐变蓝韵主题下的导航栏样式 */
+@keyframes welcome-text-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes welcome-image-breathe {
+  0%, 100% {
+    transform: scale(1.015);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@keyframes welcome-swipe-cue {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.72;
+  }
+  50% {
+    transform: translateX(4px);
+    opacity: 1;
+  }
+}
+
+@keyframes welcome-button-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.welcome-text-reveal {
+  animation: welcome-text-reveal 0.65s ease-out both;
+}
+
+.welcome-image-breathe {
+  animation: welcome-image-breathe 8s ease-in-out infinite;
+}
+
+.welcome-swipe-cue {
+  animation: welcome-swipe-cue 1.8s ease-in-out infinite;
+}
+
+.welcome-enter-button {
+  animation: welcome-button-float 3.6s ease-in-out infinite;
+}
+
+.indigo-gradient .nav-header {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px) saturate(200%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.home-page-clean-bg {
+  background-color: transparent !important;
+}
+
+.porcelain-blue .home-page-clean-bg,
+.indigo-gradient .home-page-clean-bg {
+  background: transparent !important;
+}
+
+.porcelain-blue .home-page-clean-bg::before,
+.porcelain-blue .home-page-clean-bg::after,
+.indigo-gradient .home-page-clean-bg::before,
+.indigo-gradient .home-page-clean-bg::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+.mobile-frame.home-page-fixed-bg,
+body.home-page-fixed-bg .home-page-clean-bg {
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(180deg, rgba(252, 251, 248, 0.82) 0%, rgba(246, 244, 238, 0.78) 100%),
+    var(--ssly-home-background-image) !important;
+  background-position: top center !important;
+  background-repeat: repeat-y !important;
+  background-size: 100% auto !important;
+  background-attachment: local !important;
+}
+
+body.home-page-fixed-bg .bg-app-background {
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(180deg, rgba(252, 251, 248, 0.82) 0%, rgba(246, 244, 238, 0.78) 100%),
+    var(--ssly-home-background-image) !important;
+  background-position: top center !important;
+  background-repeat: repeat-y !important;
+  background-size: 100% auto !important;
+}
+
+body.shared-page-fixed-bg .bg-app-background,
+.mobile-frame.shared-page-fixed-bg .bg-app-background {
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(180deg, rgba(252, 251, 248, 0.82) 0%, rgba(246, 244, 238, 0.78) 100%),
+    var(--ssly-home-background-image) !important;
+  background-position: top center !important;
+  background-repeat: repeat-y !important;
+  background-size: 100% auto !important;
+}
+
+.mobile-frame.shared-page-fixed-bg,
+body.shared-page-fixed-bg {
+  background-color: #f6f4ee !important;
+  background-image:
+    linear-gradient(180deg, rgba(252, 251, 248, 0.82) 0%, rgba(246, 244, 238, 0.78) 100%),
+    var(--ssly-home-background-image) !important;
+  background-position: top center !important;
+  background-repeat: repeat-y !important;
+  background-size: 100% auto !important;
+  background-attachment: local !important;
+}
+
+.mobile-frame.shared-page-fixed-bg #mobile-bottom-nav-root,
+body.shared-page-fixed-bg #mobile-bottom-nav-root {
+  background: transparent !important;
+}
+
+body.shared-page-fixed-bg .bottom-nav,
+.mobile-frame.shared-page-fixed-bg .bottom-nav {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, rgba(242, 248, 255, 0.44) 100%);
+  backdrop-filter: blur(24px) saturate(165%);
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+  border-top: 1px solid rgba(219, 231, 248, 0.72);
+  box-shadow:
+    0 -12px 30px rgba(40, 66, 108, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.52) inset;
+}
+
+/* 渐变蓝韵主题下的底部导航 */
+.indigo-gradient .bottom-nav {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(35px) saturate(220%);
+  border-top: 1px solid rgba(255, 255, 255, 0.30);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.20);
+}
+
+/* 渐变蓝韵主题下的卡片效果增强 */
+.indigo-gradient .cultural-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 12px 35px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.indigo-gradient .cultural-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  transition: left 0.8s ease;
+}
+
+.indigo-gradient .cultural-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    0 16px 45px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transform: translateY(-3px);
+}
+
+.indigo-gradient .cultural-card:hover::before {
+  left: 100%;
+}
+
+/* 渐变蓝韵主题下的按钮效果增强 */
+.indigo-gradient .btn-indigo {
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  color: rgba(255, 255, 255, 0.98);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40);
+  position: relative;
+  overflow: hidden;
+}
+
+.indigo-gradient .btn-indigo::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.indigo-gradient .btn-indigo:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.40);
+  box-shadow: 
+    0 12px 35px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.50);
+  transform: translateY(-2px);
+}
+
+.indigo-gradient .btn-indigo:hover::before {
+  opacity: 1;
+}
+
+/* 渐变蓝韵主题下的金色按钮 */
+.indigo-gradient .btn-gold {
+  background: var(--gradient-accent);
+  border: 1px solid rgba(255, 215, 0, 0.40);
+  color: oklch(0.08 0.08 250);
+  box-shadow: 
+    0 8px 25px rgba(255, 215, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30);
+}
+
+.indigo-gradient .btn-gold:hover {
+  box-shadow: 
+    0 12px 35px rgba(255, 215, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40);
+  transform: translateY(-2px);
+}
+
+/* 渐变蓝韵主题下的输入框效果 */
+.indigo-gradient .input-indigo {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.indigo-gradient .input-indigo::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.indigo-gradient .input-indigo:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.40);
+  box-shadow: 
+    0 0 0 2px rgba(255, 255, 255, 0.25),
+    0 8px 25px rgba(0, 0, 0, 0.20);
+}
+
+/* 渐变蓝韵主题下的文字效果 */
+.indigo-gradient .heading-primary {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 2px 15px rgba(0, 0, 0, 0.40);
+}
+
+.indigo-gradient .heading-secondary {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.30);
+}
+
+.indigo-gradient .body-text {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 渐变蓝韵主题下的价格标签 */
+.indigo-gradient .price-tag {
+  background: var(--gradient-accent);
+  color: oklch(0.08 0.08 250);
+  box-shadow: 
+    0 6px 20px rgba(255, 215, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40);
+}
+
+/* 渐变蓝韵主题下的分类标签 */
+.indigo-gradient .category-tag {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(15px);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.indigo-gradient .category-tag:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* 动态渐变流动动画 */
+@keyframes gradient-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 25%;
+  }
+  50% {
+    background-position: 50% 100%;
+  }
+  75% {
+    background-position: 25% 0%;
+  }
+}
+
+/* 极光流动动画 */
+@keyframes aurora-flow {
+  0%, 100% {
+    opacity: 0.2;
+    transform: translateX(-50%) translateY(-50%) rotate(0deg) scale(1);
+  }
+  25% {
+    opacity: 0.4;
+    transform: translateX(-30%) translateY(-60%) rotate(90deg) scale(1.1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translateX(-70%) translateY(-40%) rotate(180deg) scale(0.9);
+  }
+  75% {
+    opacity: 0.5;
+    transform: translateX(-40%) translateY(-70%) rotate(270deg) scale(1.05);
+  }
+}
+
+/* 粒子浮动动画 */
+@keyframes particles-float {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: translateY(-5px) translateX(-8px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(3px);
+  }
+}
+
+.indigo-gradient body {
+  background: var(--gradient-primary);
+  background-size: 400% 400%;
+  animation: gradient-flow 20s ease-in-out infinite;
+}
+
+/* 渐变蓝韵主题下的特殊动画效果 */
+@keyframes aurora-flow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translateX(-50%) translateY(-50%) rotate(0deg);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(-50%) translateY(-50%) rotate(180deg);
+  }
+}
+
+.indigo-gradient::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vh;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(79, 70, 229, 0.1) 0%,
+    rgba(124, 58, 237, 0.05) 25%,
+    transparent 50%
+  );
+  animation: aurora-flow 30s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 渐变蓝韵主题下的文字效果 */
+.indigo-gradient .heading-primary {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.indigo-gradient .heading-secondary {
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.indigo-gradient .body-text {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 渐变蓝韵主题下的分割线效果 */
+.indigo-gradient .divider-indigo {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent 100%
+  );
+}
+
+/* 渐变蓝韵主题下的价格标签效果 */
+.indigo-gradient .price-tag {
+  background: linear-gradient(135deg, 
+    oklch(0.75 0.15 60) 0%, 
+    oklch(0.68 0.12 65) 50%,
+    oklch(0.72 0.14 58) 100%
+  );
+  color: oklch(0.12 0.04 245);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* 渐变蓝韵主题下的分类标签效果 */
+.indigo-gradient .category-tag {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.indigo-gradient .category-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 渐变蓝韵主题下的特殊效果类 */
+.indigo-gradient .glow-effect {
+  box-shadow: 
+    0 0 20px rgba(79, 70, 229, 0.4),
+    0 0 40px rgba(124, 58, 237, 0.2),
+    0 0 60px rgba(79, 70, 229, 0.1);
+}
+
+.indigo-gradient .shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.indigo-gradient .shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  animation: shimmer-slide 2s infinite;
+}
+
+@keyframes shimmer-slide {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .indigo-gradient .glassmorphism,
+  .indigo-gradient .glassmorphism-strong,
+  .indigo-gradient .glassmorphism-subtle {
+    backdrop-filter: blur(20px) saturate(150%);
+  }
+  
+  .indigo-gradient body {
+    animation-duration: 30s; /* 移动端减慢动画速度 */
+  }
+}
+
+/* 减少动画的用户偏好设置 */
+@media (prefers-reduced-motion: reduce) {
+  .indigo-gradient body,
+  .indigo-gradient::before,
+  .indigo-gradient .shimmer-effect::after {
+    animation: none;
+  }
+}
+/* ========================================
+   主题感知背景类 - 全面增强
+   ======================================== */
+
+/* 主背景色 - 根据主题自动切换 */
+.bg-app-background {
+  background-color: var(--background);
+}
+
+.indigo-gradient .bg-app-background {
+  background: var(--gradient-primary);
+  background-size: 400% 400%;
+  animation: gradient-flow 25s ease-in-out infinite;
+  position: relative;
+}
+
+/* 半透明背景 - 用于导航栏等 */
+.bg-app-background-blur {
+  background-color: rgba(241, 247, 255, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.dark .bg-app-background-blur {
+  background-color: rgba(20, 25, 40, 0.95);
+  backdrop-filter: blur(12px);
+}
+
+.indigo-gradient .bg-app-background-blur {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* 卡片背景 - 主题感知 */
+.bg-app-card {
+  background-color: var(--card);
+}
+
+.indigo-gradient .bg-app-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 12px 35px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* 页面容器 - 主题感知 */
+.page-container {
+  min-height: 100vh;
+  background-color: var(--background);
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+
+.porcelain-blue .page-container {
+  position: relative;
+  background:
+    radial-gradient(900px 520px at 18% 10%, rgba(37, 99, 235, 0.16) 0%, rgba(37, 99, 235, 0.00) 60%),
+    radial-gradient(820px 460px at 86% 22%, rgba(14, 165, 233, 0.14) 0%, rgba(14, 165, 233, 0.00) 58%),
+    radial-gradient(720px 420px at 55% 86%, rgba(30, 64, 175, 0.10) 0%, rgba(30, 64, 175, 0.00) 62%),
+    linear-gradient(135deg,
+      oklch(0.975 0.02 235) 0%,
+      oklch(0.955 0.03 238) 40%,
+      oklch(0.97 0.02 232) 100%
+    );
+}
+
+/* 蓝染水墨 - 轻量静态装饰层（避免动画以减少滚动抖动风险） */
+.porcelain-blue .page-container::before {
+  content: '';
+  position: fixed;
+  inset: -20vh -20vw;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(520px 360px at 12% 32%, rgba(17, 94, 213, 0.14) 0%, rgba(17, 94, 213, 0.00) 66%),
+    radial-gradient(460px 340px at 78% 38%, rgba(29, 78, 216, 0.12) 0%, rgba(29, 78, 216, 0.00) 62%),
+    radial-gradient(540px 380px at 52% 74%, rgba(30, 64, 175, 0.10) 0%, rgba(30, 64, 175, 0.00) 68%);
+  filter: blur(18px);
+  opacity: 0.9;
+}
+
+.porcelain-blue .page-container::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    repeating-linear-gradient(
+      105deg,
+      rgba(30, 64, 175, 0.018) 0px,
+      rgba(30, 64, 175, 0.018) 2px,
+      rgba(30, 64, 175, 0.00) 10px,
+      rgba(30, 64, 175, 0.00) 18px
+    );
+  opacity: 0.55;
+}
+
+.porcelain-blue .page-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+.page-background-home-echo {
+  position: relative;
+  background-color: #f6f4ee;
+  background-image:
+    linear-gradient(180deg, rgba(252, 251, 248, 0.82) 0%, rgba(246, 244, 238, 0.78) 100%),
+    var(--ssly-home-background-image);
+  background-position: top center;
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+}
+
+.page-background-home-echo::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(520px 320px at 16% 12%, rgba(74, 106, 154, 0.14) 0%, rgba(74, 106, 154, 0) 72%),
+    radial-gradient(420px 280px at 84% 22%, rgba(101, 133, 176, 0.10) 0%, rgba(101, 133, 176, 0) 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 100%);
+}
+
+.page-background-home-echo > * {
+  position: relative;
+  z-index: 1;
+}
+
+.indigo-gradient .page-container {
+  background: var(--gradient-primary);
+  background-size: 400% 400%;
+  animation: gradient-flow 25s ease-in-out infinite;
+  position: relative;
+}
+
+/* 导航栏 - 主题感知 */
+.nav-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: rgba(241, 247, 255, 0.24);
+  backdrop-filter: blur(14px) saturate(135%);
+  border-bottom: 1px solid rgba(79, 109, 163, 0.08);
+}
+
+.porcelain-blue .nav-header {
+  background-color: rgba(240, 248, 255, 0.78);
+  border-bottom-color: rgba(37, 99, 235, 0.14);
+}
+
+.dark .nav-header {
+  background-color: rgba(20, 25, 40, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.indigo-gradient .nav-header {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px) saturate(200%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 底部导航 - 主题感知 */
+.bottom-nav {
+  background-color: rgba(241, 247, 255, 0.24);
+  backdrop-filter: blur(14px) saturate(135%);
+  border-top: 1px solid rgba(79, 109, 163, 0.1);
+}
+
+.porcelain-blue .bottom-nav {
+  background-color: rgba(240, 248, 255, 0.78);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  border-top-color: rgba(37, 99, 235, 0.14);
+}
+
+.dark .bottom-nav {
+  background-color: rgba(20, 25, 40, 0.95);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.indigo-gradient .bottom-nav {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(35px) saturate(220%);
+  border-top: 1px solid rgba(255, 255, 255, 0.30);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.20);
+}
+
+/* 状态栏 - 主题感知 */
+.mobile-status-bar {
+  background-color: rgba(241, 247, 255, 0.98);
+  color: rgba(79, 109, 163, 0.8);
+}
+
+.dark .mobile-status-bar {
+  background-color: rgba(20, 25, 40, 1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.indigo-gradient .mobile-status-bar {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* 搜索框 - 主题感知 */
+.search-input {
+  background-color: rgba(252, 254, 255, 0.92);
+  border: 1px solid rgba(112, 143, 189, 0.24);
+  color: rgba(46, 78, 126, 0.92);
+}
+
+.dark .search-input {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.indigo-gradient .search-input {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.indigo-gradient .search-input::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* 按钮变体 - 主题感知 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--indigo-600) 0%, var(--indigo-700) 100%);
+  color: white;
+}
+
+.indigo-gradient .btn-primary {
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  color: rgba(255, 255, 255, 0.98);
+}
+
+/* 文本颜色 - 主题感知 */
+.text-primary {
+  color: var(--foreground);
+}
+
+.text-secondary {
+  color: var(--muted-foreground);
+}
+
+.indigo-gradient .text-primary {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.indigo-gradient .text-secondary {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+
+/* ========================================
+   主题切换过渡动画系统
+   ======================================== */
+
+/* 全局主题切换过渡 */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.indigo-gradient {
+  transition: background 0.5s ease, color 0.3s ease;
+}
+
+/* 主题切换时的元素过渡 */
+.theme-transition,
+.page-container,
+.nav-header,
+.bottom-nav,
+.glassmorphism,
+.glassmorphism-strong,
+.glassmorphism-subtle,
+.cultural-card,
+.ui-card-elevated,
+.btn-indigo,
+.btn-gold,
+.input-indigo,
+.search-input {
+  transition: 
+    background 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    color 0.3s ease,
+    backdrop-filter 0.3s ease;
+}
+
+/* 禁用过渡（用于初始加载） */
+html.no-transition,
+html.no-transition * {
+  transition: none !important;
+}
+
+/* ========================================
+   渐变蓝韵主题 - 25秒循环背景动画
+   ======================================== */
+
+@keyframes indigo-gradient-cycle {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  12.5% {
+    background-position: 100% 0%;
+  }
+  25% {
+    background-position: 100% 100%;
+  }
+  37.5% {
+    background-position: 0% 100%;
+  }
+  50% {
+    background-position: 50% 50%;
+  }
+  62.5% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 100%;
+  }
+  87.5% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 极光流动效果 */
+@keyframes aurora-wave {
+  0%, 100% {
+    opacity: 0.15;
+    transform: translateX(-25%) translateY(-25%) rotate(0deg) scale(1);
+  }
+  25% {
+    opacity: 0.25;
+    transform: translateX(0%) translateY(-15%) rotate(90deg) scale(1.1);
+  }
+  50% {
+    opacity: 0.20;
+    transform: translateX(-15%) translateY(0%) rotate(180deg) scale(0.95);
+  }
+  75% {
+    opacity: 0.30;
+    transform: translateX(-30%) translateY(-20%) rotate(270deg) scale(1.05);
+  }
+}
+
+/* 粒子浮动效果 */
+@keyframes particle-drift {
+  0%, 100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translateY(-30px) translateX(15px) rotate(90deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-15px) translateX(-20px) rotate(180deg);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translateY(-45px) translateX(10px) rotate(270deg);
+    opacity: 0.5;
+  }
+}
+
+/* 渐变蓝韵主题页面容器增强 */
+.indigo-gradient .page-container {
+  background: 
+    radial-gradient(1200px 760px at 18% 12%, oklch(0.22 0.16 240 / 0.18) 0%, transparent 62%),
+    radial-gradient(980px 680px at 84% 26%, oklch(0.24 0.14 220 / 0.14) 0%, transparent 60%),
+    linear-gradient(135deg, 
+      oklch(0.07 0.10 254) 0%,
+      oklch(0.11 0.12 248) 18%,
+      oklch(0.15 0.10 240) 38%,
+      oklch(0.13 0.14 252) 58%,
+      oklch(0.10 0.12 258) 78%,
+      oklch(0.08 0.10 254) 100%
+    );
+  background-size: 400% 400%;
+  animation: indigo-gradient-cycle 25s ease-in-out infinite;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 极光背景层 */
+.indigo-gradient .page-container::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vh;
+  background: radial-gradient(
+    ellipse at center,
+    oklch(0.26 0.18 238 / 0.16) 0%,
+    oklch(0.20 0.12 248 / 0.10) 32%,
+    oklch(0.14 0.10 258 / 0.05) 62%,
+    transparent 100%
+  );
+  animation: aurora-wave 40s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 粒子效果层 */
+.indigo-gradient .page-container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.08) 2px, transparent 2px),
+    radial-gradient(circle at 85% 75%, rgba(255, 255, 255, 0.06) 2px, transparent 2px),
+    radial-gradient(circle at 45% 65%, rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 75% 35%, rgba(255, 255, 255, 0.07) 1.5px, transparent 1.5px);
+  background-size: 80px 80px, 120px 120px, 60px 60px, 100px 100px;
+  animation: particle-drift 60s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 确保内容在装饰层之上 */
+.indigo-gradient .page-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   渐变蓝韵主题 - 组件增强样式
+   ======================================== */
+
+/* 统计卡片深色主题适配 */
+.indigo-gradient .ui-card-elevated {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 15px 45px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.indigo-gradient .ui-card-title {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.indigo-gradient .ui-card-desc {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.indigo-gradient .ui-section-title {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.indigo-gradient .ui-section-kicker {
+  color: rgba(255, 255, 255, 0.70);
+}
+
+.indigo-gradient .ui-section-action {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.indigo-gradient .ui-section-action:hover {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* 金色强调标题 */
+.indigo-gradient .gold-accent-title {
+  background: linear-gradient(135deg, 
+    oklch(0.85 0.15 60) 0%,
+    oklch(0.78 0.18 65) 50%,
+    oklch(0.82 0.16 58) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* 按钮发光效果 */
+.indigo-gradient .btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.indigo-gradient .btn-glow::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.indigo-gradient .btn-glow:hover::before {
+  opacity: 1;
+}
+
+/* 卡片悬停光线扫过效果 */
+.indigo-gradient .card-light-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.indigo-gradient .card-light-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.indigo-gradient .card-light-sweep:hover::after {
+  left: 100%;
+}
+
+/* 进度条蓝色渐变效果 */
+.indigo-gradient .progress-bar {
+  background: linear-gradient(90deg,
+    oklch(0.55 0.12 230) 0%,
+    oklch(0.65 0.10 225) 50%,
+    oklch(0.72 0.08 220) 100%
+  );
+  box-shadow: 0 0 10px oklch(0.65 0.10 225 / 0.5);
+}
+
+/* 分页控件深色主题适配 */
+.indigo-gradient .pagination-item {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.indigo-gradient .pagination-item:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.30);
+}
+
+.indigo-gradient .pagination-item.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.40);
+  color: rgba(255, 255, 255, 0.98);
+}
+
+/* ========================================
+   响应式和性能优化
+   ======================================== */
+
+/* 移动设备性能优化 */
+@media (max-width: 768px) {
+  .indigo-gradient .page-container {
+    animation-duration: 35s; /* 减慢动画速度 */
+  }
+  
+  .indigo-gradient .page-container::before,
+  .indigo-gradient .page-container::after,
+  .porcelain-blue .page-container::before,
+  .porcelain-blue .page-container::after {
+    display: none; /* Hide heavy animated background layers on small screens */
+  }
+  
+  .indigo-gradient .glassmorphism,
+  .indigo-gradient .glassmorphism-strong,
+  .indigo-gradient .glassmorphism-subtle,
+  .indigo-gradient .ui-card-elevated,
+  .indigo-gradient .cultural-card {
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+  }
+}
+
+/* 低性能设备降级 */
+@media (prefers-reduced-motion: reduce) {
+  .indigo-gradient .page-container,
+  .indigo-gradient .page-container::before,
+  .indigo-gradient .page-container::after {
+    animation: none;
+  }
+  
+  .indigo-gradient .page-container {
+    background: linear-gradient(135deg, 
+      oklch(0.10 0.07 248) 0%, 
+      oklch(0.14 0.05 242) 100%
+    );
+    background-size: 100% 100%;
+  }
+  
+  .indigo-gradient .card-light-sweep::after {
+    display: none;
+  }
+  
+  .theme-transition,
+  .page-container,
+  .nav-header,
+  .bottom-nav {
+    transition: none;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .indigo-gradient .glassmorphism,
+  .indigo-gradient .glassmorphism-strong,
+  .indigo-gradient .glassmorphism-subtle {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+  
+  .indigo-gradient .heading-primary,
+  .indigo-gradient .heading-secondary,
+  .indigo-gradient .body-text {
+    color: white;
+    text-shadow: none;
+  }
+}
+
+
+/* ========================================
+   个人中心页面 - 渐变蓝韵主题适配
+   修复亮色元素问题
+   ======================================== */
+
+/* 个人中心背景 */
+.indigo-gradient .bg-indigo-texture {
+  background: transparent;
+  background-image: none;
+}
+
+/* 个人中心头部区域 */
+.indigo-gradient .bg-primary {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+}
+
+.indigo-gradient .bg-primary\/10,
+.indigo-gradient .bg-primary\/5 {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 个人中心卡片 */
+.indigo-gradient .bg-card {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+.indigo-gradient .bg-white {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.indigo-gradient .bg-white\/80,
+.indigo-gradient .bg-white\/90,
+.indigo-gradient .bg-white\/95 {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+}
+
+/* 个人中心文字颜色 */
+.indigo-gradient .text-indigo-900 {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.indigo-gradient .text-indigo-800 {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.indigo-gradient .text-indigo-700 {
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.indigo-gradient .text-indigo-700\/70 {
+  color: rgba(255, 255, 255, 0.70);
+}
+
+.indigo-gradient .text-indigo-600 {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.indigo-gradient .text-indigo-500 {
+  color: rgba(255, 255, 255, 0.80);
+}
+
+.indigo-gradient .text-indigo-500\/70 {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.indigo-gradient .text-indigo-400 {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.indigo-gradient .text-indigo-300 {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.indigo-gradient .text-gray-800,
+.indigo-gradient .text-gray-700,
+.indigo-gradient .text-gray-600 {
+  color: rgba(255, 255, 255, 0.90);
+}
+
+.indigo-gradient .text-gray-500 {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.indigo-gradient .text-gray-400 {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.indigo-gradient .text-slate-400,
+.indigo-gradient .text-slate-500 {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* 个人中心边框颜色 */
+.indigo-gradient .border-indigo-100,
+.indigo-gradient .border-indigo-50,
+.indigo-gradient .border-indigo-100\/70,
+.indigo-gradient .border-indigo-50\/50 {
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+.indigo-gradient .border-indigo-200,
+.indigo-gradient .border-indigo-200\/70,
+.indigo-gradient .border-indigo-200\/60 {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.indigo-gradient .border-white,
+.indigo-gradient .border-white\/20,
+.indigo-gradient .border-white\/40 {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.indigo-gradient .border-border,
+.indigo-gradient .border-border\/40,
+.indigo-gradient .border-border\/50 {
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* 个人中心背景色 */
+.indigo-gradient .bg-muted {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.indigo-gradient .bg-indigo-50,
+.indigo-gradient .bg-indigo-100 {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.indigo-gradient .bg-indigo-50\/30 {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.indigo-gradient .bg-slate-100 {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+/* 个人中心功能卡片 */
+.indigo-gradient .bg-foreground {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(20px);
+}
+
+/* 个人中心渐变背景 */
+.indigo-gradient .bg-gradient-to-br.from-indigo-100,
+.indigo-gradient .bg-gradient-to-br.from-indigo-200 {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.indigo-gradient .bg-gradient-to-r.from-indigo-50 {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 个人中心进度条 */
+.indigo-gradient .bg-gradient-to-r.from-indigo-400.to-indigo-600 {
+  background: linear-gradient(90deg,
+    oklch(0.55 0.12 230) 0%,
+    oklch(0.65 0.10 225) 50%,
+    oklch(0.72 0.08 220) 100%
+  );
+}
+
+/* 个人中心阴影 */
+.indigo-gradient .shadow-primary\/10,
+.indigo-gradient .shadow-primary\/15,
+.indigo-gradient .shadow-indigo-100\/50,
+.indigo-gradient .shadow-indigo-900\/10 {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* 个人中心装饰元素 */
+.indigo-gradient .bg-primary\/10,
+.indigo-gradient .bg-primary\/20 {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 个人中心按钮 */
+.indigo-gradient .hover\:bg-indigo-50:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.indigo-gradient .hover\:bg-white\/80:hover {
+  background: rgba(255, 255, 255, 0.20);
+}
+
+.indigo-gradient .active\:bg-indigo-50\/30:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 个人中心图标颜色 */
+.indigo-gradient .text-primary {
+  color: oklch(0.72 0.10 225);
+}
+
+.indigo-gradient .text-primary\/80 {
+  color: oklch(0.72 0.10 225 / 0.80);
+}
+
+/* 个人中心特殊元素 */
+.indigo-gradient .bg-destructive {
+  background: oklch(0.62 0.25 25);
+}
+
+.indigo-gradient .text-destructive {
+  color: oklch(0.70 0.20 25);
+}
+
+/* 个人中心波浪装饰 */
+.indigo-gradient svg path[fill="currentColor"],
+.indigo-gradient svg path[fill="url(#inkGradient)"] {
+  fill: rgba(255, 255, 255, 0.15);
+}
+
+/* 个人中心纹理背景移除 */
+.indigo-gradient .bg-\[url\(\'https\:\/\/www\.transparenttextures\.com\/patterns\/cream-paper\.png\'\)\],
+.indigo-gradient .bg-\[url\(\'https\:\/\/www\.transparenttextures\.com\/patterns\/shattered-island\.png\'\)\] {
+  background-image: none;
+}
+
+/* 个人中心联系客服按钮 */
+.indigo-gradient .bg-primary.rounded-2xl {
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+}
+
+/* 个人中心退出登录按钮 */
+.indigo-gradient .border-destructive {
+  border-color: oklch(0.62 0.25 25 / 0.60);
+}
+
+.indigo-gradient .hover\:bg-destructive:hover {
+  background: oklch(0.62 0.25 25);
+}
+
+/* ========================================
+   首页组件 - 渐变蓝韵主题适配
+   ======================================== */
+
+/* 首页快捷入口 */
+.indigo-gradient .bg-white\/80.border.border-white {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* 首页搜索面板 */
+.indigo-gradient .bg-white.rounded-2xl.shadow-xl {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* 首页用户菜单 */
+.indigo-gradient .bg-white.rounded-2xl.shadow-xl.border {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px) saturate(200%);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* 首页课程卡片 */
+.indigo-gradient .bg-white.rounded-xl.shadow-sm.border.border-indigo-50 {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* 首页产品卡片 */
+.indigo-gradient .bg-white.rounded-xl.p-2.shadow-sm.border.border-indigo-50 {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* 首页文章卡片 */
+.indigo-gradient .bg-white.rounded-xl.p-2\.5.shadow-sm.border.border-indigo-50 {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* ========================================
+   教学页面 - 渐变蓝韵主题适配
+   ======================================== */
+
+/* 教学页面课程卡片 */
+.indigo-gradient .bg-white.rounded-2xl.p-3.shadow-md {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+/* 教学页面分类按钮 */
+.indigo-gradient .bg-white.border-indigo-50\/50 {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* 教学页面筛选按钮 */
+.indigo-gradient .bg-white.px-3.py-1\.5.rounded-full.shadow-sm.border.border-indigo-50 {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* ========================================
+   商店页面 - 渐变蓝韵主题适配
+   ======================================== */
+
+/* 商店页面分类按钮 */
+.indigo-gradient .bg-indigo-50.flex.items-center.justify-center.border.border-indigo-100\/70,
+.indigo-gradient .bg-orange-50.flex.items-center.justify-center.border,
+.indigo-gradient .bg-teal-50.flex.items-center.justify-center.border,
+.indigo-gradient .bg-slate-50.flex.items-center.justify-center.border,
+.indigo-gradient .bg-pink-50.flex.items-center.justify-center.border {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* 商店页面标签按钮 */
+.indigo-gradient .bg-white.text-slate-500.border.border-indigo-50 {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.80);
+}
+
+/* ========================================
+   搜索页面 - 渐变蓝韵主题适配
+   ======================================== */
+
+/* 搜索框 */
+.indigo-gradient .bg-white.border.border-indigo-100.rounded-2xl {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* 搜索历史标签 */
+.indigo-gradient .bg-white.rounded-full.border.border-indigo-100 {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.20);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 热门搜索标签 */
+.indigo-gradient .bg-amber-50.text-amber-700,
+.indigo-gradient .bg-indigo-50.text-indigo-700,
+.indigo-gradient .bg-emerald-50.text-emerald-700 {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.90);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* 搜索结果卡片 */
+.indigo-gradient .bg-white.rounded-2xl.shadow-sm.border.border-indigo-50 {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* ========================================
+   游戏页面 - 渐变蓝韵主题适配
+   ======================================== */
+
+/* 游戏页面状态栏 */
+.indigo-gradient .bg-gradient-to-b.from-amber-900\/90.to-amber-800\/80 {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(25px) saturate(180%);
+}
+
+/* 游戏页面底部操作区 */
+.indigo-gradient .bg-gradient-to-t.from-amber-900\/95.to-amber-800\/90 {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(30px) saturate(200%);
+}
+
+/* 游戏页面统计条 */
+.indigo-gradient .enhanced-glass.border.border-white\/20 {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+}

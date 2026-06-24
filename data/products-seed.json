@@ -1,0 +1,149 @@
+[
+  {
+    "slug": "tie-dye-tshirt",
+    "name": "扎染T恤",
+    "description": "传统扎染工艺制作的纯棉T恤，舒适透气，图案独特",
+    "price": 128,
+    "original_price": 168,
+    "category": "服饰",
+    "inventory": 80,
+    "status": "published",
+    "is_new": true,
+    "discount": 24,
+    "metadata": {
+      "specs": {
+        "colors": ["靛蓝", "云白", "雾灰"],
+        "sizes": ["S", "M", "L", "XL"]
+      }
+    },
+    "media": [
+      {
+        "type": "image",
+        "localPath": "public/tie-dye-tutorial-hands-on.jpg",
+        "is_cover": true,
+        "position": 0
+      },
+      {
+        "type": "image",
+        "localPath": "public/handmade-tie-dye-silk-scarf.jpg",
+        "position": 1
+      }
+    ]
+  },
+  {
+    "slug": "wax-resist-scarf",
+    "name": "蜡染丝巾",
+    "description": "手工蜡染真丝丝巾，精美图案，优雅大方",
+    "price": 198,
+    "original_price": 228,
+    "category": "配饰",
+    "inventory": 60,
+    "status": "published",
+    "is_new": true,
+    "discount": 23,
+    "metadata": {
+      "specs": {
+        "sizes": ["90x90cm", "110x110cm"],
+        "materials": ["真丝", "桑蚕丝"]
+      }
+    },
+    "media": [
+      {
+        "type": "image",
+        "localPath": "public/wax-resist-dyeing-technique.jpg",
+        "is_cover": true,
+        "position": 0
+      },
+      {
+        "type": "image",
+        "localPath": "public/ancient-indigo-dyeing-history-silk-road.jpg",
+        "position": 1
+      }
+    ]
+  },
+  {
+    "slug": "tie-dye-bag",
+    "name": "扎染帆布包",
+    "description": "环保帆布材质，传统扎染图案，实用时尚",
+    "price": 88,
+    "original_price": 118,
+    "category": "配饰",
+    "inventory": 120,
+    "status": "published",
+    "discount": 25,
+    "metadata": {
+      "specs": {
+        "sizes": ["中号", "大号"],
+        "features": ["可机洗", "内袋设计"]
+      }
+    },
+    "media": [
+      {
+        "type": "image",
+        "localPath": "public/indigo-dyed-canvas-bag.jpg",
+        "is_cover": true,
+        "position": 0
+      },
+      {
+        "type": "image",
+        "localPath": "public/modern-indigo-dyed-fashion-products.jpg",
+        "position": 1
+      }
+    ]
+  },
+  {
+    "slug": "wax-resist-pillow",
+    "name": "蜡染抱枕",
+    "description": "精美蜡染图案抱枕，为家居增添艺术气息",
+    "price": 68,
+    "original_price": 98,
+    "category": "家居",
+    "inventory": 90,
+    "status": "published",
+    "metadata": {
+      "specs": {
+        "sizes": ["45x45cm", "50x50cm"],
+        "fill": ["羽丝绒", "棉花"]
+      }
+    },
+    "media": [
+      {
+        "type": "image",
+        "localPath": "public/traditional-wax-resist-cushion.jpg",
+        "is_cover": true,
+        "position": 0
+      },
+      {
+        "type": "image",
+        "localPath": "public/indigo-dyeing-workshop-students-learning.jpg",
+        "position": 1
+      }
+    ]
+  },
+  {
+    "slug": "tie-dye-tapestry",
+    "name": "扎染壁挂",
+    "description": "大型扎染艺术壁挂，适合客厅或卧室装饰",
+    "price": 268,
+    "original_price": 328,
+    "category": "家居",
+    "inventory": 35,
+    "status": "published",
+    "is_new": true,
+    "discount": 18,
+    "media": [
+      {
+        "type": "image",
+        "localPath": "public/modern-indigo-dyeing-art.jpg",
+        "is_cover": true,
+        "position": 0
+      },
+      {
+        "type": "image",
+        "localPath": "public/modern-indigo-dyed-fashion-products.jpg",
+        "position": 1
+      }
+    ]
+  }
+]
+

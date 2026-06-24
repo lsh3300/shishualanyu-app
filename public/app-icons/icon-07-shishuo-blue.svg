@@ -1,0 +1,17 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="232" fill="#F5F8FC"/>
+  <rect x="84" y="84" width="856" height="856" rx="196" fill="url(#bg)"/>
+  <circle cx="512" cy="382" r="166" fill="#F7FBFF"/>
+  <path d="M512 280C568.333 280 614 325.667 614 382C614 438.333 568.333 484 512 484C455.667 484 410 438.333 410 382C410 369.852 412.121 358.199 416.012 347.381C427.672 368.986 450.49 383.625 476.72 383.625C514.931 383.625 545.908 352.648 545.908 314.438C545.908 302.155 542.711 290.619 537.111 280.597C529.184 280.2 520.985 280 512 280Z" fill="#214A79"/>
+  <circle cx="449" cy="326" r="24" fill="#88AFDC"/>
+  <circle cx="583" cy="326" r="16" fill="#88AFDC"/>
+  <rect x="204" y="600" width="616" height="164" rx="82" fill="#F7FBFF"/>
+  <text x="512" y="673" text-anchor="middle" font-family="Noto Serif SC, Source Han Serif SC, serif" font-size="56" font-weight="700" fill="#21496F">世说蓝语</text>
+  <text x="512" y="730" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="28" font-weight="700" letter-spacing="5" fill="#6988B0">INDIGO CULTURE</text>
+  <defs>
+    <linearGradient id="bg" x1="158" y1="146" x2="848" y2="878" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#173A64"/>
+      <stop offset="1" stop-color="#346A9E"/>
+    </linearGradient>
+  </defs>
+</svg>

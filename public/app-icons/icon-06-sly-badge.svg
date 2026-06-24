@@ -1,0 +1,16 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="232" fill="#F3F6FA"/>
+  <rect x="84" y="84" width="856" height="856" rx="196" fill="url(#bg)"/>
+  <rect x="218" y="226" width="588" height="396" rx="132" fill="#F8FBFF"/>
+  <path d="M512 298C601.47 298 674 370.53 674 460C674 549.47 601.47 622 512 622C422.53 622 350 549.47 350 460C350 440.852 353.348 422.486 359.492 405.437C377.899 439.458 413.897 462.5 455.257 462.5C515.491 462.5 564.325 413.666 564.325 353.432C564.325 334.073 559.281 315.892 550.449 300.113C537.955 298.858 525.278 298 512 298Z" fill="#24507F"/>
+  <circle cx="432" cy="384" r="36" fill="#89AEDB"/>
+  <circle cx="598" cy="382" r="22" fill="#89AEDB"/>
+  <rect x="264" y="678" width="496" height="98" rx="49" fill="#F8FBFF"/>
+  <text x="512" y="742" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-size="70" font-weight="700" letter-spacing="10" fill="#224B76">SLY</text>
+  <defs>
+    <linearGradient id="bg" x1="162" y1="148" x2="850" y2="884" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15365B"/>
+      <stop offset="1" stop-color="#3E75A8"/>
+    </linearGradient>
+  </defs>
+</svg>

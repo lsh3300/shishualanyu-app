@@ -1,0 +1,70 @@
+[
+  {
+    "id": "f3e1b7b7-4d6b-4a1a-9bdf-101f00000001",
+    "slug": "indigo-thermos-cup",
+    "name": "青花蓝染保温杯",
+    "description": "蓝白花枝纹样保温杯，搭配流苏挂饰，适合日常随行与礼赠场景。",
+    "price": 139,
+    "originalPrice": 169,
+    "category": "礼品",
+    "inventory": 96,
+    "isNew": true,
+    "discount": 18,
+    "tag": "热销 NO.1",
+    "media": [
+      "/api/files/local/images/products/homepage-featured/indigo-thermos-1.png",
+      "/api/files/local/images/products/homepage-featured/indigo-thermos-2.png"
+    ]
+  },
+  {
+    "id": "f3e1b7b7-4d6b-4a1a-9bdf-101f00000002",
+    "slug": "indigo-stationery-gift-set",
+    "name": "蓝染文具礼盒",
+    "description": "收纳夹、签字笔、卡包与束口袋组合成套，适合作为文化创意礼盒。",
+    "price": 199,
+    "originalPrice": 239,
+    "category": "文具",
+    "inventory": 68,
+    "isNew": true,
+    "discount": 17,
+    "tag": "新品",
+    "media": [
+      "/api/files/local/images/products/homepage-featured/indigo-stationery-set-1.png",
+      "/api/files/local/images/products/homepage-featured/indigo-stationery-set-2.png"
+    ]
+  },
+  {
+    "id": "f3e1b7b7-4d6b-4a1a-9bdf-101f00000003",
+    "slug": "shishuolanyu-canvas-tote",
+    "name": "世说蓝语帆布手提袋",
+    "description": "品牌主题帆布手提袋，适合通勤、随身携带与文创周边展示。",
+    "price": 89,
+    "originalPrice": 109,
+    "category": "配饰",
+    "inventory": 132,
+    "isNew": false,
+    "discount": 18,
+    "tag": null,
+    "media": [
+      "/api/files/local/images/products/homepage-featured/indigo-canvas-tote-1.png",
+      "/api/files/local/images/products/homepage-featured/indigo-canvas-tote-2.png"
+    ]
+  },
+  {
+    "id": "f3e1b7b7-4d6b-4a1a-9bdf-101f00000004",
+    "slug": "indigo-travel-notebook",
+    "name": "蓝染随行笔记本",
+    "description": "蓝染纹理封面搭配书签流苏的随行笔记本，适合记录灵感与日常书写。",
+    "price": 79,
+    "originalPrice": 99,
+    "category": "文具",
+    "inventory": 118,
+    "isNew": false,
+    "discount": 20,
+    "tag": null,
+    "media": [
+      "/api/files/local/images/products/homepage-featured/indigo-notebook-1.png",
+      "/api/files/local/images/products/homepage-featured/indigo-notebook-2.png"
+    ]
+  }
+]

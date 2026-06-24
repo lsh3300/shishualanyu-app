@@ -1,0 +1,17 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="232" fill="#F4F7FB"/>
+  <rect x="84" y="84" width="856" height="856" rx="196" fill="url(#bg)"/>
+  <circle cx="512" cy="418" r="186" fill="#F8FBFF"/>
+  <circle cx="512" cy="418" r="160" stroke="#2E5E92" stroke-width="18" stroke-dasharray="16 20"/>
+  <path d="M512 302C575.513 302 627 353.487 627 417C627 480.513 575.513 532 512 532C448.487 532 397 480.513 397 417C397 403.295 399.397 390.149 403.793 377.946C416.944 402.293 442.669 418.785 472.231 418.785C515.306 418.785 550.231 383.86 550.231 340.785C550.231 326.935 546.622 313.928 540.299 302.643C531.355 302.218 522.01 302 512 302Z" fill="#214B79"/>
+  <circle cx="441" cy="354" r="28" fill="#83A8D6"/>
+  <circle cx="594" cy="355" r="18" fill="#83A8D6"/>
+  <rect x="238" y="646" width="548" height="112" rx="56" fill="#F8FBFF"/>
+  <text x="512" y="719" text-anchor="middle" font-family="Noto Serif SC, Source Han Serif SC, serif" font-size="78" font-weight="700" fill="#20466F">蓝语</text>
+  <defs>
+    <linearGradient id="bg" x1="170" y1="150" x2="842" y2="874" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#163D68"/>
+      <stop offset="1" stop-color="#3870A7"/>
+    </linearGradient>
+  </defs>
+</svg>

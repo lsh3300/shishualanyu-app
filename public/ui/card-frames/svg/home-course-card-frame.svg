@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 118" fill="none">
+  <g stroke="#A9C0E3" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2.5" y="2.5" width="95" height="113" rx="12" stroke-width="1.6"/>
+    <rect x="7.5" y="7.5" width="85" height="103" rx="10" stroke-width="0.9" stroke-dasharray="2.2 2.6"/>
+    <path d="M36 8H64" stroke-width="1.1"/>
+    <path d="M36 110H64" stroke-width="1.1"/>
+  </g>
+  <g fill="#A9C0E3">
+    <g transform="translate(50 8)">
+      <circle r="1.7"/>
+      <circle cx="-3.1" cy="2.1" r="1.1"/>
+      <circle cx="3.1" cy="2.1" r="1.1"/>
+      <circle cx="0" cy="4.6" r="1.1"/>
+    </g>
+    <g transform="translate(50 110)">
+      <circle r="1.9"/>
+      <circle cx="-3.4" cy="-2.2" r="1.2"/>
+      <circle cx="3.4" cy="-2.2" r="1.2"/>
+      <circle cx="0" cy="-5" r="1.2"/>
+    </g>
+  </g>
+  <g stroke="#A9C0E3" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(8.5 8.5)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1.2"/>
+      <path d="M3.2 0.8C3.2 4.2 2 6.9 0 9" stroke-width="0.9"/>
+      <path d="M7.4 1.1C7.1 4.9 5.7 7.5 3.1 9.9" stroke-width="0.9"/>
+      <circle cx="3.2" cy="3.2" r="1.1" fill="#A9C0E3" stroke="none"/>
+    </g>
+    <g transform="translate(91.5 8.5) scale(-1 1)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1.2"/>
+      <path d="M3.2 0.8C3.2 4.2 2 6.9 0 9" stroke-width="0.9"/>
+      <path d="M7.4 1.1C7.1 4.9 5.7 7.5 3.1 9.9" stroke-width="0.9"/>
+      <circle cx="3.2" cy="3.2" r="1.1" fill="#A9C0E3" stroke="none"/>
+    </g>
+    <g transform="translate(8.5 109.5) scale(1 -1)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1.2"/>
+      <path d="M3.2 0.8C3.2 4.2 2 6.9 0 9" stroke-width="0.9"/>
+      <path d="M7.4 1.1C7.1 4.9 5.7 7.5 3.1 9.9" stroke-width="0.9"/>
+      <circle cx="3.2" cy="3.2" r="1.1" fill="#A9C0E3" stroke="none"/>
+    </g>
+    <g transform="translate(91.5 109.5) scale(-1 -1)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1.2"/>
+      <path d="M3.2 0.8C3.2 4.2 2 6.9 0 9" stroke-width="0.9"/>
+      <path d="M7.4 1.1C7.1 4.9 5.7 7.5 3.1 9.9" stroke-width="0.9"/>
+      <circle cx="3.2" cy="3.2" r="1.1" fill="#A9C0E3" stroke="none"/>
+    </g>
+  </g>
+</svg>

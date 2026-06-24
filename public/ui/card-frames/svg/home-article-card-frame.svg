@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 52" fill="none">
+  <g stroke="#A9C0E3" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2.5" y="2.5" width="95" height="47" rx="10" stroke-width="1.4"/>
+    <path d="M21 7H36" stroke-width="1"/>
+    <path d="M64 7H79" stroke-width="1"/>
+    <path d="M21 45H36" stroke-width="1"/>
+    <path d="M64 45H79" stroke-width="1"/>
+    <path d="M50 9V43" stroke-width="0.9" stroke-dasharray="2 2.4"/>
+  </g>
+  <g fill="#A9C0E3">
+    <g transform="translate(50 7)">
+      <circle r="1.5"/>
+      <circle cx="-2.8" cy="1.9" r="0.95"/>
+      <circle cx="2.8" cy="1.9" r="0.95"/>
+      <circle cx="0" cy="4.1" r="0.95"/>
+    </g>
+    <g transform="translate(50 45)">
+      <circle r="1.5"/>
+      <circle cx="-2.8" cy="-1.9" r="0.95"/>
+      <circle cx="2.8" cy="-1.9" r="0.95"/>
+      <circle cx="0" cy="-4.1" r="0.95"/>
+    </g>
+  </g>
+  <g stroke="#A9C0E3" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(8 8)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1"/>
+      <path d="M3.2 1C3.2 4 2 6.3 0 8.4" stroke-width="0.75"/>
+    </g>
+    <g transform="translate(92 8) scale(-1 1)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1"/>
+      <path d="M3.2 1C3.2 4 2 6.3 0 8.4" stroke-width="0.75"/>
+    </g>
+    <g transform="translate(8 44) scale(1 -1)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1"/>
+      <path d="M3.2 1C3.2 4 2 6.3 0 8.4" stroke-width="0.75"/>
+    </g>
+    <g transform="translate(92 44) scale(-1 -1)">
+      <path d="M0 8C0 3.6 3.6 0 8 0" stroke-width="1"/>
+      <path d="M3.2 1C3.2 4 2 6.3 0 8.4" stroke-width="0.75"/>
+    </g>
+  </g>
+</svg>

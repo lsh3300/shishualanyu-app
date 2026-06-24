@@ -1,0 +1,93 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
+  "rules": {
+    "@next/next/no-img-element": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "jsx-a11y/alt-text": "off"
+  },
+  "ignorePatterns": [
+    "**/*.old.*",
+    "**/*-old.*",
+    "app/teaching/**/page-*.tsx"
+  ],
+  "overrides": [
+    {
+      "files": ["components/ui/lazy-load.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["components/ui/dynamic-import.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@next/next/no-assign-module-variable": "off"
+      }
+    },
+    {
+      "files": ["components/game/**/*.{ts,tsx}"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "react/no-unescaped-entities": "off"
+      }
+    },
+    {
+      "files": ["components/templates/**/*.{ts,tsx}"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    },
+    {
+      "files": ["app/game/**/*.{ts,tsx}"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "react/no-unescaped-entities": "off"
+      }
+    },
+    {
+      "files": ["app/api/**/*.{ts,tsx}"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["app/admin/**/*.{ts,tsx}"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "react/no-unescaped-entities": "off"
+      }
+    },
+    {
+      "files": ["lib/s3-upload-service.js"],
+      "rules": {
+        "@typescript-eslint/no-require-imports": "off"
+      }
+    },
+    {
+      "files": ["**/__tests__/**/*", "**/*.test.*", "**/*.spec.*"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["app/api/admin/**/*.{ts,tsx}"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    },
+    {
+      "files": ["components/auth/admin-route.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": "off"
+      }
+    }
+  ]
+}

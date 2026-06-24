@@ -1,0 +1,347 @@
+[
+  {
+    "id": "c0000001-0001-0001-0001-000000000001",
+    "slug": "tie-dye-basics",
+    "title": "传统扎染基础入门课程",
+    "description": "本课程将带您深入了解传统扎染工艺的精髓，从基础理论到实际操作，让您掌握这门古老而美丽的艺术。",
+    "instructor_name": "李师傅",
+    "instructor_bio": "从事蓝染工艺30年，国家级非物质文化遗产传承人",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "2小时30分",
+    "students": 1234,
+    "rating": 4.8,
+    "is_free": true,
+    "difficulty": "入门",
+    "category": "扎染",
+    "thumbnail": "/tie-dye-tutorial-hands-on.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "扎染历史与文化背景",
+        "duration": "15分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "工具与材料准备",
+        "duration": "20分钟",
+        "is_free": true,
+        "position": 1
+      },
+      {
+        "title": "基础扎染技法演示",
+        "duration": "45分钟",
+        "is_free": false,
+        "position": 2
+      },
+      {
+        "title": "图案设计与创作",
+        "duration": "35分钟",
+        "is_free": false,
+        "position": 3
+      },
+      {
+        "title": "染色过程详解",
+        "duration": "25分钟",
+        "is_free": false,
+        "position": 4
+      }
+    ]
+  },
+  {
+    "id": "c0000002-0002-0002-0002-000000000002",
+    "slug": "tie-dye-advanced",
+    "title": "扎染进阶技法与创作",
+    "description": "深入学习扎染的高级技法，包括复杂图案设计、多色染色技术等，提升您的扎染创作水平。",
+    "instructor_name": "王老师",
+    "instructor_bio": "扎染艺术创作专家，擅长将传统工艺与现代设计结合",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "3小时15分",
+    "students": 987,
+    "rating": 4.9,
+    "price": 168.00,
+    "is_free": false,
+    "difficulty": "进阶",
+    "category": "扎染",
+    "thumbnail": "/traditional-indigo-dyeing-workshop.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "高级扎染技法回顾",
+        "duration": "20分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "复杂图案设计原理",
+        "duration": "45分钟",
+        "is_free": false,
+        "position": 1
+      },
+      {
+        "title": "多色染色技术",
+        "duration": "50分钟",
+        "is_free": false,
+        "position": 2
+      },
+      {
+        "title": "扎染作品创作实践",
+        "duration": "70分钟",
+        "is_free": false,
+        "position": 3
+      }
+    ]
+  },
+  {
+    "id": "c0000003-0003-0003-0003-000000000003",
+    "slug": "modern-tie-dye-art",
+    "title": "现代扎染艺术创作",
+    "description": "探索扎染在现代设计中的应用，学习如何将传统工艺与现代审美相结合，创作具有个人风格的扎染作品。",
+    "instructor_name": "张设计师",
+    "instructor_bio": "当代扎染艺术家，作品多次参加国际展览",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "2小时45分",
+    "students": 756,
+    "rating": 4.7,
+    "price": 198.00,
+    "is_free": false,
+    "difficulty": "进阶",
+    "category": "扎染",
+    "thumbnail": "/modern-indigo-dyeing-art.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "现代扎染艺术概述",
+        "duration": "25分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "扎染与时尚设计",
+        "duration": "40分钟",
+        "is_free": false,
+        "position": 1
+      },
+      {
+        "title": "扎染在家居中的应用",
+        "duration": "35分钟",
+        "is_free": false,
+        "position": 2
+      },
+      {
+        "title": "个人风格创作指导",
+        "duration": "65分钟",
+        "is_free": false,
+        "position": 3
+      }
+    ]
+  },
+  {
+    "id": "c0000004-0004-0004-0004-000000000004",
+    "slug": "tie-dye-business",
+    "title": "扎染工艺与商业应用",
+    "description": "了解扎染工艺的商业价值，学习如何将扎染产品推向市场，打造个人扎染品牌。",
+    "instructor_name": "陈企业家",
+    "instructor_bio": "扎染品牌创始人，成功将传统工艺商业化",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "1小时45分",
+    "students": 543,
+    "rating": 4.6,
+    "price": 128.00,
+    "is_free": false,
+    "difficulty": "高级",
+    "category": "扎染",
+    "thumbnail": "/modern-indigo-dyed-fashion-products.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "扎染市场分析",
+        "duration": "30分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "扎染产品开发",
+        "duration": "35分钟",
+        "is_free": false,
+        "position": 1
+      },
+      {
+        "title": "品牌建设与营销",
+        "duration": "40分钟",
+        "is_free": false,
+        "position": 2
+      }
+    ]
+  },
+  {
+    "id": "c0000005-0005-0005-0005-000000000005",
+    "slug": "wax-dyeing-basics",
+    "title": "蜡染工艺基础入门",
+    "description": "学习苗族传统蜡染工艺，从蜡刀使用到图案设计，全面掌握这项非物质文化遗产技艺。",
+    "instructor_name": "王老师",
+    "instructor_bio": "苗族蜡染传承人，精通传统蜡染技艺",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "3小时15分",
+    "students": 856,
+    "rating": 4.9,
+    "price": 199.00,
+    "is_free": false,
+    "difficulty": "入门",
+    "category": "蜡染",
+    "thumbnail": "/wax-resist-dyeing-technique.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "蜡染历史与文化",
+        "duration": "25分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "蜡刀使用技巧",
+        "duration": "40分钟",
+        "is_free": false,
+        "position": 1
+      },
+      {
+        "title": "基础图案绘制",
+        "duration": "50分钟",
+        "is_free": false,
+        "position": 2
+      },
+      {
+        "title": "蜡染染色工艺",
+        "duration": "70分钟",
+        "is_free": false,
+        "position": 3
+      }
+    ]
+  },
+  {
+    "id": "c0000006-0006-0006-0006-000000000006",
+    "slug": "traditional-miao-wax-dyeing",
+    "title": "传统苗族蜡染技法",
+    "description": "深入学习苗族传统蜡染技法，学习绘制传统图案，掌握这门古老艺术的精髓。",
+    "instructor_name": "陈老师",
+    "instructor_bio": "苗族蜡染大师，作品被多家博物馆收藏",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "4小时",
+    "students": 723,
+    "rating": 4.8,
+    "price": 258.00,
+    "is_free": false,
+    "difficulty": "进阶",
+    "category": "蜡染",
+    "thumbnail": "/traditional-wax-resist-cushion.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "苗族蜡染概述",
+        "duration": "30分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "传统图案解析",
+        "duration": "60分钟",
+        "is_free": false,
+        "position": 1
+      },
+      {
+        "title": "高级蜡染技法",
+        "duration": "80分钟",
+        "is_free": false,
+        "position": 2
+      },
+      {
+        "title": "作品创作指导",
+        "duration": "90分钟",
+        "is_free": false,
+        "position": 3
+      }
+    ]
+  },
+  {
+    "id": "c0000007-0007-0007-0007-000000000007",
+    "slug": "wax-dyeing-pattern-design",
+    "title": "蜡染纹样设计与应用",
+    "description": "学习蜡染纹样设计原理，掌握传统纹样的现代应用，创作具有个人风格的蜡染作品。",
+    "instructor_name": "张设计师",
+    "instructor_bio": "蜡染纹样设计师，擅长将传统纹样与现代设计结合",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "2小时45分",
+    "students": 654,
+    "rating": 4.7,
+    "price": 178.00,
+    "is_free": false,
+    "difficulty": "进阶",
+    "category": "蜡染",
+    "thumbnail": "/modern-indigo-dyeing-art.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "蜡染纹样设计基础",
+        "duration": "35分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "传统纹样解析",
+        "duration": "45分钟",
+        "is_free": false,
+        "position": 1
+      },
+      {
+        "title": "现代纹样创作",
+        "duration": "55分钟",
+        "is_free": false,
+        "position": 2
+      },
+      {
+        "title": "纹样应用实践",
+        "duration": "50分钟",
+        "is_free": false,
+        "position": 3
+      }
+    ]
+  },
+  {
+    "id": "c0000008-0008-0008-0008-000000000008",
+    "slug": "wax-and-tie-dye-combination",
+    "title": "蜡染与扎染结合创作",
+    "description": "学习如何将蜡染与扎染两种工艺相结合，创作更加丰富多样的蓝染艺术作品。",
+    "instructor_name": "李师傅",
+    "instructor_bio": "精通蜡染与扎染两种工艺，擅长将两者结合创作",
+    "instructor_avatar": "/traditional-indigo-dyeing-master-craftsman.jpg",
+    "duration": "3小时30分",
+    "students": 921,
+    "rating": 4.9,
+    "price": 238.00,
+    "is_free": false,
+    "difficulty": "高级",
+    "category": "蜡染",
+    "thumbnail": "/modern-indigo-dyed-fashion-products.jpg",
+    "status": "published",
+    "chapters": [
+      {
+        "title": "蜡染与扎染工艺比较",
+        "duration": "30分钟",
+        "is_free": true,
+        "position": 0
+      },
+      {
+        "title": "结合技法演示",
+        "duration": "70分钟",
+        "is_free": false,
+        "position": 1
+      },
+      {
+        "title": "综合创作实践",
+        "duration": "100分钟",
+        "is_free": false,
+        "position": 2
+      }
+    ]
+  }
+]

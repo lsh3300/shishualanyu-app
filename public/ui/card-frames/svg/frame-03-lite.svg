@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 243 365" fill="none">
+  <g stroke="#4E78B4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="16" y="16" width="211" height="333" rx="18" stroke-width="3"/>
+    <rect x="27" y="27" width="189" height="311" rx="14" stroke-width="2" stroke-dasharray="8 8" opacity=".9"/>
+  </g>
+  <g fill="#4E78B4" opacity=".95">
+    <g transform="translate(121.5 20)">
+      <circle r="4"/>
+      <circle cx="-8" cy="5" r="3"/>
+      <circle cx="8" cy="5" r="3"/>
+      <circle cx="0" cy="12" r="3"/>
+    </g>
+    <g transform="translate(121.5 345)">
+      <circle r="5"/>
+      <circle cx="-9" cy="-6" r="3.5"/>
+      <circle cx="9" cy="-6" r="3.5"/>
+      <circle cx="0" cy="-14" r="3.5"/>
+      <circle cx="-6" cy="4" r="2.4"/>
+      <circle cx="6" cy="4" r="2.4"/>
+    </g>
+  </g>
+  <g stroke="#4E78B4" stroke-linecap="round" stroke-linejoin="round" opacity=".95">
+    <g transform="translate(28 28)">
+      <path d="M0 15C0 7 6 1 14 0" stroke-width="2.2"/>
+      <path d="M8 2C9 8 7 13 3 18" stroke-width="1.5"/>
+      <path d="M17 4C16 10 13 15 8 19" stroke-width="1.5"/>
+      <circle cx="8" cy="8" r="2.4" fill="#4E78B4" stroke="none"/>
+    </g>
+    <g transform="translate(215 28) scale(-1 1)">
+      <path d="M0 15C0 7 6 1 14 0" stroke-width="2.2"/>
+      <path d="M8 2C9 8 7 13 3 18" stroke-width="1.5"/>
+      <path d="M17 4C16 10 13 15 8 19" stroke-width="1.5"/>
+      <circle cx="8" cy="8" r="2.4" fill="#4E78B4" stroke="none"/>
+    </g>
+    <g transform="translate(28 338) scale(1 -1)">
+      <path d="M0 15C0 7 6 1 14 0" stroke-width="2.2"/>
+      <path d="M8 2C9 8 7 13 3 18" stroke-width="1.5"/>
+      <path d="M17 4C16 10 13 15 8 19" stroke-width="1.5"/>
+      <circle cx="8" cy="8" r="2.4" fill="#4E78B4" stroke="none"/>
+    </g>
+    <g transform="translate(215 338) scale(-1 -1)">
+      <path d="M0 15C0 7 6 1 14 0" stroke-width="2.2"/>
+      <path d="M8 2C9 8 7 13 3 18" stroke-width="1.5"/>
+      <path d="M17 4C16 10 13 15 8 19" stroke-width="1.5"/>
+      <circle cx="8" cy="8" r="2.4" fill="#4E78B4" stroke="none"/>
+    </g>
+  </g>
+</svg>
